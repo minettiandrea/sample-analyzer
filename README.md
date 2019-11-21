@@ -1,5 +1,7 @@
 # SampleAnalyzer
 
+[![Join the chat at https://gitter.im/sample-analyzer/community](https://badges.gitter.im/sample-analyzer/community.svg)](https://gitter.im/sample-analyzer/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.19.
 
 ## Development server
