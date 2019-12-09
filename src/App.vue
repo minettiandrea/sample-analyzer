@@ -28,13 +28,20 @@
     </v-app-bar>
 
     <v-content>
-      <v-container class="fill-height" fluid>
-        <v-row align="center" justify="center">
+      <v-row>
+        <v-tabs centered grow>
+          <v-tab>
+            Harmony
+          </v-tab>
+            <v-tab>Rhtyhm
+            </v-tab>
+        </v-tabs>
+      </v-row>
 
-            <SpectrumPresenter />
-
-        </v-row>
-      </v-container>
+      <v-tabs-items>
+        <v-tab-item>
+        </v-tab-item>
+      </v-tabs-items>
     </v-content>
 
     <v-footer app>
@@ -47,12 +54,12 @@
 import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
 import SampleLoader from './components/sidebar/SampleLoader.vue'
-import SpectrumPresenter from './components/harmony/SpectrumPresenter.vue'
+import HarmonicStructure from './components/harmony/HarmonicStructure.vue'
 
 @Component({
   components: {
     SampleLoader,
-    SpectrumPresenter
+    HarmonicStructure
   }
 })
 export default class App extends Vue {

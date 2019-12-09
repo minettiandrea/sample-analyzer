@@ -1,7 +1,7 @@
 <template>
-  <v-card class="mx-auto">
+  <v-card class="mx-auto col-5 space-around">
     <v-card-title>
-      <v-icon large left>mdi-twitter</v-icon>
+      <v-icon large left></v-icon>
       <span class="title font-weight-light">Spectrum presenter</span>
     </v-card-title>
     <v-card-text>This component is responsable to show the spectrum of the sample<br>Example injection {{test}}</v-card-text>
