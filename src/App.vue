@@ -28,20 +28,21 @@
     </v-app-bar>
 
     <v-content>
-      <v-row>
-        <v-tabs centered grow>
-          <v-tab>
-            Harmony
-          </v-tab>
-            <v-tab>Rhtyhm
-            </v-tab>
-        </v-tabs>
-      </v-row>
-
-      <v-tabs-items>
+      <v-tabs centered grow>
+        <v-tab
+          v-for="tab in tabs"
+          v-bind:key="tab"
+          v-on:click="currentTab = tab"
+        >
+          {{ tab }}
+        </v-tab>
         <v-tab-item>
+          <HarmonicStructure />
         </v-tab-item>
-      </v-tabs-items>
+        <v-tab-item>
+          <RhythmicStructure />
+        </v-tab-item>
+      </v-tabs>
     </v-content>
 
     <v-footer app>
@@ -51,15 +52,17 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
-import SampleLoader from './components/sidebar/SampleLoader.vue'
-import HarmonicStructure from './components/harmony/HarmonicStructure.vue'
+import Vue from 'vue';
+import { Component, Prop } from 'vue-property-decorator';
+import SampleLoader from './components/sidebar/SampleLoader.vue';
+import HarmonicStructure from './components/harmony/HarmonicStructure.vue';
+import RhythmicStructure from './components/rhythm/RhythmicStructure.vue';
 
 @Component({
   components: {
     SampleLoader,
-    HarmonicStructure
+    HarmonicStructure,
+    RhythmicStructure
   }
 })
 export default class App extends Vue {
@@ -68,5 +71,13 @@ export default class App extends Vue {
   drawer = false;
 
   @Prop(String) source: string;
+
+  data () {
+    return {
+      currentTab: 'Harmony',
+      tabs: ['Harmony', 'Rhthym']
+    }
+  }
+  computed () {}
 }
 </script>
