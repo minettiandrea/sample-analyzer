@@ -52,11 +52,11 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import { Component, Prop } from 'vue-property-decorator';
-import SampleLoader from './components/sidebar/SampleLoader.vue';
-import HarmonicStructure from './components/harmony/HarmonicStructure.vue';
-import RhythmicStructure from './components/rhythm/RhythmicStructure.vue';
+import Vue from 'vue'
+import { Component, Prop } from 'vue-property-decorator'
+import SampleLoader from './components/sidebar/SampleLoader.vue'
+import HarmonicStructure from './components/harmony/HarmonicStructure.vue'
+import RhythmicStructure from './components/rhythm/RhythmicStructure.vue'
 
 @Component({
   components: {
