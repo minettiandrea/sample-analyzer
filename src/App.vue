@@ -1,6 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-navigation-drawer v-model="drawer" app clipped>
+      <SampleLoader />
       <v-list dense>
         <v-list-item link>
           <v-list-item-action>
@@ -64,10 +65,14 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from 'vue-property-decorator'
+import Vue from 'vue'
+import { Component, Prop } from 'vue-property-decorator'
+import SampleLoader from './components/SampleLoader.vue'
 
 @Component({
-  components: {}
+  components: {
+    SampleLoader
+  }
 })
 export default class App extends Vue {
   created () {}
