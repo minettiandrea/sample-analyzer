@@ -64,13 +64,13 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component, Prop } from "vue-property-decorator";
+import { Vue, Component, Prop } from 'vue-property-decorator'
 
 @Component({
   components: {}
 })
 export default class App extends Vue {
-  created() {}
+  created () {}
 
   drawer = false;
 
