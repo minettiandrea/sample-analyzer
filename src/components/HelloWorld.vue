@@ -9,7 +9,7 @@ import 'reflect-metadata' // Import only once
 import { Component, Prop, Vue } from 'vue-property-decorator'
 import { inject } from 'inversify-props'
 import { SpectralExtractor } from '@/services/spectral-extractor/spectral-extractor'
-import { REGISTRY } from '../registry'
+import { REGISTRY } from '../ioc/registry'
 
 @Component
 export default class HelloWorld extends Vue {

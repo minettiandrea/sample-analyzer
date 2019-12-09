@@ -3,12 +3,7 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
-import { container } from 'inversify-props'
-import { DummySpectralExtractor } from './services/spectral-extractor/spectral-extractor-impl'
-import { SpectralExtractor } from './services/spectral-extractor/spectral-extractor'
-import { REGISTRY } from './registry'
-
-container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
+import './ioc'
 
 Vue.config.productionTip = false
 
