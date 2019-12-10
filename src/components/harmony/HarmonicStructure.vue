@@ -1,11 +1,13 @@
 <template>
-<v-container id="harmonic-structure" class="fill-height" fluid>
+<v-container fluid>
      <v-row align="center" justify="center">
 
             <SpectrumPresenter />
             <OvertonesPresenter />
     </v-row>
-<VoicingsPresenter />
+      <v-row>
+        <VoicingsPresenter />
+      </v-row>
 </v-container>
 
 </template>
@@ -27,3 +29,6 @@ import VoicingsPresenter from './VoicingsPresenter.vue'
 export default class HarmonicStructure extends Vue {
 }
 </script>
+
+<style lang="sass" scoped>
+</style>

@@ -1,5 +1,5 @@
 <template>
-<v-card class="mx-auto col-5 space-around">
+<v-card class='mx-auto col-5 space-around'>
     <v-card-title>
       <v-icon large left color='orange darken-2'>fab fa-itunes-note</v-icon>
       <span class="title font-weight-light">Overtones presenter</span>

@@ -29,6 +29,7 @@
 
     <v-content>
       <v-tabs centered grow>
+        <v-tabs-slider color="orange"></v-tabs-slider>
         <v-tab
           v-for="tab in tabs"
           v-bind:key="tab"
@@ -81,3 +82,4 @@ export default class App extends Vue {
   computed () {}
 }
 </script>
+<style> .v-window__container { height: 100% !important; } </style>
