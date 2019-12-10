@@ -1,5 +1,14 @@
 <template>
       <v-card flat class='col-8 mt-5' style='text-align: center'>
+          <v-row>
+              <v-progress-linear
+                v-model="power"
+                color="dark orange"
+                height="25"
+                reactive
+                >
+            </v-progress-linear>
+          </v-row>
           <v-row align='center' justify='center'>
             <v-col cols="10" sm="2">
                 <v-btn text icon color="orange" @click.native='playing ? pause() : play()'>
@@ -23,6 +32,7 @@
         <v-slider dark
           v-model="volume"
           color='orange'
+          class='mt-2'
         ></v-slider>
       </v-col>
 
