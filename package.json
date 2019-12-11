@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
+    "@types/vexflow": "^1.2.33",
     "core-js": "^3.4.3",
     "inversify-props": "^1.4.9",
     "reflect-metadata": "^0.1.13",
     "roboto-fontface": "*",
+    "vexflow": "^1.2.89",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",
     "vue-property-decorator": "^8.3.0",
