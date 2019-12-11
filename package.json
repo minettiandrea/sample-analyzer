@@ -16,6 +16,7 @@
     "inversify-props": "^1.4.9",
     "reflect-metadata": "^0.1.13",
     "roboto-fontface": "*",
+    "rxjs": "^6.5.3",
     "vexflow": "^1.2.89",
     "vue": "^2.6.10",
     "vue-class-component": "^7.0.2",

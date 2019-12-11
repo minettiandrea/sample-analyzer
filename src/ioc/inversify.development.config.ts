@@ -5,9 +5,11 @@ import { container } from 'inversify-props'
 import { AudioContextProviderImpl, AudioContextProvider } from '@/services/providers/context-provider'
 import { SampleLoaderService } from '@/services/sample-loader/sample-loader'
 import { SampleLoaderImpl } from '@/services/sample-loader/sample-loader-impl'
+import { StoreImpl, Store } from '@/services/store/store'
 
 export default function () {
   container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
   container.addSingleton<SampleLoaderService>(SampleLoaderImpl, REGISTRY.SampleLoader)
+  container.addSingleton<Store>(StoreImpl, REGISTRY.Store)
 };
