@@ -6,7 +6,7 @@
                 color="dark orange"
                 height="20"
                 >
-            </v-progress-linear>
+            </v-progress-linear> {{ sampletime }}
           </v-row>
           <v-row align='center' justify='center' class='col-12'>
             <v-col cols="2">
@@ -29,10 +29,13 @@
             </v-col>
 
             <v-col cols="4">
-              <v-slider dark
+              <v-slider @change='changeVolume' dark
               v-model='volume'
               color='orange'
               class='mt-2'
+              max='1'
+              min='0'
+              step='.1'
               ></v-slider>
             </v-col>
 
@@ -43,21 +46,47 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
+import { inject } from 'inversify-props'
+import { REGISTRY } from '@/ioc/registry'
+import { Store } from '@/services/store/store'
+import { AudioContextProvider } from '../../services/providers/context-provider'
 
 @Component
 export default class AudioPlayer extends Vue {
     playing: boolean = false
     paused: boolean = true
-    volume: number = 0
+    volume: number = 1
     sampletime: number = 5 // is going to change according to sample length (in ms?)
+
+    @inject(REGISTRY.Store) store:Store
+    @inject(REGISTRY.AudioContextProvider) ctx:AudioContextProvider
+    private source : AudioBufferSourceNode = this.ctx.context().createBufferSource()
+    private gain : GainNode = this.ctx.context().createGain()
+
+    private newSample (ab:AudioBuffer | null) {
+      if (ab) {
+        this.source.buffer = ab
+        this.sampletime = ab.length
+      }
+    }
+
+    created () {
+      this.gain.gain.setValueAtTime(this.volume, this.ctx.context().currentTime)
+      this.store.sample().subscribe(this.newSample)
+      this.source.connect(this.gain)
+      this.gain.connect(this.ctx.context().destination)
+    }
 
     play () {
       this.paused = false
-      this.playing = true // then it will also play the audio file
+      this.playing = true
+      this.source.loop = true
+      this.source.start()
     }
 
     pause () {
       this.paused = !this.paused
+      this.source.stop()
     }
 
     stop () {
@@ -68,6 +97,10 @@ export default class AudioPlayer extends Vue {
       this.paused = false
       this.sampletime = 0
       this.playing = true // changes the model, need to trigger audio
+    }
+
+    changeVolume () {
+      this.gain.gain.setValueAtTime(this.volume, this.ctx.context().currentTime)
     }
 }
 </script>
