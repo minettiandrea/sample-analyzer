@@ -1,28 +1,32 @@
 <template>
-      <v-card flat class='col-10 mt-5' style='text-align: center'>
+<v-container flex>
           <v-row>
               <v-progress-linear
                 v-model='sampletime'
                 color="dark orange"
                 height="10"
+                class = 'mt-5'
                 >
             </v-progress-linear>
           </v-row>
-          <v-row align='center' justify='center' class='col-12'>
-            <v-col cols="2">
+          <v-row class='col-5'
+          justify='center'
+          align='center'
+          >
+            <v-col cols="1">
                 <v-btn text icon color="orange" @click.native='playing ? pause() : play()'>
                 <v-icon v-if='!playing || paused'>fas fa-play</v-icon>
                 <v-icon v-else>fas fa-pause</v-icon>
                 </v-btn>
             </v-col>
 
-            <v-col cols="2">
-                <v-btn text icon color="orange" @click.native='stop()'>
+            <v-col cols="1">
+                <v-btn small text icon color="orange" @click.native='stop()'>
                 <v-icon>fas fa-stop</v-icon>
                 </v-btn>
             </v-col>
 
-            <v-col cols="2">
+            <v-col cols="1">
                 <v-btn text icon color="orange" @click.native='restart()'>
                 <v-icon>fas fa-backward</v-icon>
                 </v-btn>
@@ -40,7 +44,7 @@
             </v-col>
 
           </v-row>
-    </v-card>
+</v-container>
 </template>
 
 <script lang="ts">
