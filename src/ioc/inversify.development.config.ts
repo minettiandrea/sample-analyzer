@@ -6,9 +6,12 @@ import { AudioContextProviderImpl, AudioContextProvider } from '@/services/provi
 import { SampleLoaderService } from '@/services/sample-loader/sample-loader'
 import { SampleLoaderImpl } from '@/services/sample-loader/sample-loader-impl'
 import { StoreImpl, Store } from '@/services/store/store'
+import { TimeExtractor } from '@/services/time-extractor/time-extractor'
+import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 
 export default function () {
   container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
+  container.addSingleton<TimeExtractor>(DummyTimeExtractor, REGISTRY.TimeExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
   container.addSingleton<SampleLoaderService>(SampleLoaderImpl, REGISTRY.SampleLoader)
   container.addSingleton<Store>(StoreImpl, REGISTRY.Store)

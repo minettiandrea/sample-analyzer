@@ -50,5 +50,5 @@ export interface SpectralExtractor {
      * Perform spectral analysis on the sample
      * @param sample sample to analyze
      */
-    analyze(sample:AudioBuffer): SpectralAnalisis;
+    analyze(sample:AudioBuffer): Promise<SpectralAnalisis>;
 }
