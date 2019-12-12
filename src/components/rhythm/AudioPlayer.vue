@@ -53,10 +53,10 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 
 @Component
 export default class AudioPlayer extends Vue {
-    playing: boolean = false
-    paused: boolean = true
-    volume: number = 1
-    sampletime: number = 5 // is going to change according to sample length (in ms?)
+    private playing: boolean = false
+    private paused: boolean = true
+    private volume: number = 1
+    private sampletime: number = 0 // is going to change according to sample length (in ms?)
 
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.AudioContextProvider) ctx:AudioContextProvider
@@ -80,7 +80,7 @@ export default class AudioPlayer extends Vue {
     play () {
       this.paused = false
       this.playing = true
-      this.source.loop = true
+      // this.source.loop = true
       this.source.start()
     }
 
