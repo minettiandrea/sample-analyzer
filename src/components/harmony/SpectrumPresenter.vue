@@ -4,7 +4,7 @@
       <v-icon large left></v-icon>
       <span class="title font-weight-light">Spectrum presenter</span>
     </v-card-title>
-    <v-card-text>This component is responsable to show the spectrum of the sample<br>Example injection {{test}}</v-card-text>
+    <v-card-text>This component is responsable to show the spectrum of the sample</v-card-text>
   </v-card>
 </template>
 
@@ -18,8 +18,6 @@ import { SpectralExtractor } from '@/services/spectral-extractor/spectral-extrac
 @Component
 export default class SpectrumPresenter extends Vue {
     @inject(REGISTRY.SpectralExtractor) spectralExtractor: SpectralExtractor;
-
-    test = this.spectralExtractor.test();
 }
 </script>
 
