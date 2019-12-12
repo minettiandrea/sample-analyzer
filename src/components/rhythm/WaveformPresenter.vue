@@ -1,10 +1,6 @@
 <template>
   <v-card class='mx-auto col-10 mt-5 space-around'>
-    <v-card-title>
-      <v-icon large left></v-icon>
-      <span class="title font-weight-light">Show waveform</span>
-    </v-card-title>
-    <canvas ref='waveform'> </canvas>
+    <canvas ref='waveform' style='width:inherit'> </canvas>
   </v-card>
 </template>
 
@@ -19,51 +15,74 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 @Component
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
-  @inject(REGISTRY.AudioContextProvider) ctx:AudioContextProvider
-  @Ref() readonly canvasdom!: HTMLCanvasElement
+  @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
 
-  private sourceNode : AudioBufferSourceNode = this.ctx.context().createBufferSource() // for audio
   private dataArray : Uint8Array
-  private drawing : CanvasRenderingContext2D | null
+  private data : number[]
 
-  created () {
+  mounted () {
+    let canvas : HTMLCanvasElement = this.canvasdom
+    let ctx : CanvasRenderingContext2D | null = canvas.getContext('2d')
     this.store.sample().subscribe(s => {
       if (s) {
-        this.filterData(s)
+        this.data = this.filterData(s)
+        if (ctx) {
+          this.strokeCanvas(ctx)
+        }
       }
-    })  }
-  
-  filterData(audiobuffer : AudioBuffer) : number[]{ //something like sampling again
-    
-    const data = audiobuffer.getChannelData(0) //left channel? maybe taking the average
-    const bars = 50 //number of bars to plot
-    const blocksize = Math.floor(data.length/bars) // how many samples in each block
-    const filteredData = [] //initialize the output
-    
-    for (let i=0;i<bars; i++){ //for each bar
+    })
+  }
+
+  filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
+    const data = audiobuffer.getChannelData(0) // left channel? maybe taking the average
+    const bars = 400 // number of bars to plot
+    const blocksize = Math.floor(data.length / bars) // how many samples in each block
+    var dataf : number [] = [] // initialize the output
+
+    for (let i = 0; i < bars; i++) { // for each bar
       let blockbegins = blocksize * i
       let sum = 0
 
-      for(let j=0; j < blocksize; j++){ // in each bar I sum up the values of each sample
-        sum = sum + Math.abs(data[blockbegins+j]) //sum
+      for (let j = 0; j < blocksize; j++) { // in each bar I sum up the values of each sample
+        sum = sum + Math.abs(data[blockbegins + j])
+        // sum
       }
-      filteredData.push(sum / blocksize) // pushes the average of each block into an array
+      dataf.push(sum / blocksize) // pushes the average of each block into an array
     }
-      const factor = Math.max(...filteredData);
-      filteredData.map(n => n * 1/factor); // average respect to the max 
-      return filteredData
-
+    const factor = Math.max(...dataf)
+    dataf = dataf.map(n => n * (1 / factor)) // average respect to the max
+    return dataf
   }
 
-  mounted () {
+  strokeCanvas (ctx : CanvasRenderingContext2D) {
+    let canvas : HTMLCanvasElement = this.canvasdom
+    const dpr = window.devicePixelRatio || 1
+    canvas.width = canvas.offsetWidth * dpr
+    canvas.height = (canvas.offsetHeight) * dpr
+    ctx.scale(dpr, dpr)
+    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
 
-   if (this.canvasdom.getContext('2d')){
-     this.drawing = this.canvasdom.getContext('2d')
-   }
+    const width = canvas.offsetWidth / this.data.length
+    const padding = 10
+    for (let i = 0; i < this.data.length; i++) {
+      let x = i * width
+      let y = this.data[i] * canvas.offsetHeight - padding
 
+      this.drawLine(ctx, x, y)
+    }
+  }
 
-    
+  drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
+    ctx.lineWidth = 0.5
+    ctx.strokeStyle = 'orange'
+    ctx.beginPath()
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, y)
+    ctx.moveTo(x, 0)
+    ctx.lineTo(x, -y)
+
+    ctx.stroke()
   }
 }
-}
+
 </script>
