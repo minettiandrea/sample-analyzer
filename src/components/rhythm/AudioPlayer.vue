@@ -1,42 +1,34 @@
 <template>
-<v-container flex>
-          <v-row>
-              <v-progress-linear
-                v-model='sampletime'
-                color="dark orange"
-                height="10"
-                class = 'mt-5'
-                >
-            </v-progress-linear>
-          </v-row>
-          <v-row class='col-5'
+<v-container>
+            <v-row class='col-12 py-0'
+          align-content='center'
           justify='center'
-          align='center'
+          dense
           >
             <v-col cols="1">
                 <v-btn text icon color="orange" @click.native='playing ? pause() : play()'>
-                <v-icon v-if='!playing || paused'>fas fa-play</v-icon>
-                <v-icon v-else>fas fa-pause</v-icon>
-                </v-btn>
-            </v-col>
-
-            <v-col cols="1">
-                <v-btn small text icon color="orange" @click.native='stop()'>
-                <v-icon>fas fa-stop</v-icon>
+                <v-icon x-small="" v-if='!playing || paused'>fas fa-play</v-icon>
+                <v-icon x-small v-else>fas fa-pause</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="1">
                 <v-btn text icon color="orange" @click.native='restart()'>
-                <v-icon>fas fa-backward</v-icon>
+                <v-icon x-small>fas fa-backward</v-icon>
+                </v-btn>
+            </v-col>
+
+            <v-col cols="1">
+                <v-btn text icon color="orange">
+                <v-icon x-small>fas fa-volume-up</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="4">
-              <v-slider @change='changeVolume' dark
+              <v-slider @change='changeVolume'
+              dark dense
               v-model='volume'
               color='orange'
-              class='mt-2'
               max='1'
               min='0'
               step='.1'
@@ -44,6 +36,16 @@
             </v-col>
 
           </v-row>
+          <v-row justify='center' class='pt-0'>
+              <v-progress-linear
+                v-model='sampletime'
+                color="orange"
+                height="10"
+                rounded
+                >
+            </v-progress-linear>
+          </v-row>
+
 </v-container>
 </template>
 
@@ -65,12 +67,17 @@ export default class AudioPlayer extends Vue {
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.AudioContextProvider) ctx:AudioContextProvider
     private source : AudioBufferSourceNode = this.ctx.context().createBufferSource()
+    private rate : number = this.ctx.context().sampleRate
     private gain : GainNode = this.ctx.context().createGain()
+    private samplelng : number
 
+    beforeUpdate () {
+    }
     private newSample (ab:AudioBuffer | null) {
       if (ab) {
         this.source.buffer = ab
-        this.sampletime = ab.length
+        this.samplelng = ab.length / this.rate
+        // this.sampletime = ab.length
       }
     }
 
@@ -86,15 +93,27 @@ export default class AudioPlayer extends Vue {
       this.playing = true
       // this.source.loop = true
       this.source.start()
+      // let audioElement = new Audio()
+
+      var int = setInterval(() => {
+        if (this.sampletime < 100) {
+          this.sampletime += 1
+        }
+        if (this.sampletime >= 100) {
+          this.sampletime = 0
+          this.playing = false
+
+          clearInterval(int)
+        }
+      }, 1000 * this.samplelng / 100) // *1000 in order to get ms
+
+      this.$emit('is-playing', Math.floor(this.sampletime), this.ctx.context().currentTime, this.rate)
+      // emits event arguments (sample)
     }
 
     pause () {
       this.paused = !this.paused
       this.source.stop()
-    }
-
-    stop () {
-      this.paused = this.playing = false
     }
 
     restart () {
