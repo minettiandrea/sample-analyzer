@@ -5,7 +5,7 @@ import { container } from 'inversify-props'
 import { AudioContextProviderImpl, AudioContextProvider } from '@/services/providers/context-provider'
 import { SampleLoaderService } from '@/services/sample-loader/sample-loader'
 import { SampleLoaderImpl } from '@/services/sample-loader/sample-loader-impl'
-import { StoreImpl, Store } from '@/services/store/store'
+import { StoreImpl, Store, PreLoadedStore } from '@/services/store/store'
 import { TimeExtractor } from '@/services/time-extractor/time-extractor'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 
@@ -14,5 +14,5 @@ export default function () {
   container.addSingleton<TimeExtractor>(DummyTimeExtractor, REGISTRY.TimeExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
   container.addSingleton<SampleLoaderService>(SampleLoaderImpl, REGISTRY.SampleLoader)
-  container.addSingleton<Store>(StoreImpl, REGISTRY.Store)
+  container.addSingleton<Store>(PreLoadedStore, REGISTRY.Store)
 };
