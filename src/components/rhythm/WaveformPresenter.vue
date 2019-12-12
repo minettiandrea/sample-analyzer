@@ -1,6 +1,6 @@
 <template>
   <v-card class='mx-auto col-10 mt-5 space-around'>
-    <canvas ref='waveform' style='width:inherit'> </canvas>
+    <canvas ref='waveform' id='waveform'> </canvas>
   </v-card>
 </template>
 
@@ -86,3 +86,10 @@ export default class WaveformPresenter extends Vue {
 }
 
 </script>
+
+<style lang="scss" scoped>
+  #waveform{
+    width:inherit;
+    height:300px;
+  }
+</style>
