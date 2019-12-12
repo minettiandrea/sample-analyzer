@@ -1,11 +1,6 @@
 <template>
 <v-container fluid>
-     <v-row align="center" justify="center">
-      <WaveformPresenter />
-    </v-row>
-    <v-row align='center' justify='center'>
-      <AudioPlayer />
-    </v-row>
+   <WaveformPresenter />
     <v-row>
       <SchemaPresenter />
     </v-row>

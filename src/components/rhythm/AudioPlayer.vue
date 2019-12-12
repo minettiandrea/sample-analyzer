@@ -105,9 +105,13 @@ export default class AudioPlayer extends Vue {
 
           clearInterval(int)
         }
+        if (this.paused) {
+          this.pause()
+          clearInterval(int)
+        }
       }, 1000 * this.samplelng / 100) // *1000 in order to get ms
 
-      this.$emit('is-playing', Math.floor(this.sampletime), this.ctx.context().currentTime, this.rate)
+      this.$emit('isPlaying', Math.floor(this.sampletime), this.ctx.context().currentTime, this.rate)
       // emits event arguments (sample)
     }
 

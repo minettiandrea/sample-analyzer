@@ -1,18 +1,31 @@
 <template>
+<v-container class='col-12' >
+  <v-row align='center' justify='center'>
   <v-card class='mx-auto col-10 mt-5 space-around'>
     <canvas ref='waveform' id='waveform'> </canvas>
   </v-card>
+  </v-row>
+  <v-row align='center' justify='center'>
+      <AudioPlayer  v-on:isPlaying='drawPlaying' />
+  </v-row>
+</v-container>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
+import AudioPlayer from './AudioPlayer.vue'
+
 import { Component, Ref } from 'vue-property-decorator'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 
-@Component
+@Component({
+  components: { AudioPlayer
+  }
+
+})
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
@@ -82,6 +95,10 @@ export default class WaveformPresenter extends Vue {
     ctx.lineTo(x, y)
 
     ctx.stroke()
+  }
+
+  drawPlaying () {
+    console.log('prova')
   }
 }
 
