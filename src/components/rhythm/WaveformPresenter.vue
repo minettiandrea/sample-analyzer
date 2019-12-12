@@ -35,7 +35,7 @@ export default class WaveformPresenter extends Vue {
 
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
     const data = audiobuffer.getChannelData(0) // left channel? maybe taking the average
-    const bars = 400 // number of bars to plot
+    const bars = 16000 // number of bars to plot
     const blocksize = Math.floor(data.length / bars) // how many samples in each block
     var dataf : number [] = [] // initialize the output
 
@@ -66,7 +66,7 @@ export default class WaveformPresenter extends Vue {
     const padding = 10
     for (let i = 0; i < this.data.length; i++) {
       let x = i * width
-      let y = this.data[i] * canvas.offsetHeight - padding
+      let y = this.data[i] * (canvas.offsetHeight / 2) - padding
 
       this.drawLine(ctx, x, y)
     }
@@ -77,9 +77,9 @@ export default class WaveformPresenter extends Vue {
     ctx.strokeStyle = 'orange'
     ctx.beginPath()
     ctx.moveTo(x, 0)
-    ctx.lineTo(x, y)
-    ctx.moveTo(x, 0)
     ctx.lineTo(x, -y)
+
+    ctx.lineTo(x, y)
 
     ctx.stroke()
   }

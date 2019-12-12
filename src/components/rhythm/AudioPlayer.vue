@@ -4,9 +4,9 @@
               <v-progress-linear
                 v-model='sampletime'
                 color="dark orange"
-                height="20"
+                height="10"
                 >
-            </v-progress-linear> {{ sampletime }}
+            </v-progress-linear>
           </v-row>
           <v-row align='center' justify='center' class='col-12'>
             <v-col cols="2">
