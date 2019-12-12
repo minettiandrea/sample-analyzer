@@ -2,7 +2,10 @@
 <v-container class='col-12' >
   <v-row align='center' justify='center'>
   <v-card class='mx-auto col-10 mt-5 space-around'>
-    <canvas ref='waveform' id='waveform'> </canvas>
+    <canvas ref='waveform' class='waveform'>
+    </canvas>
+    <canvas ref='waveformchild' id='waveformchild' class='waveform'> </canvas>
+
   </v-card>
   </v-row>
   <v-row align='center' justify='center'>
@@ -29,9 +32,13 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
+  @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
 
   private dataArray : Uint8Array
   private data : number[]
+  private context : CanvasRenderingContext2D | null
+  private xpos : number
+  private ypos : number
 
   mounted () {
     let canvas : HTMLCanvasElement = this.canvasdom
@@ -40,6 +47,7 @@ export default class WaveformPresenter extends Vue {
       if (s) {
         this.data = this.filterData(s)
         if (ctx) {
+          this.context = ctx
           this.strokeCanvas(ctx)
         }
       }
@@ -69,17 +77,13 @@ export default class WaveformPresenter extends Vue {
 
   strokeCanvas (ctx : CanvasRenderingContext2D) {
     let canvas : HTMLCanvasElement = this.canvasdom
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = canvas.offsetWidth * dpr
-    canvas.height = (canvas.offsetHeight) * dpr
-    ctx.scale(dpr, dpr)
-    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
-
+    this.setUp(canvas, ctx)
     const width = canvas.offsetWidth / this.data.length
+    const height = canvas.offsetHeight
     const padding = 10
     for (let i = 0; i < this.data.length; i++) {
       let x = i * width
-      let y = this.data[i] * (canvas.offsetHeight / 2) - padding
+      let y = this.data[i] * (height / 2) - padding
 
       this.drawLine(ctx, x, y)
     }
@@ -97,15 +101,40 @@ export default class WaveformPresenter extends Vue {
     ctx.stroke()
   }
 
-  drawPlaying () {
-    console.log('prova')
+  drawPlaying (length : number, current : number, fs : number) { // emitted, check in audioplayer play() function
+    let ctx = this.canvasalpha.getContext('2d')
+
+    var blocksize = this.canvasdom.offsetWidth / 100
+    let height = this.canvasdom.offsetHeight
+
+    setInterval(() => {
+      if (ctx) {
+        this.setUp(this.canvasalpha, ctx)
+
+        ctx.save()
+        ctx.strokeStyle = 'white'
+        ctx.beginPath()
+        ctx.fillStyle = 'rgba(225,225,225,0.3)'
+        ctx.fillRect(0, -height / 2, blocksize, height)
+        ctx.restore()
+        blocksize = blocksize + Math.floor(length * 1000 / this.canvasdom.offsetWidth)
+      }
+    }, 1000 * length / 100)
+  }
+
+  setUp (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) {
+    const dpr = window.devicePixelRatio || 1
+    canvas.width = canvas.offsetWidth * dpr
+    canvas.height = (canvas.offsetHeight) * dpr
+    ctx.scale(dpr, dpr)
+    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
   }
 }
 
 </script>
 
 <style lang="scss" scoped>
-  #waveform{
+  .waveform{
     width:inherit;
     height:300px;
   }
