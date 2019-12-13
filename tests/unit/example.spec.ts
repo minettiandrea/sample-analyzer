@@ -1,6 +1,6 @@
 import 'reflect-metadata'
-import { shallowMount } from '@vue/test-utils'
 import '../../src/ioc'
+import { shallowMount } from '@vue/test-utils'
 import SampleLoader from '@/components/sidebar/SampleLoader.vue'
 import { container } from 'inversify-props'
 import { SpectralExtractor } from '@/services/spectral-extractor/spectral-extractor'
