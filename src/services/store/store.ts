@@ -28,6 +28,8 @@ export class PreLoadedStore implements Store {
     constructor () {
       const cello = require('@/assets/cello.wav')
       this.sampleLoader.loadFromUrl(cello).then(sample => {
+        console.log(sample)
+        console.log(sample.duration)
         this._sample.next(sample)
       })
     }
