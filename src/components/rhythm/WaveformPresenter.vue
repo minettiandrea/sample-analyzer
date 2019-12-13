@@ -2,10 +2,11 @@
 <v-container class='col-12' >
   <v-row align='center' justify='center'>
   <v-card class='mx-auto col-10 mt-5 space-around'>
-    <canvas ref='waveform' class='waveform'>
-    </canvas>
-    <canvas ref='waveformchild' id='waveformchild' class='waveform'> </canvas>
-
+    <div class='wrapper'>
+      <canvas ref='waveform' class='waveform'>
+      </canvas>
+      <canvas ref='waveformchild' class='waveform'> </canvas>
+    </div>
   </v-card>
   </v-row>
   <v-row align='center' justify='center'>
@@ -78,6 +79,8 @@ export default class WaveformPresenter extends Vue {
   strokeCanvas (ctx : CanvasRenderingContext2D) {
     let canvas : HTMLCanvasElement = this.canvasdom
     this.setUp(canvas, ctx)
+    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
+
     const width = canvas.offsetWidth / this.data.length
     const height = canvas.offsetHeight
     const padding = 10
@@ -103,23 +106,32 @@ export default class WaveformPresenter extends Vue {
 
   drawPlaying (length : number, current : number, fs : number) { // emitted, check in audioplayer play() function
     let ctx = this.canvasalpha.getContext('2d')
+    var width = this.canvasalpha.offsetWidth
+    let height = this.canvasalpha.offsetHeight
 
-    var blocksize = this.canvasdom.offsetWidth / 100
-    let height = this.canvasdom.offsetHeight
+    const blocksize = Math.floor(width / 100)
+    var previousblock : number = 0
 
-    setInterval(() => {
-      if (ctx) {
-        this.setUp(this.canvasalpha, ctx)
+    if (ctx) {
+      this.setUp(this.canvasalpha, ctx)
+      ctx.globalAlpha = 0.2
+    }
 
-        ctx.save()
-        ctx.strokeStyle = 'white'
+    let it = setInterval(() => {
+      if (ctx && previousblock < width) {
+        ctx.fillStyle = 'orange'
         ctx.beginPath()
-        ctx.fillStyle = 'rgba(225,225,225,0.3)'
-        ctx.fillRect(0, -height / 2, blocksize, height)
-        ctx.restore()
-        blocksize = blocksize + Math.floor(length * 1000 / this.canvasdom.offsetWidth)
+        ctx.fillRect(previousblock, 0, blocksize, height)
+
+        if (previousblock > 0) {
+          ctx.clearRect(previousblock - blocksize, 0, blocksize, height)
+        }
+        previousblock += blocksize
+      } else if (ctx && previousblock >= width) {
+        ctx.clearRect(0, 0, width, height)
+        clearInterval(it)
       }
-    }, 1000 * length / 100)
+    }, Math.ceil(length * 1000 / (this.canvasalpha.offsetWidth / Math.floor(this.canvasalpha.offsetWidth / 100))))
   }
 
   setUp (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) {
@@ -127,15 +139,23 @@ export default class WaveformPresenter extends Vue {
     canvas.width = canvas.offsetWidth * dpr
     canvas.height = (canvas.offsetHeight) * dpr
     ctx.scale(dpr, dpr)
-    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
   }
 }
 
 </script>
 
 <style lang="scss" scoped>
-  .waveform{
-    width:inherit;
-    height:300px;
-  }
+
+  .wrapper {
+    height: 275px;
+   position: relative; /* add */
+}
+.waveform{
+
+  width:100%;
+  height:275px;
+  position:absolute;
+   left: 0;
+   top: 0;
+}
 </style>

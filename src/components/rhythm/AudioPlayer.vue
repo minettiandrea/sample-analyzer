@@ -65,10 +65,11 @@ export default class AudioPlayer extends Vue {
     private sampletime: number = 0 // is going to change according to sample length (in ms?)
 
     @inject(REGISTRY.Store) store:Store
-    @inject(REGISTRY.AudioContextProvider) ctx:AudioContextProvider
-    private source : AudioBufferSourceNode = this.ctx.context().createBufferSource()
-    private rate : number = this.ctx.context().sampleRate
-    private gain : GainNode = this.ctx.context().createGain()
+    @inject(REGISTRY.AudioContextProvider) ctxprovider:AudioContextProvider
+    private ctx = this.ctxprovider.context()
+    private source : AudioBufferSourceNode = this.ctx.createBufferSource()
+    private rate : number = this.ctx.sampleRate
+    private gain : GainNode
     private samplelng : number
 
     beforeUpdate () {
@@ -82,10 +83,7 @@ export default class AudioPlayer extends Vue {
     }
 
     created () {
-      this.gain.gain.setValueAtTime(this.volume, this.ctx.context().currentTime)
-      this.store.sample().subscribe(this.newSample)
-      this.source.connect(this.gain)
-      this.gain.connect(this.ctx.context().destination)
+      this.setup()
     }
 
     play () {
@@ -102,7 +100,7 @@ export default class AudioPlayer extends Vue {
         if (this.sampletime >= 100) {
           this.sampletime = 0
           this.playing = false
-
+          this.restore()
           clearInterval(int)
         }
         if (this.paused) {
@@ -111,7 +109,7 @@ export default class AudioPlayer extends Vue {
         }
       }, 1000 * this.samplelng / 100) // *1000 in order to get ms
 
-      this.$emit('isPlaying', this.samplelng, this.ctx.context().currentTime, this.rate)
+      this.$emit('isPlaying', this.samplelng, this.ctx.currentTime, this.rate)
       // emits event arguments (length of sample in seconds, currenttime of audio context and frequency rate)
     }
 
@@ -127,7 +125,23 @@ export default class AudioPlayer extends Vue {
     }
 
     changeVolume () {
-      this.gain.gain.setValueAtTime(this.volume, this.ctx.context().currentTime)
+      this.gain.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+    }
+
+    restore () {
+      this.ctx = new AudioContext()
+
+      this.source = this.ctx.createBufferSource()
+
+      this.setup()
+    }
+
+    setup () {
+      this.gain = this.ctx.createGain()
+      this.gain.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+      this.store.sample().subscribe(this.newSample)
+      this.source.connect(this.gain)
+      this.gain.connect(this.ctx.destination)
     }
 }
 </script>
