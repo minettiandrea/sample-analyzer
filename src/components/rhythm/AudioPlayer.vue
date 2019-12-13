@@ -109,7 +109,7 @@ export default class AudioPlayer extends Vue {
         }
       }, 1000 * this.samplelng / 100) // *1000 in order to get ms
 
-      this.$emit('isPlaying', this.samplelng, this.ctx.currentTime, this.rate)
+      this.$emit('isPlaying', this.samplelng)
       // emits event arguments (length of sample in seconds, currenttime of audio context and frequency rate)
     }
 

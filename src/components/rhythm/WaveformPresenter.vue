@@ -2,10 +2,14 @@
 <v-container class='col-12' >
   <v-row align='center' justify='center'>
   <v-card class='mx-auto col-10 mt-5 space-around'>
-    <div class='wrapper'>
+    <div class='wrapper'
+      id='canvas-wrapper'
+      @mouseover="hover = true"
+      @mouseleave="hover = false">
+      <canvas ref='waveformchild'
+      class='waveform'> </canvas>
       <canvas ref='waveform' class='waveform'>
       </canvas>
-      <canvas ref='waveformchild' class='waveform'> </canvas>
     </div>
   </v-card>
   </v-row>
@@ -38,8 +42,7 @@ export default class WaveformPresenter extends Vue {
   private dataArray : Uint8Array
   private data : number[]
   private context : CanvasRenderingContext2D | null
-  private xpos : number
-  private ypos : number
+  private hover : boolean = false
 
   mounted () {
     let canvas : HTMLCanvasElement = this.canvasdom
@@ -50,6 +53,7 @@ export default class WaveformPresenter extends Vue {
         if (ctx) {
           this.context = ctx
           this.strokeCanvas(ctx)
+          this.mouseHandler()
         }
       }
     })
@@ -98,7 +102,6 @@ export default class WaveformPresenter extends Vue {
     ctx.beginPath()
     ctx.moveTo(x, 0)
     ctx.lineTo(x, -y)
-
     ctx.lineTo(x, y)
 
     ctx.stroke()
@@ -140,6 +143,35 @@ export default class WaveformPresenter extends Vue {
     canvas.height = (canvas.offsetHeight) * dpr
     ctx.scale(dpr, dpr)
   }
+
+  // ANIMATION WITH MOUSE OVER
+  private mouseHandler () {
+    let target = document.getElementById('canvas-wrapper')
+    if (target) {
+      console.log('event added')
+      target.addEventListener('mousemove', this.onMouseMove)
+    }
+  }
+
+  private onMouseMove = (e: MouseEvent) => {
+    console.log(this)
+    let canvas = this.canvasalpha
+    let ctx = canvas.getContext('2d')
+    console.log(ctx)
+
+    if (this.hover && canvas && ctx) {
+      let posx = e.clientX
+      console.log(posx)
+      var width = this.canvasalpha.offsetWidth
+      let height = this.canvasalpha.offsetHeight
+      const blocksize = Math.floor(width / 500)
+      ctx.fillStyle = 'white'
+      ctx.beginPath()
+      ctx.fillRect(posx, 0, blocksize, height)
+    } else if (canvas && !this.hover) {
+
+    }
+  }
 }
 
 </script>
@@ -147,15 +179,16 @@ export default class WaveformPresenter extends Vue {
 <style lang="scss" scoped>
 
   .wrapper {
-    height: 275px;
+   height: 275px;
    position: relative; /* add */
 }
-.waveform{
 
+.waveform{
   width:100%;
   height:275px;
   position:absolute;
-   left: 0;
-   top: 0;
+  left: 0;
+  top: 0;
 }
+
 </style>
