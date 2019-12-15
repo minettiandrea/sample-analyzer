@@ -4,9 +4,10 @@
   <v-card class='mx-auto col-10 mt-5 space-around'>
     <div class='wrapper'
       id='canvas-wrapper'
-      @mouseover="hover = true"
-      @mouseleave="hover = false">
+      @mouseover.native="hover = true"
+      @mouseleave.native="hover = false">
       <canvas ref='waveformchild'
+      id='waveformchild'
       class='waveform'> </canvas>
       <canvas ref='waveform' class='waveform'>
       </canvas>
@@ -14,7 +15,7 @@
   </v-card>
   </v-row>
   <v-row align='center' justify='center'>
-      <AudioPlayer  v-on:isPlaying='drawPlaying' />
+      <AudioPlayer  v-on:isPlaying='drawPlaying'/>
   </v-row>
 </v-container>
 </template>
@@ -28,6 +29,7 @@ import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
+import { TimeInterval } from 'rxjs'
 
 @Component({
   components: { AudioPlayer
@@ -42,9 +44,11 @@ export default class WaveformPresenter extends Vue {
   private dataArray : Uint8Array
   private data : number[]
   private context : CanvasRenderingContext2D | null
-  private hover : boolean = false
+  public hover : boolean = true
+  private GLOBALALPHA : number = 0.5;
+  private previousInterval : number
 
-  mounted () {
+  mounted () { // access canvas
     let canvas : HTMLCanvasElement = this.canvasdom
     let ctx : CanvasRenderingContext2D | null = canvas.getContext('2d')
     this.store.sample().subscribe(s => {
@@ -61,7 +65,7 @@ export default class WaveformPresenter extends Vue {
 
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
     const data = audiobuffer.getChannelData(0) // left channel? maybe taking the average
-    const bars = 16000 // number of bars to plot
+    const bars = 12000 // number of bars to plot
     const blocksize = Math.floor(data.length / bars) // how many samples in each block
     var dataf : number [] = [] // initialize the output
 
@@ -107,7 +111,9 @@ export default class WaveformPresenter extends Vue {
     ctx.stroke()
   }
 
-  drawPlaying (length : number, current : number, fs : number) { // emitted, check in audioplayer play() function
+  drawPlaying (length : number, sampletime : number, status : boolean) {
+    // emitted, check in audioplayer play() function
+
     let ctx = this.canvasalpha.getContext('2d')
     var width = this.canvasalpha.offsetWidth
     let height = this.canvasalpha.offsetHeight
@@ -117,24 +123,30 @@ export default class WaveformPresenter extends Vue {
 
     if (ctx) {
       this.setUp(this.canvasalpha, ctx)
-      ctx.globalAlpha = 0.2
+      ctx.globalAlpha = this.GLOBALALPHA
+      ctx.clearRect(0, 0, width, height)
     }
+    if (status) { // TRUE is playing
+      let it = setInterval(() => {
+        if (ctx && previousblock < width) {
+          ctx.fillStyle = 'orange'
+          ctx.beginPath()
+          ctx.fillRect(previousblock, 0, blocksize, height)
 
-    let it = setInterval(() => {
-      if (ctx && previousblock < width) {
-        ctx.fillStyle = 'orange'
-        ctx.beginPath()
-        ctx.fillRect(previousblock, 0, blocksize, height)
-
-        if (previousblock > 0) {
-          ctx.clearRect(previousblock - blocksize, 0, blocksize, height)
+          if (previousblock > 0) {
+            ctx.clearRect(previousblock - blocksize, 0, blocksize, height)
+          }
+          previousblock += blocksize
+        } else if (ctx && previousblock >= width) {
+          ctx.clearRect(0, 0, width, height)
+          clearInterval(it)
         }
-        previousblock += blocksize
-      } else if (ctx && previousblock >= width) {
-        ctx.clearRect(0, 0, width, height)
-        clearInterval(it)
       }
-    }, Math.ceil(length * 1000 / (this.canvasalpha.offsetWidth / Math.floor(this.canvasalpha.offsetWidth / 100))))
+      , Math.ceil(length * 1000 / (this.canvasalpha.offsetWidth / Math.floor(this.canvasalpha.offsetWidth / 100))))
+      this.previousInterval = it
+    } else {
+      clearInterval(this.previousInterval)
+    }
   }
 
   setUp (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) {
@@ -145,33 +157,43 @@ export default class WaveformPresenter extends Vue {
   }
 
   // ANIMATION WITH MOUSE OVER
-  private mouseHandler () {
+  mouseHandler () {
     let target = document.getElementById('canvas-wrapper')
     if (target) {
-      console.log('event added')
       target.addEventListener('mousemove', this.onMouseMove)
     }
   }
 
-  private onMouseMove = (e: MouseEvent) => {
-    console.log(this)
-    let canvas = this.canvasalpha
-    let ctx = canvas.getContext('2d')
-    console.log(ctx)
+   onMouseMove = (e: MouseEvent) => {
+     let canvas = document.getElementById('waveformchild') as HTMLCanvasElement
+     let offset = canvas.offsetLeft
+     let movement = e.movementX
+     if (canvas) {
+       let ctx = canvas.getContext('2d')
+       if (this.hover && ctx) {
+         this.setUp(canvas, ctx)
+         ctx.globalAlpha = this.GLOBALALPHA
 
-    if (this.hover && canvas && ctx) {
-      let posx = e.clientX
-      console.log(posx)
-      var width = this.canvasalpha.offsetWidth
-      let height = this.canvasalpha.offsetHeight
-      const blocksize = Math.floor(width / 500)
-      ctx.fillStyle = 'white'
-      ctx.beginPath()
-      ctx.fillRect(posx, 0, blocksize, height)
-    } else if (canvas && !this.hover) {
+         let width = canvas.offsetWidth
+         let height = canvas.offsetHeight // clear the canvas for new movement
 
-    }
-  }
+         ctx.clearRect(0, 0, width, height)
+
+         let posx = e.offsetX
+         const blocksize = Math.floor(width / 500)
+         ctx.strokeStyle = 'red'
+         ctx.lineWidth = 1.5
+         ctx.beginPath()
+         ctx.moveTo(posx, 0)
+         ctx.lineTo(posx, height)
+         ctx.stroke()
+
+         if (movement > blocksize || !this.hover) {
+           ctx.clearRect(0, 0, width, height)
+         }
+       }
+     }
+   }
 }
 
 </script>

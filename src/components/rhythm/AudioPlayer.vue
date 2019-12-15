@@ -19,7 +19,7 @@
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="orange">
+                <v-btn text icon color="orange" @click ='mute'>
                 <v-icon x-small>fas fa-volume-up</v-icon>
                 </v-btn>
             </v-col>
@@ -39,6 +39,7 @@
           <v-row justify='center' class='pt-0'>
               <v-progress-linear
                 v-model='sampletime'
+                v-on:samplechanged='changeSample'
                 color="orange"
                 height="10"
                 rounded
@@ -92,6 +93,8 @@ export default class AudioPlayer extends Vue {
       // this.source.loop = true
       this.source.start()
       // let audioElement = new Audio()
+      this.$emit('isPlaying', this.samplelng, this.sampletime, true)
+      // emits event arguments (length of sample in seconds, playing is true)
 
       var int = setInterval(() => {
         if (this.sampletime < 100) {
@@ -108,20 +111,32 @@ export default class AudioPlayer extends Vue {
           clearInterval(int)
         }
       }, 1000 * this.samplelng / 100) // *1000 in order to get ms
-
-      this.$emit('isPlaying', this.samplelng)
-      // emits event arguments (length of sample in seconds, currenttime of audio context and frequency rate)
     }
 
     pause () {
-      this.paused = !this.paused
+      this.paused = true
+      this.playing = false
+      this.$emit('isPlaying', this.samplelng, this.sampletime, this.playing)
       this.source.stop()
+
+      this.restore()
     }
 
     restart () {
       this.paused = false
       this.sampletime = 0
+      this.restore()
       this.playing = true // changes the model, need to trigger audio
+    }
+
+    mute () {
+      if (this.volume !== 0) {
+        this.volume = 0
+        this.gain.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+      } else {
+        this.volume = 0.25
+        this.gain.gain.setValueAtTime(this.volume, this.ctx.currentTime)
+      }
     }
 
     changeVolume () {
@@ -134,6 +149,10 @@ export default class AudioPlayer extends Vue {
       this.source = this.ctx.createBufferSource()
 
       this.setup()
+    }
+
+    changeSample () {
+
     }
 
     setup () {
