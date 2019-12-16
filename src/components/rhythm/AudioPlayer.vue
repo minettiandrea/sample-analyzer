@@ -73,14 +73,30 @@ export default class AudioPlayer extends Vue {
     private gain : GainNode
     private samplelng : number
 
+    private sample:AudioBuffer
+
+    private startplayingtime = 0;
+    private pausedAt = 0;
+    private interval:NodeJS.Timeout
+
     beforeUpdate () {
     }
     private newSample (ab:AudioBuffer | null) {
       if (ab) {
+        this.sample = ab
         this.source.buffer = ab
         this.samplelng = ab.length / this.rate
         // this.sampletime = ab.length
       }
+    }
+
+    onEnd () {
+      this.playing = false
+      clearInterval(this.interval)
+      this.sampletime = 0
+      this.restore()
+      this.store.nextPlayEvent({ status: false, elapsed: 0, length: this.samplelng })
+      this.pausedAt = 0
     }
 
     created () {
@@ -90,49 +106,42 @@ export default class AudioPlayer extends Vue {
     play () {
       this.paused = false
       this.playing = true
-      // this.source.loop = true
+
+      this.startplayingtime = this.ctxprovider.context().currentTime
       if (this.sampletime === 0) {
         this.source.start()
       }
       if (this.sampletime > 0) {
-        this.source.start(0, Math.ceil(this.sampletime * this.samplelng / 100))
+        this.source.start(0, this.pausedAt)
       }
-      // let audioElement = new Audio()
-      this.$emit('isPlaying', this.samplelng, this.sampletime, this.playing)
-      // emits event arguments (length of sample in seconds, playing is true)
 
-      var int = setInterval(() => {
-        if (this.sampletime < 100 && !this.paused) {
-          this.sampletime += 1
+      this.interval = setInterval(() => {
+        const elapsed = this.ctxprovider.context().currentTime - this.startplayingtime + this.pausedAt
+        this.sampletime = Math.ceil(elapsed / this.samplelng * 100)
+        this.store.nextPlayEvent({ status: this.playing, length: this.samplelng, elapsed: elapsed })
+        if (elapsed > this.samplelng) {
+          this.onEnd()
         }
-        if (this.sampletime >= 100) {
-          this.sampletime = 0
-          this.playing = false
-          this.restore()
-          clearInterval(int)
-        }
-        if (this.paused && !this.playing) {
-          clearInterval(int)
-        }
-      }, 1000 * this.samplelng / 100) // *1000 in order to get ms
+      }, 50)
     }
 
     pause () {
+      clearInterval(this.interval)
       this.paused = true
       this.playing = false
-      this.$emit('isPlaying', this.samplelng, this.sampletime, this.playing)
       this.source.stop()
+      this.pausedAt = this.ctxprovider.context().currentTime - this.startplayingtime + this.pausedAt
+      this.store.nextPlayEvent({ length: this.samplelng, status: false, elapsed: this.pausedAt })
 
       this.restore()
     }
 
     restart () {
+      console.log('restart')
       this.sampletime = 0
       this.restore()
       this.paused = false
-
-      this.playing = true
-
+      this.play()
       // changes the model, need to trigger audio
     }
 
@@ -151,9 +160,9 @@ export default class AudioPlayer extends Vue {
     }
 
     restore () {
-      this.ctx = new AudioContext()
       this.source = this.ctx.createBufferSource()
-      this.setup()
+      this.source.buffer = this.sample
+      this.source.connect(this.gain)
     }
 
     changeSample () {
