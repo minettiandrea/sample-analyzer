@@ -6,20 +6,20 @@
           dense
           >
             <v-col cols="1">
-                <v-btn text icon color="orange" @click.native='playing ? pause() : play()'>
+                <v-btn text icon color="orange" @click='playing ? pause() : play()'>
                 <v-icon x-small="" v-if='!playing || paused'>fas fa-play</v-icon>
                 <v-icon x-small v-else>fas fa-pause</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="orange" @click.native='restart()'>
+                <v-btn text icon color="orange" @click='restart()'>
                 <v-icon x-small>fas fa-backward</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="orange" @click ='mute'>
+                <v-btn text icon color="orange" @click ='mute()'>
                 <v-icon x-small>fas fa-volume-up</v-icon>
                 </v-btn>
             </v-col>
@@ -91,13 +91,18 @@ export default class AudioPlayer extends Vue {
       this.paused = false
       this.playing = true
       // this.source.loop = true
-      this.source.start()
+      if (this.sampletime === 0) {
+        this.source.start()
+      }
+      if (this.sampletime > 0) {
+        this.source.start(0, Math.ceil(this.sampletime * this.samplelng / 100))
+      }
       // let audioElement = new Audio()
-      this.$emit('isPlaying', this.samplelng, this.sampletime, true)
+      this.$emit('isPlaying', this.samplelng, this.sampletime, this.playing)
       // emits event arguments (length of sample in seconds, playing is true)
 
       var int = setInterval(() => {
-        if (this.sampletime < 100) {
+        if (this.sampletime < 100 && !this.paused) {
           this.sampletime += 1
         }
         if (this.sampletime >= 100) {
@@ -106,8 +111,7 @@ export default class AudioPlayer extends Vue {
           this.restore()
           clearInterval(int)
         }
-        if (this.paused) {
-          this.pause()
+        if (this.paused && !this.playing) {
           clearInterval(int)
         }
       }, 1000 * this.samplelng / 100) // *1000 in order to get ms
@@ -123,10 +127,13 @@ export default class AudioPlayer extends Vue {
     }
 
     restart () {
-      this.paused = false
       this.sampletime = 0
       this.restore()
-      this.playing = true // changes the model, need to trigger audio
+      this.paused = false
+
+      this.playing = true
+
+      // changes the model, need to trigger audio
     }
 
     mute () {
@@ -145,9 +152,7 @@ export default class AudioPlayer extends Vue {
 
     restore () {
       this.ctx = new AudioContext()
-
       this.source = this.ctx.createBufferSource()
-
       this.setup()
     }
 

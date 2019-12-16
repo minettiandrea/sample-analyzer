@@ -47,6 +47,7 @@ export default class WaveformPresenter extends Vue {
   public hover : boolean = true
   private GLOBALALPHA : number = 0.5;
   private previousInterval : number
+  private previousblock : number = 0
 
   mounted () { // access canvas
     let canvas : HTMLCanvasElement = this.canvasdom
@@ -111,7 +112,7 @@ export default class WaveformPresenter extends Vue {
     ctx.stroke()
   }
 
-  drawPlaying (length : number, sampletime : number, status : boolean) {
+  drawPlaying (length : number, sampletime : number, status : boolean) { // status: true playing, false in pause
     // emitted, check in audioplayer play() function
 
     let ctx = this.canvasalpha.getContext('2d')
@@ -119,26 +120,23 @@ export default class WaveformPresenter extends Vue {
     let height = this.canvasalpha.offsetHeight
 
     const blocksize = Math.floor(width / 100)
-    var previousblock : number = 0
-
-    if (ctx) {
-      this.setUp(this.canvasalpha, ctx)
-      ctx.globalAlpha = this.GLOBALALPHA
-      ctx.clearRect(0, 0, width, height)
-    }
     if (status) { // TRUE is playing
+      if (ctx) {
+        this.setUp(this.canvasalpha, ctx)
+        ctx.globalAlpha = this.GLOBALALPHA
+        ctx.clearRect(0, 0, width, height)
+      }
       let it = setInterval(() => {
-        if (ctx && previousblock < width) {
+        if (ctx && this.previousblock < width) {
           ctx.fillStyle = 'orange'
           ctx.beginPath()
-          ctx.fillRect(previousblock, 0, blocksize, height)
+          ctx.fillRect(this.previousblock, 0, blocksize, height)
 
-          if (previousblock > 0) {
-            ctx.clearRect(previousblock - blocksize, 0, blocksize, height)
+          if (this.previousblock > 0) {
+            ctx.clearRect(this.previousblock - blocksize, 0, blocksize, height)
           }
-          previousblock += blocksize
-        } else if (ctx && previousblock >= width) {
-          ctx.clearRect(0, 0, width, height)
+          this.previousblock += blocksize
+        } else if (ctx && this.previousblock >= width) {
           clearInterval(it)
         }
       }
@@ -175,10 +173,7 @@ export default class WaveformPresenter extends Vue {
          ctx.globalAlpha = this.GLOBALALPHA
 
          let width = canvas.offsetWidth
-         let height = canvas.offsetHeight // clear the canvas for new movement
-
-         ctx.clearRect(0, 0, width, height)
-
+         let height = canvas.offsetHeight
          let posx = e.offsetX
          const blocksize = Math.floor(width / 500)
          ctx.strokeStyle = 'red'
@@ -189,7 +184,7 @@ export default class WaveformPresenter extends Vue {
          ctx.stroke()
 
          if (movement > blocksize || !this.hover) {
-           ctx.clearRect(0, 0, width, height)
+           ctx.clearRect(0, 0, posx, height)
          }
        }
      }
