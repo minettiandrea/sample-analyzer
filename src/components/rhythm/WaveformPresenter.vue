@@ -3,11 +3,10 @@
   <v-row align='center' justify='center'>
   <v-card class='mx-auto col-10 mt-5 space-around'>
     <div class='wrapper'
-      id='canvas-wrapper'
+      ref='canvas-wrapper'
       @mouseover.native="hover = true"
       @mouseleave.native="hover = false">
       <canvas ref='waveformchild'
-      id='waveformchild'
       class='waveform'> </canvas>
       <canvas ref='waveform' class='waveform'>
       </canvas>
@@ -40,6 +39,7 @@ export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
   @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
+  @Ref('canvas-wrapper') readonly canvasWrapper!:HTMLDivElement
 
   private dataArray : Uint8Array
   private data : number[]
@@ -47,20 +47,26 @@ export default class WaveformPresenter extends Vue {
   public hover : boolean = true
   private GLOBALALPHA : number = 0.5;
   private previousInterval : NodeJS.Timeout
+  private previousblock : number = 0
 
   mounted () { // access canvas
     let canvas : HTMLCanvasElement = this.canvasdom
     let ctx : CanvasRenderingContext2D | null = canvas.getContext('2d')
+    if (ctx) {
+      this.context = ctx
+    }
+    this.setUp(canvas)
+    this.setUp(this.canvasalpha)
+    this.mouseHandler()
+
     this.store.sample().subscribe(s => {
       if (s) {
         this.data = this.filterData(s)
-        if (ctx) {
-          this.context = ctx
-          this.strokeCanvas(ctx)
-          this.mouseHandler()
-        }
+        this.strokeCanvas()
       }
     })
+
+    this.store.playing().subscribe(p => console.log(p))
   }
 
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
@@ -84,19 +90,21 @@ export default class WaveformPresenter extends Vue {
     return dataf
   }
 
-  strokeCanvas (ctx : CanvasRenderingContext2D) {
-    let canvas : HTMLCanvasElement = this.canvasdom
-    this.setUp(canvas, ctx)
-    ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
+  strokeCanvas () {
+    if (this.context) {
+      let canvas : HTMLCanvasElement = this.canvasdom
 
-    const width = canvas.offsetWidth / this.data.length
-    const height = canvas.offsetHeight
-    const padding = 10
-    for (let i = 0; i < this.data.length; i++) {
-      let x = i * width
-      let y = this.data[i] * (height / 2) - padding
+      this.context.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
 
-      this.drawLine(ctx, x, y)
+      const width = canvas.offsetWidth / this.data.length
+      const height = canvas.offsetHeight
+      const padding = 10
+      for (let i = 0; i < this.data.length; i++) {
+        let x = i * width
+        let y = this.data[i] * (height / 2) - padding
+
+        this.drawLine(this.context, x, y)
+      }
     }
   }
 
@@ -107,11 +115,10 @@ export default class WaveformPresenter extends Vue {
     ctx.moveTo(x, 0)
     ctx.lineTo(x, -y)
     ctx.lineTo(x, y)
-
     ctx.stroke()
   }
 
-  drawPlaying (length : number, sampletime : number, status : boolean) {
+  drawPlaying (length : number, sampletime : number, status : boolean) { // status: true playing, false in pause
     // emitted, check in audioplayer play() function
 
     let ctx = this.canvasalpha.getContext('2d')
@@ -119,26 +126,22 @@ export default class WaveformPresenter extends Vue {
     let height = this.canvasalpha.offsetHeight
 
     const blocksize = Math.floor(width / 100)
-    var previousblock : number = 0
-
-    if (ctx) {
-      this.setUp(this.canvasalpha, ctx)
-      ctx.globalAlpha = this.GLOBALALPHA
-      ctx.clearRect(0, 0, width, height)
-    }
     if (status) { // TRUE is playing
+      if (ctx) {
+        ctx.globalAlpha = this.GLOBALALPHA
+        ctx.clearRect(0, 0, width, height)
+      }
       let it = setInterval(() => {
-        if (ctx && previousblock < width) {
+        if (ctx && this.previousblock < width) {
           ctx.fillStyle = 'orange'
           ctx.beginPath()
-          ctx.fillRect(previousblock, 0, blocksize, height)
+          ctx.fillRect(this.previousblock, 0, blocksize, height)
 
-          if (previousblock > 0) {
-            ctx.clearRect(previousblock - blocksize, 0, blocksize, height)
+          if (this.previousblock > 0) {
+            ctx.clearRect(this.previousblock - blocksize, 0, blocksize, height)
           }
-          previousblock += blocksize
-        } else if (ctx && previousblock >= width) {
-          ctx.clearRect(0, 0, width, height)
+          this.previousblock += blocksize
+        } else if (ctx && this.previousblock >= width) {
           clearInterval(it)
         }
       }
@@ -149,51 +152,49 @@ export default class WaveformPresenter extends Vue {
     }
   }
 
-  setUp (canvas : HTMLCanvasElement, ctx : CanvasRenderingContext2D) {
-    const dpr = window.devicePixelRatio || 1
-    canvas.width = canvas.offsetWidth * dpr
-    canvas.height = (canvas.offsetHeight) * dpr
-    ctx.scale(dpr, dpr)
+  setUp (canvas : HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d')
+    if (ctx) {
+      const dpr = window.devicePixelRatio || 1
+      canvas.width = canvas.offsetWidth * dpr
+      canvas.height = (canvas.offsetHeight) * dpr
+      ctx.scale(dpr, dpr)
+    }
   }
 
   // ANIMATION WITH MOUSE OVER
   mouseHandler () {
-    let target = document.getElementById('canvas-wrapper')
-    if (target) {
-      target.addEventListener('mousemove', this.onMouseMove)
+    if (this.canvasWrapper) {
+      this.canvasWrapper.addEventListener('mousemove', this.onMouseMove)
     }
   }
 
-   onMouseMove = (e: MouseEvent) => {
-     let canvas = document.getElementById('waveformchild') as HTMLCanvasElement
-     let offset = canvas.offsetLeft
-     let movement = e.movementX
-     if (canvas) {
-       let ctx = canvas.getContext('2d')
-       if (this.hover && ctx) {
-         this.setUp(canvas, ctx)
-         ctx.globalAlpha = this.GLOBALALPHA
+  onMouseMove (e: MouseEvent) {
+    let canvas = this.canvasalpha
+    let offset = canvas.offsetLeft
+    let movement = e.movementX
+    if (canvas) {
+      let ctx = canvas.getContext('2d')
+      if (this.hover && ctx) {
+        ctx.globalAlpha = this.GLOBALALPHA
 
-         let width = canvas.offsetWidth
-         let height = canvas.offsetHeight // clear the canvas for new movement
+        let width = canvas.offsetWidth
+        let height = canvas.offsetHeight
+        let posx = e.offsetX
+        const blocksize = Math.floor(width / 500)
+        ctx.strokeStyle = 'red'
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.moveTo(posx, 0)
+        ctx.lineTo(posx, height)
+        ctx.stroke()
 
-         ctx.clearRect(0, 0, width, height)
-
-         let posx = e.offsetX
-         const blocksize = Math.floor(width / 500)
-         ctx.strokeStyle = 'red'
-         ctx.lineWidth = 1.5
-         ctx.beginPath()
-         ctx.moveTo(posx, 0)
-         ctx.lineTo(posx, height)
-         ctx.stroke()
-
-         if (movement > blocksize || !this.hover) {
-           ctx.clearRect(0, 0, width, height)
-         }
-       }
-     }
-   }
+        if (movement > blocksize || !this.hover) {
+          ctx.clearRect(0, 0, posx, height)
+        }
+      }
+    }
+  }
 }
 
 </script>
