@@ -46,7 +46,7 @@ export default class WaveformPresenter extends Vue {
   private context : CanvasRenderingContext2D | null
   public hover : boolean = true
   private GLOBALALPHA : number = 0.5;
-  private previousInterval : number
+  private previousInterval : NodeJS.Timeout
 
   mounted () { // access canvas
     let canvas : HTMLCanvasElement = this.canvasdom

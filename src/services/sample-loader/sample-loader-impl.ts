@@ -22,7 +22,11 @@ export class SampleLoaderImpl implements SampleLoaderService {
       const fr = new FileReader()
       fr.readAsArrayBuffer(file)
       fr.onload = () => {
-        this.context.context().decodeAudioData(fr.result as ArrayBuffer, audioBuffer => resolve(audioBuffer))
+        if (fr.result) {
+          this.context.context().decodeAudioData(fr.result as ArrayBuffer, audioBuffer => resolve(audioBuffer))
+        } else {
+          resolve(this.context.context().createBuffer(2, 0, 44100))
+        }
       }
     })
   }

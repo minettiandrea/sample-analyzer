@@ -1,11 +1,8 @@
+import { Note } from '@/model/note'
 
 export interface FFTElement{
     frequency: number,
     magnitude:number
-}
-
-export interface Note{
-    name: 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
 }
 
 export interface SpectralAnalisis{
