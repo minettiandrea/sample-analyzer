@@ -30,6 +30,18 @@ import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
 
+export class Line {
+  ctx:CanvasRenderingContext2D
+  color:string
+  id:string
+  x: number
+  visible: boolean
+
+  draw () {
+    // TODO
+  }
+}
+
 @Component({
   components: { AudioPlayer
   }
@@ -49,6 +61,10 @@ export default class WaveformPresenter extends Vue {
   private previousInterval : NodeJS.Timeout
   private previousblock : number = 0
 
+  private playingCursor:Line
+  private mouseCursor:Line
+  private objects:Line[] = [this.playingCursor, this.mouseCursor]
+
   mounted () { // access canvas
     let canvas : HTMLCanvasElement = this.canvasdom
     let ctx : CanvasRenderingContext2D | null = canvas.getContext('2d')
@@ -66,7 +82,15 @@ export default class WaveformPresenter extends Vue {
       }
     })
 
-    this.store.playing().subscribe(p => console.log(p))
+    this.store.playing().subscribe(p => {
+      console.log(p)
+      // increment cursor x
+      this.draw()
+    })
+  }
+
+  draw () {
+    this.objects.forEach(o => o.draw())
   }
 
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
