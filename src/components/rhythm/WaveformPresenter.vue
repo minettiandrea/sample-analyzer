@@ -5,7 +5,8 @@
     <div class='wrapper'
       ref='canvas-wrapper'
       @mouseover="hover = true"
-      @mouseleave="hide()">
+      @mouseleave="hide"
+      @click='skip'>
       <canvas ref='waveformchild'
       class='waveform'> </canvas>
       <canvas ref='waveform' class='waveform'>
@@ -213,6 +214,12 @@ export default class WaveformPresenter extends Vue {
     this.mouseCursor.x = 0
     this.mouseCursor.visible = false
     this.redraw()
+  }
+
+  // click event managing, skips to another sample
+  skip (e: MouseEvent) {
+    let pos = Math.floor(e.offsetX / this.canvasalpha.offsetWidth * 100)
+    this.store.nextSkipped(pos)
   }
 }
 

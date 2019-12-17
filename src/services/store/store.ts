@@ -9,12 +9,17 @@ export interface Store{
     playing ():Observable<PlayingEvent>
     resetPlayEvent ():void
     nextPlayEvent (pe:PlayingEvent):void
+    skipped():Observable<number | null>
+    nextSkipped(skipped:number):void
 }
 
 export interface PlayingEvent{
   status:boolean
   length:number
   elapsed:number
+}
+
+export interface SkipSample{
 }
 
 @injectable()
@@ -24,6 +29,8 @@ export class StoreImpl implements Store {
     emptySampleEvent:PlayingEvent = { status: false, length: 0, elapsed: 0 }
 
     private _playing:BehaviorSubject<PlayingEvent> = new BehaviorSubject<PlayingEvent>(this.emptySampleEvent);
+
+    protected _skipped:BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -43,6 +50,14 @@ export class StoreImpl implements Store {
 
     nextPlayEvent (pe:PlayingEvent) {
       this._playing.next(pe)
+    }
+
+    skipped (): Observable<number | null> {
+      return this._skipped
+    }
+
+    nextSkipped (skipped : number): void {
+      this._skipped.next(skipped)
     }
 }
 

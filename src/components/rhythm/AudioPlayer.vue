@@ -39,11 +39,10 @@
           <v-row justify='center' class='pt-0'>
               <v-progress-linear
                 v-model='sampletime'
-                v-on:samplechanged='changeSample'
                 color="orange"
                 height="10"
                 rounded
-                >
+              >
             </v-progress-linear>
           </v-row>
 
@@ -79,7 +78,13 @@ export default class AudioPlayer extends Vue {
     private pausedAt = 0;
     private interval:NodeJS.Timeout
 
-    beforeUpdate () {
+    mounted () {
+      this.store.skipped().subscribe(p => {
+        if (p) {
+          this.sampletime = p
+          this.pausedAt = this.samplelng * p / 100
+        }
+      })
     }
     private newSample (ab:AudioBuffer | null) {
       if (ab) {
@@ -162,10 +167,6 @@ export default class AudioPlayer extends Vue {
       this.source = this.ctx.createBufferSource()
       this.source.buffer = this.sample
       this.source.connect(this.gain)
-    }
-
-    changeSample () {
-
     }
 
     setup () {
