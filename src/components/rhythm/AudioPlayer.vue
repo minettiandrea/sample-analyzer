@@ -86,7 +86,6 @@ export default class AudioPlayer extends Vue {
         this.sample = ab
         this.source.buffer = ab
         this.samplelng = ab.length / this.rate
-        // this.sampletime = ab.length
       }
     }
 
