@@ -129,7 +129,7 @@ export default class WaveformPresenter extends Vue {
   }
 
   redraw () { // chiamiamolo redraw cosi si distingue dal draw del line
-    this.objects.forEach(o => o.draw()) // e' `o` che e' undefined
+    this.objects.forEach(o => o.draw())
   }
 
   // setup canvas for dpi and transparency

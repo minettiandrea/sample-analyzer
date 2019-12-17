@@ -94,6 +94,10 @@ export default class AudioPlayer extends Vue {
       }
     }
 
+    created () {
+      this.setup()
+    }
+
     onEnd () {
       this.playing = false
       clearInterval(this.interval)
@@ -101,10 +105,6 @@ export default class AudioPlayer extends Vue {
       this.restore()
       this.store.nextPlayEvent({ status: false, elapsed: 0, length: this.samplelng })
       this.pausedAt = 0
-    }
-
-    created () {
-      this.setup()
     }
 
     play () {
@@ -141,12 +141,12 @@ export default class AudioPlayer extends Vue {
     }
 
     restart () {
-      console.log('restart')
+      this.pausedAt = 0
+
       this.sampletime = 0
       this.restore()
       this.paused = false
       this.play()
-      // changes the model, need to trigger audio
     }
 
     mute () {
