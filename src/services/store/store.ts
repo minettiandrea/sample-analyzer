@@ -19,9 +19,6 @@ export interface PlayingEvent{
   elapsed:number
 }
 
-export interface SkipSample{
-}
-
 @injectable()
 export class StoreImpl implements Store {
     protected _sample:BehaviorSubject<AudioBuffer | null> = new BehaviorSubject<AudioBuffer | null>(null);
@@ -69,8 +66,6 @@ export class PreLoadedStore extends StoreImpl {
       super()
       const cello = require('@/assets/cello.wav')
       this.sampleLoader.loadFromUrl(cello).then(sample => {
-        console.log(sample)
-        console.log(sample.duration)
         this._sample.next(sample)
       })
     }

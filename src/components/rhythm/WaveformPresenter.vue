@@ -7,10 +7,11 @@
       @mouseover="hover = true"
       @mouseleave="hide"
       @click='skip'>
-      <canvas ref='waveformchild'
-      class='waveform'> </canvas>
       <canvas ref='waveform' class='waveform'>
       </canvas>
+            <canvas ref='waveformchild'
+      class='waveform'> </canvas>
+
     </div>
   </v-card>
   </v-row>
@@ -30,6 +31,7 @@ import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
+import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 
 export class Line {
   ctx:CanvasRenderingContext2D
@@ -62,7 +64,7 @@ export class Line {
 
         case ('mouse'): {
           if (this.x > 0) {
-            this.ctx.strokeStyle = 'red'
+            this.ctx.strokeStyle = this.color
             this.ctx.lineWidth = 1.5
             this.ctx.beginPath()
             this.ctx.moveTo(this.x, 0)
@@ -70,6 +72,14 @@ export class Line {
             this.ctx.stroke()
           }
           break
+        }
+        case ('peak'): {
+          this.ctx.strokeStyle = this.color
+          this.ctx.lineWidth = 2
+          this.ctx.beginPath()
+          this.ctx.moveTo(this.x, 0)
+          this.ctx.lineTo(this.x, this.ctx.canvas.offsetHeight)
+          this.ctx.stroke()
         }
       }
     }
@@ -82,12 +92,14 @@ export class Line {
 })
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
+  @inject(REGISTRY.TimeExtractor) extractor:DummyTimeExtractor
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
   @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
   @Ref('canvas-wrapper') readonly canvasWrapper!:HTMLDivElement
 
   private dataArray : Uint8Array
   private data : number[]
+  private samplerate:number
   private context : CanvasRenderingContext2D | null
   private contextAlpha : CanvasRenderingContext2D | null
   public hover : boolean
@@ -116,7 +128,20 @@ export default class WaveformPresenter extends Vue {
 
     this.store.sample().subscribe(s => {
       if (s) {
-        this.data = this.filterData(s) // sempre uguale.
+        this.data = this.filterData(s)
+        this.samplerate = s.sampleRate
+        this.extractor.analyze(s).then(te => {
+          te.peaks.forEach(peak => {
+            if (ctxAlpha) {
+              let xpos = (peak / this.samplerate) / s.duration * this.canvasalpha.offsetWidth
+              console.log(xpos)
+              let o = new Line(ctxAlpha, 'blue', 'peak', xpos, true)
+              this.objects.push(o)
+            }
+          })
+        })
+        console.log(this.objects)
+
         this.strokeCanvas()
       }
     })
@@ -129,7 +154,9 @@ export default class WaveformPresenter extends Vue {
 
     this.store.skipped().subscribe(p => {
       if (p) {
-        this.playingCursor.x = p * this.canvasalpha.offsetWidth
+        if (this.canvasalpha) {
+          this.playingCursor.x = p * this.canvasalpha.offsetWidth
+        }
       }
     })
   }

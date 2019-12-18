@@ -70,7 +70,7 @@ export default class AudioPlayer extends Vue {
     private source : AudioBufferSourceNode = this.ctx.createBufferSource()
     private rate : number = this.ctx.sampleRate
     private gain : GainNode
-    private samplelng : number
+    private samplelng : number = 0
 
     private sample:AudioBuffer
 
@@ -82,7 +82,6 @@ export default class AudioPlayer extends Vue {
       this.store.skipped().subscribe(p => {
         if (p) {
           this.sampletime = p
-
           this.pausedAt = this.samplelng * p / 100
         }
       })
@@ -143,7 +142,7 @@ export default class AudioPlayer extends Vue {
 
     restart () {
       this.pausedAt = 0
-
+      this.source.stop()
       this.sampletime = 0
       this.restore()
       this.paused = false
