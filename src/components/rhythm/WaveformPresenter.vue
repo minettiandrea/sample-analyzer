@@ -126,6 +126,12 @@ export default class WaveformPresenter extends Vue {
       this.playingCursor.visible = true
       this.redraw()
     })
+
+    this.store.skipped().subscribe(p => {
+      if (p) {
+        this.playingCursor.x = p * this.canvasalpha.offsetWidth
+      }
+    })
   }
 
   redraw () { // chiamiamolo redraw cosi si distingue dal draw del line

@@ -37,13 +37,13 @@
 
           </v-row>
           <v-row justify='center' class='pt-0'>
-              <v-progress-linear
+              <v-slider
                 v-model='sampletime'
                 color="orange"
-                height="10"
-                rounded
+                @click='skip'
+                :label=" (sampletime * samplelng / 100).toFixed(3)  + ' : ' +  samplelng.toFixed(3)"
               >
-            </v-progress-linear>
+            </v-slider>
           </v-row>
 
 </v-container>
@@ -82,6 +82,7 @@ export default class AudioPlayer extends Vue {
       this.store.skipped().subscribe(p => {
         if (p) {
           this.sampletime = p
+
           this.pausedAt = this.samplelng * p / 100
         }
       })
@@ -175,6 +176,11 @@ export default class AudioPlayer extends Vue {
       this.store.sample().subscribe(this.newSample)
       this.source.connect(this.gain)
       this.gain.connect(this.ctx.destination)
+    }
+
+    skip () {
+      let pos = this.sampletime
+      this.store.nextSkipped(pos)
     }
 }
 </script>
