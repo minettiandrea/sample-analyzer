@@ -18,7 +18,7 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
-import { fft, util } from 'fft-js'
+import { FFTR } from 'kissfft-js'
 
 @Component
 export default class SpectrumPresenter extends Vue {
@@ -34,11 +34,10 @@ export default class SpectrumPresenter extends Vue {
       this.store.sample().subscribe(ab => {
         if (ab) {
           this.sample = ab
-          let array = [1, 2, 3, 4, 0, 2]
-          let data = this.sample.getChannelData(0) // #TODO take the average
-          var phasors = fft(array)
-          // var freq = util.fftFreq(phasors, 44100)
-          // console.log(phasors)
+          const data = this.sample.getChannelData(0) // #TODO take the average
+          const fftr = new FFTR(data.length)
+          const Data = fftr.forward(Array.from(data))
+          console.log(Data)
         }
       })
     }

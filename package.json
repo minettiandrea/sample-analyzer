@@ -11,11 +11,11 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
+    "@types/kissfft-js": "^0.1.0",
     "@types/vexflow": "^1.2.33",
     "core-js": "^3.4.3",
-    "fft-js": "0.0.12",
     "inversify-props": "^1.4.9",
-    "ooura": "^2.1.6",
+    "kissfft-js": "^0.1.8",
     "reflect-metadata": "^0.1.13",
     "roboto-fontface": "*",
     "rxjs": "^6.5.3",
