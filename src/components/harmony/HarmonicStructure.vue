@@ -3,9 +3,10 @@
      <v-row align="center" justify="center">
 
             <SpectrumPresenter />
-            <OvertonesPresenter />
     </v-row>
       <v-row>
+        <OvertonesPresenter />
+
         <VoicingsPresenter />
       </v-row>
 </v-container>
