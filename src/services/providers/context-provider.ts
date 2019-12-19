@@ -6,7 +6,9 @@ export interface AudioContextProvider {
 
 @injectable()
 export class AudioContextProviderImpl implements AudioContextProvider {
-    private audioContext = new AudioContext();
+    private audioContext = new AudioContext({
+      sampleRate: 44100
+    });
 
     context (): AudioContext {
       return this.audioContext
