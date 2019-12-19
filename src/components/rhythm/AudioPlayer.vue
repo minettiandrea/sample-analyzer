@@ -81,8 +81,16 @@ export default class AudioPlayer extends Vue {
     mounted () {
       this.store.skipped().subscribe(p => {
         if (p) {
-          this.sampletime = p
-          this.pausedAt = this.samplelng * p / 100
+          if (this.playing) {
+            this.onEnd()
+            this.sampletime = p
+            this.pausedAt = this.samplelng * p / 100
+            this.play()
+          } else {
+            this.sampletime = p
+            this.pausedAt = this.samplelng * p / 100
+            this.store.nextPlayEvent({ status: false, elapsed: this.pausedAt, length: this.samplelng })
+          }
         }
       })
     }
@@ -101,10 +109,7 @@ export default class AudioPlayer extends Vue {
     onEnd () {
       this.playing = false
       clearInterval(this.interval)
-      this.sampletime = 0
       this.restore()
-      this.store.nextPlayEvent({ status: false, elapsed: 0, length: this.samplelng })
-      this.pausedAt = 0
     }
 
     play () {
@@ -125,6 +130,9 @@ export default class AudioPlayer extends Vue {
         this.store.nextPlayEvent({ status: this.playing, length: this.samplelng, elapsed: elapsed })
         if (elapsed > this.samplelng) {
           this.onEnd()
+          this.pausedAt = 0
+          this.sampletime = 0
+          this.store.nextPlayEvent({ status: false, elapsed: 0, length: this.samplelng })
         }
       }, 50)
     }

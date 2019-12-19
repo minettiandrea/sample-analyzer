@@ -9,7 +9,7 @@
       @click='skip'>
       <canvas ref='waveform' class='waveform'>
       </canvas>
-            <canvas ref='waveformchild'
+      <canvas ref='waveformchild'
       class='waveform'> </canvas>
 
     </div>
@@ -36,52 +36,27 @@ import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extract
 export class Line {
   ctx:CanvasRenderingContext2D
   color:string
-  id:string
+  width:number
   x: number // expressed in %
   visible: boolean
 
-  constructor (ctx:CanvasRenderingContext2D, color:string, id:string, x: number, visible: boolean) {
+  constructor (ctx:CanvasRenderingContext2D, color:string, width:number, x: number, visible: boolean) {
     this.ctx = ctx
     this.color = color
-    this.id = id
+    this.width = width
     this.x = x
     this.visible = visible
   }
 
   draw () {
     if (this.visible) {
-      switch (this.id) {
-        case ('playing'): {
-          this.ctx.clearRect(0, 0, this.ctx.canvas.offsetWidth, this.ctx.canvas.offsetHeight)
-
-          let posX = Math.floor(this.x * this.ctx.canvas.offsetWidth / 100)
-          this.ctx.fillStyle = this.color
-          if (posX > 0) {
-            this.ctx.fillRect(posX, 0, 5, this.ctx.canvas.offsetHeight)
-          }
-          break
-        }
-
-        case ('mouse'): {
-          if (this.x > 0) {
-            this.ctx.strokeStyle = this.color
-            this.ctx.lineWidth = 1.5
-            this.ctx.beginPath()
-            this.ctx.moveTo(this.x, 0)
-            this.ctx.lineTo(this.x, this.ctx.canvas.offsetHeight)
-            this.ctx.stroke()
-          }
-          break
-        }
-        case ('peak'): {
-          this.ctx.strokeStyle = this.color
-          this.ctx.lineWidth = 2
-          this.ctx.beginPath()
-          this.ctx.moveTo(this.x, 0)
-          this.ctx.lineTo(this.x, this.ctx.canvas.offsetHeight)
-          this.ctx.stroke()
-        }
-      }
+      this.ctx.strokeStyle = this.color
+      this.ctx.lineWidth = this.width
+      this.ctx.beginPath()
+      let posx = this.ctx.canvas.offsetWidth * this.x
+      this.ctx.moveTo(posx, 0)
+      this.ctx.lineTo(posx, this.ctx.canvas.offsetHeight)
+      this.ctx.stroke()
     }
   }
 }
@@ -97,11 +72,11 @@ export default class WaveformPresenter extends Vue {
   @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
   @Ref('canvas-wrapper') readonly canvasWrapper!:HTMLDivElement
 
+  private dialog:boolean = false
   private dataArray : Uint8Array
   private data : number[]
   private samplerate:number
   private context : CanvasRenderingContext2D | null
-  private contextAlpha : CanvasRenderingContext2D | null
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
   private previousInterval : NodeJS.Timeout
@@ -118,8 +93,8 @@ export default class WaveformPresenter extends Vue {
     let ctxAlpha = canvasAlpha.getContext('2d')
     if (ctx && ctxAlpha) {
       this.context = ctx // ho cambiato perché le linee le disegni sul ctx alpha (quello trasparente)
-      this.playingCursor = new Line(ctxAlpha, 'orange', 'playing', 0, false)
-      this.mouseCursor = new Line(ctxAlpha, 'red', 'mouse', 0, false)
+      this.playingCursor = new Line(ctxAlpha, 'orange', 3, 0, false)
+      this.mouseCursor = new Line(ctxAlpha, 'red', 3, 0, false)
       this.objects = [this.playingCursor, this.mouseCursor] // ho spostato qui perche' viene creato un nuovo "puntatore" con il new, quindi i riferimenti che vi erano in object erano vecchi, funziona?
     }
     this.setUp(canvas, 1)
@@ -133,21 +108,18 @@ export default class WaveformPresenter extends Vue {
         this.extractor.analyze(s).then(te => {
           te.peaks.forEach(peak => {
             if (ctxAlpha) {
-              let xpos = (peak / this.samplerate) / s.duration * this.canvasalpha.offsetWidth
-              console.log(xpos)
-              let o = new Line(ctxAlpha, 'blue', 'peak', xpos, true)
+              let xpos = (peak / this.samplerate) / s.duration
+              let o = new Line(ctxAlpha, 'blue', 2, xpos, true)
               this.objects.push(o)
             }
           })
         })
-        console.log(this.objects)
-
         this.strokeCanvas()
       }
     })
 
     this.store.playing().subscribe(p => {
-      this.playingCursor.x = Math.floor(p.elapsed / p.length * 100)
+      this.playingCursor.x = p.elapsed / p.length
       this.playingCursor.visible = true
       this.redraw()
     })
@@ -162,7 +134,11 @@ export default class WaveformPresenter extends Vue {
   }
 
   redraw () { // chiamiamolo redraw cosi si distingue dal draw del line
-    this.objects.forEach(o => o.draw())
+    let ctx = this.canvasalpha.getContext('2d')
+    if (ctx) {
+      ctx.clearRect(0, 0, this.canvasalpha.offsetWidth, this.canvasalpha.offsetHeight)
+      this.objects.forEach(o => o.draw())
+    }
   }
 
   // setup canvas for dpi and transparency
@@ -237,7 +213,7 @@ export default class WaveformPresenter extends Vue {
 
   onMouseMove (e: MouseEvent) {
     if (this.hover) {
-      this.mouseCursor.x = e.offsetX
+      this.mouseCursor.x = e.offsetX / this.canvasalpha.offsetWidth
       this.mouseCursor.visible = true
       this.redraw()
     }
