@@ -157,9 +157,15 @@ export default class WaveformPresenter extends Vue {
   }
 
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
-    const data = audiobuffer.getChannelData(0) // left channel? maybe taking the average
+    const i = audiobuffer.numberOfChannels
+    var channel = audiobuffer.getChannelData(0) // first channel in order to initialize channel variable
+
+    for (let j = 1; j < i; j++) {
+      var d = audiobuffer.getChannelData(j)
+      channel.map((a, b) => (a + d[b]) / i)
+    }
     const bars = 12000 // number of bars to plot
-    const blocksize = Math.floor(data.length / bars) // how many samples in each block
+    const blocksize = Math.floor(channel.length / bars) // how many samples in each block
     var dataf : number [] = [] // initialize the output
 
     for (let i = 0; i < bars; i++) { // for each bar
@@ -167,7 +173,7 @@ export default class WaveformPresenter extends Vue {
       let sum = 0
 
       for (let j = 0; j < blocksize; j++) { // in each bar I sum up the values of each sample
-        sum = sum + Math.abs(data[blockbegins + j])
+        sum = sum + Math.abs(channel[blockbegins + j])
         // sum
       }
       dataf.push(sum / blocksize) // pushes the average of each block into an array
