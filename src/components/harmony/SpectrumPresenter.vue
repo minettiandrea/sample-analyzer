@@ -47,6 +47,7 @@ export default class SpectrumPresenter extends Vue {
           }
           const fftr = new FFTR(data.length)
           this.FFT = fftr.forward(Array.from(data))
+          this.FFT = this.FFT.map(f => Math.abs(f))
           this.setUp(this.canvasspec, 1)
           this.draw()
         }
@@ -54,8 +55,8 @@ export default class SpectrumPresenter extends Vue {
     }
 
     filterData (FFT: number[]) {
-      const bars = 1024 // number of bars to plot
-      const blocksize = Math.floor(this.FFT.length / bars) // how many samples in each block
+      const bars = 22050 // number of bars to plot
+      const blocksize = Math.floor(FFT.length / bars) // how many samples in each block
       var dataf : number [] = [] // initialize the output
 
       for (let i = 0; i < bars; i++) { // for each bar
@@ -68,9 +69,6 @@ export default class SpectrumPresenter extends Vue {
         }
         dataf.push(sum / blocksize) // pushes the average of each block into an array
       }
-      const factor = Math.max(...dataf)
-      dataf = dataf.map(n => n * (1 / factor)) // average respect to the max
-
       return { yaxis: dataf, xaxis: bars }
     }
 
@@ -80,13 +78,21 @@ export default class SpectrumPresenter extends Vue {
       if (ctx) {
         ctx.translate(0, this.canvasspec.offsetHeight) // canvas y axis to be on the bottom of the canvas |_|
         let { yaxis, xaxis } = this.filterData(this.FFT)
+        const maxin = Math.max(...yaxis)
+        const minin = Math.min(...yaxis)
+        const maxout = 10
+        const minout = 1
+        yaxis = yaxis.map((a) => {
+          return (a - minin) * (maxout - minout) / (maxin - minin) + minout
+        })
+
         const width = Math.ceil(this.canvasspec.offsetWidth / xaxis)
         const height = this.canvasspec.offsetHeight
         const padding = 5
 
         for (let i = 0; i < yaxis.length; i++) {
           let x = i * width
-          let y = yaxis[i] * height - padding
+          let y = Math.log10(yaxis[i]) * height - padding
           this.drawLine(ctx, x, y)
         }
       }
