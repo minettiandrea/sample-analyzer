@@ -22,17 +22,20 @@ import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
 import { FFTR } from 'kissfft-js'
+import { DrawToolkit } from '../../services/providers/draw-toolkit'
 
 @Component
 export default class SpectrumPresenter extends Vue {
     @inject(REGISTRY.SpectralExtractor) spectralExtractor: DummySpectralExtractor;
     @inject(REGISTRY.Store) store:Store
+    @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
 
     @Ref('spectrum') readonly canvasspec!: HTMLCanvasElement
 
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
+    private bars:number = 22050 // number of bars to plot
 
     mounted () {
       this.store.sample().subscribe(ab => {
@@ -48,28 +51,10 @@ export default class SpectrumPresenter extends Vue {
           const fftr = new FFTR(data.length)
           this.FFT = fftr.forward(Array.from(data))
           this.FFT = this.FFT.map(f => Math.abs(f))
-          this.setUp(this.canvasspec, 1)
+          this.drawtoolkit.setUp(this.canvasspec, 1)
           this.draw()
         }
       })
-    }
-
-    filterData (FFT: number[]) {
-      const bars = 22050 // number of bars to plot
-      const blocksize = Math.floor(FFT.length / bars) // how many samples in each block
-      var dataf : number [] = [] // initialize the output
-
-      for (let i = 0; i < bars; i++) { // for each bar
-        let blockbegins = blocksize * i
-        let sum = 0
-
-        for (let j = 0; j < blocksize; j++) { // in each bar I sum up the values of each sample
-          sum = sum + Math.abs(FFT[blockbegins + j])
-        // sum
-        }
-        dataf.push(sum / blocksize) // pushes the average of each block into an array
-      }
-      return { yaxis: dataf, xaxis: bars }
     }
 
     draw () {
@@ -77,7 +62,7 @@ export default class SpectrumPresenter extends Vue {
 
       if (ctx) {
         ctx.translate(0, this.canvasspec.offsetHeight) // canvas y axis to be on the bottom of the canvas |_|
-        let { yaxis, xaxis } = this.filterData(this.FFT)
+        let yaxis = this.drawtoolkit.filterData(this.FFT, this.bars)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
         const maxout = 10
@@ -86,7 +71,7 @@ export default class SpectrumPresenter extends Vue {
           return (a - minin) * (maxout - minout) / (maxin - minin) + minout
         })
 
-        const width = Math.ceil(this.canvasspec.offsetWidth / xaxis)
+        const width = Math.ceil(this.canvasspec.offsetWidth / this.bars)
         const height = this.canvasspec.offsetHeight
         const padding = 5
 
@@ -104,17 +89,6 @@ export default class SpectrumPresenter extends Vue {
       ctx.moveTo(x, 0)
       ctx.lineTo(x, -y)
       ctx.stroke()
-    }
-
-    setUp (canvas : HTMLCanvasElement, alpha : number) {
-      const ctx = canvas.getContext('2d')
-      if (ctx) {
-        const dpr = window.devicePixelRatio || 1
-        canvas.width = canvas.offsetWidth * dpr
-        canvas.height = (canvas.offsetHeight) * dpr
-        ctx.scale(dpr, dpr)
-        ctx.globalAlpha = alpha
-      }
     }
 }
 </script>

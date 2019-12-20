@@ -33,7 +33,7 @@ import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
-import { Line } from '../../services/providers/draw-toolkit'
+import { Line, DrawToolkit } from '../../services/providers/draw-toolkit'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 
 @Component({
@@ -44,6 +44,7 @@ import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extract
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @inject(REGISTRY.TimeExtractor) extractor:DummyTimeExtractor
+  @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
   @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
   @Ref('canvas-wrapper') readonly canvasWrapper!:HTMLDivElement
@@ -55,6 +56,8 @@ export default class WaveformPresenter extends Vue {
   private context : CanvasRenderingContext2D | null
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
+  private bars = 12000 // number of bars to plot
+
   private previousInterval : NodeJS.Timeout
   private previousblock : number = 0
 
@@ -73,8 +76,8 @@ export default class WaveformPresenter extends Vue {
       this.mouseCursor = new Line(ctxAlpha, 'red', 3, 0, false)
       this.objects = [this.playingCursor, this.mouseCursor] // ho spostato qui perche' viene creato un nuovo "puntatore" con il new, quindi i riferimenti che vi erano in object erano vecchi, funziona?
     }
-    this.setUp(canvas, 1)
-    this.setUp(this.canvasalpha, this.GLOBALALPHA)
+    this.drawtoolkit.setUp(canvas, 1)
+    this.drawtoolkit.setUp(this.canvasalpha, this.GLOBALALPHA)
     this.mouseHandler()
 
     this.store.sample().subscribe(s => {
@@ -117,18 +120,6 @@ export default class WaveformPresenter extends Vue {
     }
   }
 
-  // setup canvas for dpi and transparency
-  setUp (canvas : HTMLCanvasElement, alpha : number) {
-    const ctx = canvas.getContext('2d')
-    if (ctx) {
-      const dpr = window.devicePixelRatio || 1
-      canvas.width = canvas.offsetWidth * dpr
-      canvas.height = (canvas.offsetHeight) * dpr
-      ctx.scale(dpr, dpr)
-      ctx.globalAlpha = alpha
-    }
-  }
-
   filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
     const i = audiobuffer.numberOfChannels
     var channel = audiobuffer.getChannelData(0) // first channel in order to initialize channel variable
@@ -137,11 +128,10 @@ export default class WaveformPresenter extends Vue {
       var d = audiobuffer.getChannelData(j)
       channel.map((a, b) => (a + d[b]) / i)
     }
-    const bars = 12000 // number of bars to plot
-    const blocksize = Math.floor(channel.length / bars) // how many samples in each block
+    const blocksize = Math.floor(channel.length / this.bars) // how many samples in each block
     var dataf : number [] = [] // initialize the output
 
-    for (let i = 0; i < bars; i++) { // for each bar
+    for (let i = 0; i < this.bars; i++) { // for each bar
       let blockbegins = blocksize * i
       let sum = 0
 
