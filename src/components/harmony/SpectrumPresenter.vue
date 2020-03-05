@@ -35,7 +35,7 @@ export default class SpectrumPresenter extends Vue {
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
-    private bars:number = 22050 // number of bars to plot
+    private bars:number = 8000 // number of bars to plot
 
     mounted () {
       this.store.sample().subscribe(ab => {
@@ -80,11 +80,21 @@ export default class SpectrumPresenter extends Vue {
           let y = Math.log10(yaxis[i]) * height - padding
           this.drawLine(ctx, x, y)
         }
+
+        // axis
+        ctx.lineWidth = 1.5
+        ctx.beginPath()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(this.canvasspec.offsetWidth - 1, 0)
+        ctx.stroke()
+        ctx.moveTo(0, 0)
+        ctx.lineTo(0, -this.canvasspec.offsetHeight - 1)
+        ctx.stroke()
       }
     }
     drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
       ctx.lineWidth = 0.5
-      ctx.strokeStyle = 'blue'
+      ctx.strokeStyle = '#232c33'
       ctx.beginPath()
       ctx.moveTo(x, 0)
       ctx.lineTo(x, -y)

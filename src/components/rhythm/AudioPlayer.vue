@@ -6,20 +6,20 @@
           dense
           >
             <v-col cols="1">
-                <v-btn text icon color="orange" @click='playing ? pause() : play()'>
+                <v-btn text icon color="#1976D2" @click='playing ? pause() : play()'>
                 <v-icon x-small="" v-if='!playing || paused'>fas fa-play</v-icon>
                 <v-icon x-small v-else>fas fa-pause</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="orange" @click='restart()'>
+                <v-btn text icon color="#1976D2" @click='restart()'>
                 <v-icon x-small>fas fa-backward</v-icon>
                 </v-btn>
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="orange" @click ='mute()'>
+                <v-btn text icon color="#1976D2" @click ='mute()'>
                 <v-icon x-small>fas fa-volume-up</v-icon>
                 </v-btn>
             </v-col>
@@ -28,7 +28,7 @@
               <v-slider @change='changeVolume'
               dark dense
               v-model='volume'
-              color='orange'
+              color='#1976D2'
               max='1'
               min='0'
               step='.1'
@@ -39,7 +39,7 @@
           <v-row justify='center' class='pt-0'>
               <v-slider
                 v-model='sampletime'
-                color="orange"
+                color="#1976D2"
                 @click='skip'
                 :label=" (sampletime * samplelng / 100).toFixed(3)  + ' : ' +  samplelng.toFixed(3)"
               >

@@ -11,7 +11,7 @@
 
     <v-content>
       <v-tabs centered grow>
-        <v-tabs-slider color="orange"></v-tabs-slider>
+        <v-tabs-slider color="#1976D2"></v-tabs-slider>
         <v-tab
           v-for="tab in tabs"
           v-bind:key="tab"
@@ -29,7 +29,7 @@
     </v-content>
 
     <v-footer app>
-      <span>&copy; 2019</span>
+      <span>&copy; 2020</span>
     </v-footer>
   </v-app>
 </template>

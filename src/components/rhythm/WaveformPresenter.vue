@@ -166,7 +166,7 @@ export default class WaveformPresenter extends Vue {
 
   drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
     ctx.lineWidth = 0.5
-    ctx.strokeStyle = 'orange'
+    ctx.strokeStyle = '#1976D2'
     ctx.beginPath()
     ctx.moveTo(x, 0)
     ctx.lineTo(x, -y)
