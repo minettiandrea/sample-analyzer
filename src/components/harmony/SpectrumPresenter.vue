@@ -38,6 +38,7 @@ export default class SpectrumPresenter extends Vue {
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
+    private bars:number = 32000 // number of bars to plot
 
     mounted () {
       this.store.sample().subscribe(ab => {
@@ -50,8 +51,10 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-
-          this.FFT = this.fft.of(data)
+          const fftr = new FFTR(data.length)
+          this.FFT = fftr.forward(Array.from(data))
+          this.FFT = this.FFT.map(f => Math.abs(f))
+          console.log(this.FFT)
           this.drawtoolkit.setUp(this.canvasspec, 1)
           this.draw()
         }
@@ -62,11 +65,8 @@ export default class SpectrumPresenter extends Vue {
       let ctx = this.canvasspec.getContext('2d')
 
       if (ctx) {
-        ctx.translate(0, this.canvasspec.offsetHeight) // canvas y axis to be on the bottom of the canvas |_|
-        let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
-        console.log(q)
-        let yaxis = q.map(x => x.magnitude)
-        // let yaxis = this.quantizer.lin(this.FFT, 8000)
+        ctx.translate(0, this.canvasspec.offsetHeight - 10) // canvas y axis to be on the bottom of the canvas |_|
+        let yaxis = this.drawtoolkit.filterData(this.FFT, this.bars)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
         const maxout = 10
@@ -77,7 +77,7 @@ export default class SpectrumPresenter extends Vue {
 
         const width = Math.ceil(this.canvasspec.offsetWidth / yaxis.length)
         const height = this.canvasspec.offsetHeight
-        const padding = 5
+        const padding = 0
 
         for (let i = 0; i < yaxis.length; i++) {
           let x = i * width
@@ -85,20 +85,19 @@ export default class SpectrumPresenter extends Vue {
           this.drawLine(ctx, x, y)
         }
 
-        // axis
-        ctx.lineWidth = 1.5
+        // drawing axis
+        ctx.lineWidth = 1
+        ctx.strokeStyle = 'blue'
         ctx.beginPath()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(this.canvasspec.offsetWidth - 1, 0)
-        ctx.stroke()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(0, -this.canvasspec.offsetHeight - 1)
+        ctx.moveTo(0, 1)
+        ctx.lineTo(this.canvasspec.offsetWidth, 1)
         ctx.stroke()
       }
     }
+
     drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
       ctx.lineWidth = 0.5
-      ctx.strokeStyle = '#232c33'
+      ctx.strokeStyle = 'red'
       ctx.beginPath()
       ctx.moveTo(x, 0)
       ctx.lineTo(x, -y)
