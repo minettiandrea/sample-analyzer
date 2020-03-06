@@ -21,7 +21,7 @@ export class NoteFrequencyProviderImpl implements NoteFrequencyProvider {
       notes.push({
         frequency: this.noteFrequency(n),
         octave: Math.floor((n - 3) / 12) + 5,
-        name: Notes[(12*10 + n) % 12]
+        name: Notes[(12 * 10 + n) % 12]
       })
     }
     console.log(notes)
