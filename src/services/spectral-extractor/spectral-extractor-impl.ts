@@ -1,5 +1,6 @@
 import { SpectralExtractor, SpectralAnalisis } from './spectral-extractor'
 import { injectable } from 'inversify-props'
+import { ConstNote } from '@/model/note'
 
 @injectable()
 export class DummySpectralExtractor implements SpectralExtractor {
@@ -9,8 +10,8 @@ export class DummySpectralExtractor implements SpectralExtractor {
       harmonicPeaks: [440, 880],
       inharmonicPeaks: [900],
       fundamental: 440,
-      fundamentalNote: { name: 'A' },
-      overtones: [{ name: 'A' }, { name: 'B' }],
+      fundamentalNote: ConstNote,
+      overtones: [ConstNote, ConstNote],
       fft: []
     }))
   }

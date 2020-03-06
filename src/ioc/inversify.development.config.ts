@@ -9,11 +9,13 @@ import { StoreImpl, Store, PreLoadedStore } from '@/services/store/store'
 import { TimeExtractor } from '@/services/time-extractor/time-extractor'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 import { DrawToolkit } from '@/services/providers/draw-toolkit'
+import { NoteFrequencyProvider, NoteFrequencyProviderImpl } from '@/services/providers/note-frequency'
 
 export default function () {
   container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
   container.addSingleton<TimeExtractor>(DummyTimeExtractor, REGISTRY.TimeExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
+  container.addSingleton<NoteFrequencyProvider>(NoteFrequencyProviderImpl, REGISTRY.NoteFrequencyProvider)
   container.addSingleton<SampleLoaderService>(SampleLoaderImpl, REGISTRY.SampleLoader)
   container.addSingleton<Store>(PreLoadedStore, REGISTRY.Store)
   container.addSingleton<DrawToolkit>(DrawToolkit, REGISTRY.DrawToolkit)

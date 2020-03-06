@@ -1,7 +1,13 @@
 
+type NoteName = 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
+
 export interface Note{
-    name: 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
+    name: NoteName;
+    octave: number;
+    frequency: number;
 }
+
+export const Notes:NoteName[] = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
 
 export interface NoteElement{
     duration:number
@@ -23,4 +29,6 @@ export class QuarterPause implements NoteElement {
     pause = true
 }
 
-export const QuarterRythm = new Quarter({ name: 'B' })
+export const ConstNote:Note = { name: 'B', octave: 0, frequency: 0 }
+
+export const QuarterRythm = new Quarter(ConstNote)
