@@ -3,6 +3,8 @@ import { Note, Notes } from '@/model/note'
 
 export interface NoteFrequencyProvider {
     allNotes():Note[];
+
+    spectrumQuantize(fs: number, fft: number[]):number[];
 }
 
 @injectable()
@@ -24,7 +26,26 @@ export class NoteFrequencyProviderImpl implements NoteFrequencyProvider {
         name: Notes[(12 * 10 + n) % 12]
       })
     }
-    console.log(notes)
     return notes
+  }
+
+  spectrumQuantize (fs:number, fft: number[]): number[] {
+    let notes = this.allNotes()
+    let fStep = fs / fft.length
+    let quantization = []
+
+    for (let note = 1; note < notes.length; note++) {
+      let lowerBound = (notes[note - 1].frequency + notes[note].frequency) / 2
+      let upperBound = (notes[note + 1].frequency + notes[note].frequency) / 2
+      quantization[note] = 0
+
+      for (let j = 0; j < fs / 2; j++) {
+        let frequency = j * fStep
+        if (frequency >= lowerBound && frequency < upperBound) {
+          quantization[note] += fft[j]
+        }
+      }
+    }
+    return quantization
   }
 }
