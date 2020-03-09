@@ -35,6 +35,7 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
 import { Line, DrawToolkit } from '../../services/providers/draw-toolkit'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
+import { Quantizer } from '../../services/providers/quantizer'
 
 @Component({
   components: { AudioPlayer,
@@ -45,6 +46,7 @@ export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @inject(REGISTRY.TimeExtractor) extractor:DummyTimeExtractor
   @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
+  @inject(REGISTRY.Quantizer) quantizer:Quantizer
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
   @Ref('waveformchild') readonly canvasalpha!: HTMLCanvasElement
   @Ref('canvas-wrapper') readonly canvasWrapper!:HTMLDivElement
@@ -82,7 +84,14 @@ export default class WaveformPresenter extends Vue {
 
     this.store.sample().subscribe(s => {
       if (s) {
-        this.data = this.filterData(s)
+        let channel = s.getChannelData(0)
+        for (let j = 1; j < s.numberOfChannels; j++) {
+          let d = s.getChannelData(j)
+          channel.map((a, b) => (a + d[b]) / s.numberOfChannels)
+        }
+
+        this.data = this.quantizer.lin(Array.from(channel), this.bars)
+        // this.data = this.filterData(s)
         this.samplerate = s.sampleRate
         this.extractor.analyze(s).then(te => {
           te.peaks.forEach(peak => {
@@ -118,32 +127,6 @@ export default class WaveformPresenter extends Vue {
       ctx.clearRect(0, 0, this.canvasalpha.offsetWidth, this.canvasalpha.offsetHeight)
       this.objects.forEach(o => o.draw())
     }
-  }
-
-  filterData (audiobuffer : AudioBuffer) : number[] { // something like sampling again
-    const i = audiobuffer.numberOfChannels
-    var channel = audiobuffer.getChannelData(0) // first channel in order to initialize channel variable
-
-    for (let j = 1; j < i; j++) {
-      var d = audiobuffer.getChannelData(j)
-      channel.map((a, b) => (a + d[b]) / i)
-    }
-    const blocksize = Math.floor(channel.length / this.bars) // how many samples in each block
-    var dataf : number [] = [] // initialize the output
-
-    for (let i = 0; i < this.bars; i++) { // for each bar
-      let blockbegins = blocksize * i
-      let sum = 0
-
-      for (let j = 0; j < blocksize; j++) { // in each bar I sum up the values of each sample
-        sum = sum + Math.abs(channel[blockbegins + j])
-        // sum
-      }
-      dataf.push(sum / blocksize) // pushes the average of each block into an array
-    }
-    const factor = Math.max(...dataf)
-    dataf = dataf.map(n => n * (1 / factor)) // average respect to the max
-    return dataf
   }
 
   strokeCanvas () {

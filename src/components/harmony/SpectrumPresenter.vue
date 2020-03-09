@@ -63,7 +63,9 @@ export default class SpectrumPresenter extends Vue {
 
       if (ctx) {
         ctx.translate(0, this.canvasspec.offsetHeight) // canvas y axis to be on the bottom of the canvas |_|
-        let yaxis = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
+        let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
+        console.log(q)
+        let yaxis = q.map(x => x.magnitude)
         // let yaxis = this.quantizer.lin(this.FFT, 8000)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
