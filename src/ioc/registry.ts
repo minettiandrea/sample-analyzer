@@ -6,5 +6,7 @@ export const REGISTRY = {
   NoteFrequencyProvider: Symbol.for('NoteFrequencyProvider'),
   SampleLoader: Symbol.for('SampleLoader'),
   Store: Symbol.for('Store'),
-  DrawToolkit: Symbol.for('DrawToolkit')
+  DrawToolkit: Symbol.for('DrawToolkit'),
+  Quantizer: Symbol.for('Quantizer'),
+  FFT: Symbol.for('FFT')
 }

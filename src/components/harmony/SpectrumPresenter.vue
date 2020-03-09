@@ -21,21 +21,23 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
-import { FFTR } from 'kissfft-js'
 import { DrawToolkit } from '../../services/providers/draw-toolkit'
+import { Quantizer } from '../../services/providers/quantizer'
+import { FFT } from '@/services/providers/fft'
 
 @Component
 export default class SpectrumPresenter extends Vue {
     @inject(REGISTRY.SpectralExtractor) spectralExtractor: DummySpectralExtractor;
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
+    @inject(REGISTRY.Quantizer) quantizer:Quantizer
+    @inject(REGISTRY.FFT) fft:FFT
 
     @Ref('spectrum') readonly canvasspec!: HTMLCanvasElement
 
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
-    private bars:number = 8000 // number of bars to plot
 
     mounted () {
       this.store.sample().subscribe(ab => {
@@ -48,9 +50,8 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-          const fftr = new FFTR(data.length)
-          this.FFT = fftr.forward(Array.from(data))
-          this.FFT = this.FFT.map(f => Math.abs(f))
+
+          this.FFT = this.fft.of(data)
           this.drawtoolkit.setUp(this.canvasspec, 1)
           this.draw()
         }
@@ -62,7 +63,8 @@ export default class SpectrumPresenter extends Vue {
 
       if (ctx) {
         ctx.translate(0, this.canvasspec.offsetHeight) // canvas y axis to be on the bottom of the canvas |_|
-        let yaxis = this.drawtoolkit.filterData(this.FFT, this.bars)
+        let yaxis = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
+        // let yaxis = this.quantizer.lin(this.FFT, 8000)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
         const maxout = 10
@@ -71,7 +73,7 @@ export default class SpectrumPresenter extends Vue {
           return (a - minin) * (maxout - minout) / (maxin - minin) + minout
         })
 
-        const width = Math.ceil(this.canvasspec.offsetWidth / this.bars)
+        const width = Math.ceil(this.canvasspec.offsetWidth / yaxis.length)
         const height = this.canvasspec.offsetHeight
         const padding = 5
 

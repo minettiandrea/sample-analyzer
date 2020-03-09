@@ -1,10 +1,15 @@
 import { injectable } from 'inversify-props'
 import { Note, Notes } from '@/model/note'
 
+export interface NoteWeigth{
+  note:Note
+  magnitude: number
+}
+
 export interface NoteFrequencyProvider {
     allNotes():Note[];
 
-    spectrumQuantize(fs: number, fft: number[]):number[];
+    spectrumQuantize(fs: number, fft: number[]):NoteWeigth[];
 }
 
 @injectable()
@@ -29,20 +34,23 @@ export class NoteFrequencyProviderImpl implements NoteFrequencyProvider {
     return notes
   }
 
-  spectrumQuantize (fs:number, fft: number[]): number[] {
+  spectrumQuantize (fs:number, fft: number[]): NoteWeigth[] {
     let notes = this.allNotes()
     let fStep = fs / fft.length
     let quantization = []
 
-    for (let note = 1; note < notes.length; note++) {
+    for (let note = 1; note < notes.length - 1; note++) {
       let lowerBound = (notes[note - 1].frequency + notes[note].frequency) / 2
       let upperBound = (notes[note + 1].frequency + notes[note].frequency) / 2
-      quantization[note] = 0
+      quantization[note] = {
+        note: notes[note],
+        magnitude: 0
+      }
 
       for (let j = 0; j < fs / 2; j++) {
         let frequency = j * fStep
         if (frequency >= lowerBound && frequency < upperBound) {
-          quantization[note] += fft[j]
+          quantization[note].magnitude += fft[j]
         }
       }
     }
