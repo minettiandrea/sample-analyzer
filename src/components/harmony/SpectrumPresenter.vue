@@ -39,7 +39,7 @@ export default class SpectrumPresenter extends Vue {
     private FFT:number[]
     private imagepath:string = require('@/assets/prova_f_axis.png')
     private graphicFreq: number[] = [100, 1000, 10000]
-    private textFreq:string[] = ['100', '1k', '100k'] // frequency references
+    private textFreq:string[] = ['100', '1k', '10k'] // frequency references
     mounted () {
       this.store.sample().subscribe(ab => {
         if (ab) {
