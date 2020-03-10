@@ -4,7 +4,10 @@
 
     <v-card class="mx-auto col-10 mb-5 center">
         <div class='wrapper'
-          ref='wrapper-spectrum'>
+          ref='wrapper-spectrum'
+          @mouseover="hover = true"
+          @mouseleave="hide" >
+          <canvas ref='hover' class ='spectrum'/>
           <canvas ref='spectrum' class='spectrum'>
           </canvas>
         </div>
@@ -22,7 +25,7 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
-import { DrawToolkit } from '../../services/providers/draw-toolkit'
+import { DrawToolkit, FreqBox } from '../../services/providers/draw-toolkit'
 import { Quantizer } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 
@@ -34,12 +37,19 @@ export default class SpectrumPresenter extends Vue {
     @inject(REGISTRY.Quantizer) quantizer:Quantizer
     @inject(REGISTRY.FFT) fft:FFT
     @Ref('spectrum') readonly canvasspec!: HTMLCanvasElement
+    @Ref('wrapper-spectrum') readonly wrapperSpectrum!:HTMLDivElement
+    @Ref('hover') readonly canvashov!:HTMLCanvasElement
+
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
-    private imagepath:string = require('@/assets/prova_f_axis.png')
+    private quantizedFFT:number[]
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
+    private freqbounds:number[] = [20, 20000]
+    public hover : boolean
+    private freqBox : FreqBox
+
     mounted () {
       this.store.sample().subscribe(ab => {
         if (ab) {
@@ -50,19 +60,23 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
+          let ctxhov = this.canvashov.getContext('2d')
+          if (ctxhov) { this.freqBox = new FreqBox(ctxhov, '', '', 0, 0, false) }
           this.FFT = this.fft.of(data)
           this.drawtoolkit.setUp(this.canvasspec, 1)
+          this.drawtoolkit.setUp(this.canvashov, 0.5)
+          this.mouseHandler()
           this.draw()
         }
       })
     }
-    draw () {
+    draw () { // 2nd canvas -> plots spectrum
       let ctx = this.canvasspec.getContext('2d')
       if (ctx) {
         ctx.translate(0, this.canvasspec.offsetHeight - 20) // canvas y axis to be on the bottom of the canvas |_|
         let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
-        console.log(q)
         let yaxis = q.map(x => x.magnitude)
+        this.quantizedFFT = yaxis
         // let yaxis = this.quantizer.lin(this.FFT, 8000)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
@@ -110,6 +124,15 @@ export default class SpectrumPresenter extends Vue {
         }
       }
     }
+
+    redraw () {
+      let ctx = this.canvashov.getContext('2d')
+      if (ctx) {
+        ctx.clearRect(0, 0, this.canvashov.offsetWidth, this.canvashov.offsetHeight)
+        this.freqBox.draw()
+      }
+    }
+
     drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
       ctx.lineWidth = 0.5
       ctx.strokeStyle = '#232c33'
@@ -118,17 +141,46 @@ export default class SpectrumPresenter extends Vue {
       ctx.lineTo(x, -y)
       ctx.stroke()
     }
+
+    // mouse event handler
+    mouseHandler () {
+      if (this.wrapperSpectrum) {
+        this.wrapperSpectrum.addEventListener('mousemove', this.onMouseMove)
+      }
+    }
+
+    onMouseMove (e: MouseEvent) {
+      if (this.hover) {
+        this.freqBox.xpos = e.offsetX
+        this.freqBox.ypos = e.offsetY
+        this.freqBox.visible = true
+        let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
+        let f = this.quantizedFFT[idx]
+        this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
+        this.freqBox.amplitude = '200'
+
+        this.redraw()
+      }
+    }
+    hide () {
+      this.freqBox.visible = false
+      this.redraw()
+    }
 }
 </script>
 
 <style lang="scss" scoped>
   .wrapper {
    height: 285px;
+    position: relative; /* add */
+
 }
 .spectrum{
-  width:100%;
+ width:100%;
   height:285px;
-}
+  position:absolute;
+  left: 0;
+  top: 0;}
 
 img {
   max-width:100%;

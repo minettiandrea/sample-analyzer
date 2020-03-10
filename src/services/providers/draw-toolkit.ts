@@ -28,6 +28,31 @@ export class Line {
     }
 }
 
+export class FreqBox {
+  ctx:CanvasRenderingContext2D
+  freq:string
+  amplitude:string
+  xpos:number
+  ypos:number
+  visible:boolean
+
+  constructor (ctx:CanvasRenderingContext2D, freq:string, amplitude:string, xpos:number, ypos:number, visible:boolean) {
+    this.ctx = ctx
+    this.freq = freq
+    this.amplitude = amplitude
+    this.xpos = xpos
+    this.ypos = ypos
+    this.visible = visible
+  }
+
+  draw () {
+    if (this.visible) {
+      this.ctx.font = '10px verdana'
+      this.ctx.fillText(this.freq, this.xpos + 10, this.ypos + 10)
+    }
+  }
+}
+
 export interface DrawToolkit {
 
     setUp(canvas : HTMLCanvasElement, alpha : number):void;
