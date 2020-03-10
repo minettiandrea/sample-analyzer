@@ -6,7 +6,6 @@
         <div class='wrapper'
           ref='wrapper-spectrum'>
           <canvas ref='spectrum' class='spectrum'>
-
           </canvas>
         </div>
 
@@ -39,7 +38,8 @@ export default class SpectrumPresenter extends Vue {
     private data:Float64Array
     private FFT:number[]
     private imagepath:string = require('@/assets/prova_f_axis.png')
-    private graphicFreq: number[] = [100, 1000, 10000] // frequency references
+    private graphicFreq: number[] = [100, 1000, 10000]
+    private textFreq:string[] = ['100', '1k', '100k'] // frequency references
     mounted () {
       this.store.sample().subscribe(ab => {
         if (ab) {
@@ -59,7 +59,7 @@ export default class SpectrumPresenter extends Vue {
     draw () {
       let ctx = this.canvasspec.getContext('2d')
       if (ctx) {
-        ctx.translate(0, this.canvasspec.offsetHeight - 10) // canvas y axis to be on the bottom of the canvas |_|
+        ctx.translate(0, this.canvasspec.offsetHeight - 20) // canvas y axis to be on the bottom of the canvas |_|
         let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
         console.log(q)
         let yaxis = q.map(x => x.magnitude)
@@ -96,24 +96,18 @@ export default class SpectrumPresenter extends Vue {
             let minDelta = Math.min(...q.map(x => Math.abs(x.frequency - this.graphicFreq[j])))
             let idx = q.findIndex(x => x.frequency + minDelta === this.graphicFreq[j] || x.frequency - minDelta === this.graphicFreq[j])
 
-            /* let maxfreq:number | undefined
-          let allfreq = q.map(x => x.frequency)// max freq of FFT?
-          let freqlog = Math.log2(this.graphicFreq[j]) // freq in log scale
-          maxfreq = allfreq.pop() */
-
             let pos = Math.floor(idx / q.length * widthpx)
             ctx.lineWidth = 3
-            ctx.strokeStyle = 'red'
+            ctx.strokeStyle = 'black'
             ctx.beginPath()
             ctx.moveTo(pos, -4)
             ctx.lineTo(pos, 4)
             ctx.stroke()
+            ctx.lineWidth = 0.5
+            ctx.font = '8px verdana'
+            ctx.strokeText(this.textFreq[j], pos - 5, 15)
           }
         }
-        let img = new Image()
-        img.src = this.imagepath
-
-        ctx.drawImage(img, 0, -3, this.canvasspec.offsetWidth, 10)
       }
     }
     drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
@@ -129,11 +123,11 @@ export default class SpectrumPresenter extends Vue {
 
 <style lang="scss" scoped>
   .wrapper {
-   height: 275px;
+   height: 285px;
 }
 .spectrum{
   width:100%;
-  height:275px;
+  height:285px;
 }
 
 img {
