@@ -26,7 +26,7 @@ import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
 import { DrawToolkit, FreqBox, Drawer } from '../../services/providers/draw-toolkit'
-import { Quantizer } from '../../services/providers/quantizer'
+import { Quantizer, LogPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 
 @Component
@@ -43,7 +43,7 @@ export default class SpectrumPresenter extends Vue {
     private sample:AudioBuffer
     private data:Float64Array
     private FFT:number[]
-    private quantizedFFT:number[]
+    private quantizedFFT:LogPoint[]
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
     private freqbounds:number[] = [20, 20000]
@@ -66,7 +66,7 @@ export default class SpectrumPresenter extends Vue {
           this.drawtoolkit.setUp(this.canvasspec, 1)
 
           this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
-          this.freqBox = new FreqBox('', '', 0, 0, false)
+          this.freqBox = new FreqBox('', '', 0, 0, false, this.canvashov.offsetWidth)
           this.infoPanel.add(this.freqBox)
 
           this.mouseHandler()
@@ -80,7 +80,7 @@ export default class SpectrumPresenter extends Vue {
         ctx.translate(0, this.canvasspec.offsetHeight - 20) // canvas y axis to be on the bottom of the canvas |_|
         let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
         let yaxis = q.map(x => x.magnitude)
-        this.quantizedFFT = yaxis
+        this.quantizedFFT = q
         // let yaxis = this.quantizer.lin(this.FFT, 8000)
         const maxin = Math.max(...yaxis)
         const minin = Math.min(...yaxis)
@@ -155,7 +155,7 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
         let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
-        let f = this.quantizedFFT[idx]
+        let f = this.quantizedFFT[idx].frequency
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
         this.freqBox.amplitude = '200'
 
