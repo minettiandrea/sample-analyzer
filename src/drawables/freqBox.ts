@@ -18,10 +18,10 @@ export class FreqBox implements Drawable {
   draw (ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
     if (this.visible) {
       ctx.font = '10px verdana'
-      if (this.xpos + 0.15 * this.xpos <= canvas.offsetWidth) {
-        ctx.fillText(this.freq, this.xpos + 0.1 * this.xpos, this.ypos + 35)
+      if (this.xpos + 50 <= canvas.offsetWidth) {
+        ctx.fillText(this.freq, this.xpos, this.ypos + 35)
       } else {
-        ctx.fillText(this.freq, this.xpos - 0.1 * this.xpos, this.ypos + 35)
+        ctx.fillText(this.freq, this.xpos - 50, this.ypos + 35)
       }
     }
   }
