@@ -13,6 +13,7 @@ export interface DrawToolkit {
 export interface Panel {
   redraw():void;
   add(d:Drawable):void;
+  reset():void
 }
 
 export class PanelImpl implements Panel {
@@ -33,6 +34,10 @@ export class PanelImpl implements Panel {
 
   add (d:Drawable):void {
     this.elements.push(d)
+  }
+
+  reset ():void{
+    this.elements = []
   }
 }
 

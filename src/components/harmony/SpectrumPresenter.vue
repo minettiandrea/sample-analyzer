@@ -27,6 +27,7 @@ import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
 import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
+import { Spectra } from '../../drawables/spectra'
 import { Quantizer, LogPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 
@@ -51,10 +52,12 @@ export default class SpectrumPresenter extends Vue {
     public hover : boolean
     private freqBox : FreqBox
     private infoPanel: Panel
+    private mainPanel: Panel
 
     mounted () {
       this.store.sample().subscribe(ab => {
         if (ab) {
+          this.mainPanel.reset()
           this.sample = ab
           const i = ab.numberOfChannels
           var data = ab.getChannelData(0) // first channel in order to initialize channel variable
@@ -64,83 +67,23 @@ export default class SpectrumPresenter extends Vue {
           }
 
           this.FFT = this.fft.of(data)
-          this.drawtoolkit.setUp(this.canvasspec, 1)
+          this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
 
-          this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
-          this.freqBox = new FreqBox('', '', 0, 0, false)
-          this.infoPanel.add(this.freqBox)
-
-          this.mouseHandler()
-          this.draw()
+          let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
+          this.mainPanel.add(spectra)
+          this.mainPanel.redraw()
         }
       })
-    }
-    draw () { // 2nd canvas -> plots spectrum
-      let ctx = this.canvasspec.getContext('2d')
-      if (ctx) {
-        ctx.translate(0, this.canvasspec.offsetHeight - 20) // canvas y axis to be on the bottom of the canvas |_|
-        let q = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
-        let yaxis = q.map(x => x.magnitude)
-        this.quantizedFFT = q
-        // let yaxis = this.quantizer.lin(this.FFT, 8000)
-        const maxin = Math.max(...yaxis)
-        const minin = Math.min(...yaxis)
-        const maxout = 10
-        const minout = 1
-        yaxis = yaxis.map((a) => {
-          return (a - minin) * (maxout - minout) / (maxin - minin) + minout
-        })
-        const width = Math.ceil(this.canvasspec.offsetWidth / yaxis.length)
-        const height = this.canvasspec.offsetHeight
-        const padding = 0
-        for (let i = 0; i < yaxis.length; i++) {
-          let x = i * width
-          let y = Math.log10(yaxis[i]) * height - padding
-          this.drawLine(ctx, x, y)
-        }
-        // axis
-        ctx.lineWidth = 1
-        ctx.beginPath()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(this.canvasspec.offsetWidth - 1, 0)
-        ctx.stroke()
-        ctx.moveTo(0, 0)
-        ctx.lineTo(0, -this.canvasspec.offsetHeight - 1)
-        ctx.stroke()
-        // frequencies
-        for (let j = 0; j < this.graphicFreq.length; j++) {
-          if (this.graphicFreq[j] < this.sample.sampleRate) {
-            let widthpx = this.canvasspec.offsetWidth // px width
 
-            let minDelta = Math.min(...q.map(x => Math.abs(x.frequency - this.graphicFreq[j])))
-            let idx = q.findIndex(x => x.frequency + minDelta === this.graphicFreq[j] || x.frequency - minDelta === this.graphicFreq[j])
-
-            let pos = Math.floor(idx / q.length * widthpx)
-            ctx.lineWidth = 3
-            ctx.strokeStyle = 'black'
-            ctx.beginPath()
-            ctx.moveTo(pos, -4)
-            ctx.lineTo(pos, 4)
-            ctx.stroke()
-            ctx.lineWidth = 0.5
-            ctx.font = '8px verdana'
-            ctx.strokeText(this.textFreq[j], pos - 5, 15)
-          }
-        }
-      }
+      this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
+      this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
+      this.freqBox = new FreqBox('', '', 0, 0, false)
+      this.infoPanel.add(this.freqBox)
+      this.mouseHandler()
     }
 
     redraw () {
       this.infoPanel.redraw()
-    }
-
-    drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
-      ctx.lineWidth = 0.5
-      ctx.strokeStyle = '#232c33'
-      ctx.beginPath()
-      ctx.moveTo(x, 0)
-      ctx.lineTo(x, -y)
-      ctx.stroke()
     }
 
     // mouse event handler
