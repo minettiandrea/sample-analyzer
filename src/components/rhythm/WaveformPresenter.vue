@@ -33,7 +33,7 @@ import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
-import { DrawToolkit, Drawer } from '../../services/providers/draw-toolkit'
+import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { Line } from '@/drawables/line'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 import { Quantizer } from '../../services/providers/quantizer'
@@ -66,7 +66,7 @@ export default class WaveformPresenter extends Vue {
   private playingCursor:Line
   private mouseCursor:Line
 
-  private infoPanel:Drawer
+  private infoPanel:Panel
 
   mounted () { // access canvas
     this.drawtoolkit.setUp(this.canvasdom, 1)

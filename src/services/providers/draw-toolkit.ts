@@ -6,16 +6,16 @@ export interface Drawable {
 
 export interface DrawToolkit {
 
-    setUp(canvas : HTMLCanvasElement, alpha : number):Drawer;
+    setUp(canvas : HTMLCanvasElement, alpha : number):Panel;
 
 }
 
-export interface Drawer {
+export interface Panel {
   redraw():void;
   add(d:Drawable):void;
 }
 
-export class DrawerImpl implements Drawer {
+export class PanelImpl implements Panel {
   private elements:Drawable[] = [];
   private canvas:HTMLCanvasElement;
 
@@ -47,6 +47,6 @@ export class DrawToolkitImpl implements DrawToolkit {
       ctx.scale(dpr, dpr)
       ctx.globalAlpha = alpha
     }
-    return new DrawerImpl(canvas)
+    return new PanelImpl(canvas)
   }
 }

@@ -25,7 +25,7 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
-import { DrawToolkit, Drawer } from '../../services/providers/draw-toolkit'
+import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
 import { Quantizer, LogPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
@@ -50,7 +50,7 @@ export default class SpectrumPresenter extends Vue {
     private freqbounds:number[] = [20, 20000]
     public hover : boolean
     private freqBox : FreqBox
-    private infoPanel: Drawer
+    private infoPanel: Panel
 
     mounted () {
       this.store.sample().subscribe(ab => {
