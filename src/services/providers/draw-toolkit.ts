@@ -1,43 +1,43 @@
 import { injectable } from 'inversify-props'
 
-export class Line {
-    ctx:CanvasRenderingContext2D
+export interface Drawable {
+  draw(ctx:CanvasRenderingContext2D):void;
+}
+
+export class Line implements Drawable {
     color:string
     width:number
     x: number // expressed in %
     visible: boolean
 
-    constructor (ctx:CanvasRenderingContext2D, color:string, width:number, x: number, visible: boolean) {
-      this.ctx = ctx
+    constructor (color:string, width:number, x: number, visible: boolean) {
       this.color = color
       this.width = width
       this.x = x
       this.visible = visible
     }
 
-    draw () {
+    draw (ctx:CanvasRenderingContext2D) {
       if (this.visible) {
-        this.ctx.strokeStyle = this.color
-        this.ctx.lineWidth = this.width
-        this.ctx.beginPath()
-        let posx = this.ctx.canvas.offsetWidth * this.x
-        this.ctx.moveTo(posx, 0)
-        this.ctx.lineTo(posx, this.ctx.canvas.offsetHeight)
-        this.ctx.stroke()
+        ctx.strokeStyle = this.color
+        ctx.lineWidth = this.width
+        ctx.beginPath()
+        let posx = ctx.canvas.offsetWidth * this.x
+        ctx.moveTo(posx, 0)
+        ctx.lineTo(posx, ctx.canvas.offsetHeight)
+        ctx.stroke()
       }
     }
 }
 
-export class FreqBox {
-  ctx:CanvasRenderingContext2D
+export class FreqBox implements Drawable {
   freq:string
   amplitude:string
   xpos:number
   ypos:number
   visible:boolean
 
-  constructor (ctx:CanvasRenderingContext2D, freq:string, amplitude:string, xpos:number, ypos:number, visible:boolean) {
-    this.ctx = ctx
+  constructor (freq:string, amplitude:string, xpos:number, ypos:number, visible:boolean) {
     this.freq = freq
     this.amplitude = amplitude
     this.xpos = xpos
@@ -45,18 +45,45 @@ export class FreqBox {
     this.visible = visible
   }
 
-  draw () {
+  draw (ctx:CanvasRenderingContext2D) {
     if (this.visible) {
-      this.ctx.font = '10px verdana'
-      this.ctx.fillText(this.freq, this.xpos + 10, this.ypos + 10)
+      ctx.font = '10px verdana'
+      ctx.fillText(this.freq, this.xpos + 10, this.ypos + 10)
     }
   }
 }
 
 export interface DrawToolkit {
 
-    setUp(canvas : HTMLCanvasElement, alpha : number):void;
+    setUp(canvas : HTMLCanvasElement, alpha : number):Drawer;
+
+}
+
+export interface Drawer {
+  redraw():void;
+  add(d:Drawable):void;
+}
+
+export class DrawerImpl implements Drawer {
+  private elements:Drawable[] = [];
+  private canvas:HTMLCanvasElement;
+
+  constructor (canvas: HTMLCanvasElement) {
+    this.canvas = canvas
   }
+
+  redraw ():void {
+    const ctx = this.canvas.getContext('2d')
+    if (ctx) {
+      ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight)
+      this.elements.forEach(d => d.draw(ctx))
+    }
+  }
+
+  add (d:Drawable):void {
+    this.elements.push(d)
+  }
+}
 
 @injectable()
 export class DrawToolkitImpl implements DrawToolkit {
@@ -69,5 +96,6 @@ export class DrawToolkitImpl implements DrawToolkit {
       ctx.scale(dpr, dpr)
       ctx.globalAlpha = alpha
     }
+    return new DrawerImpl(canvas)
   }
 }

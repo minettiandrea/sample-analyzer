@@ -25,7 +25,7 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
-import { DrawToolkit, FreqBox } from '../../services/providers/draw-toolkit'
+import { DrawToolkit, FreqBox, Drawer } from '../../services/providers/draw-toolkit'
 import { Quantizer } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 
@@ -49,6 +49,7 @@ export default class SpectrumPresenter extends Vue {
     private freqbounds:number[] = [20, 20000]
     public hover : boolean
     private freqBox : FreqBox
+    private infoPanel: Drawer
 
     mounted () {
       this.store.sample().subscribe(ab => {
@@ -60,11 +61,14 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-          let ctxhov = this.canvashov.getContext('2d')
-          if (ctxhov) { this.freqBox = new FreqBox(ctxhov, '', '', 0, 0, false) }
+
           this.FFT = this.fft.of(data)
           this.drawtoolkit.setUp(this.canvasspec, 1)
-          this.drawtoolkit.setUp(this.canvashov, 0.5)
+
+          this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
+          this.freqBox = new FreqBox('', '', 0, 0, false)
+          this.infoPanel.add(this.freqBox)
+
           this.mouseHandler()
           this.draw()
         }
@@ -126,11 +130,7 @@ export default class SpectrumPresenter extends Vue {
     }
 
     redraw () {
-      let ctx = this.canvashov.getContext('2d')
-      if (ctx) {
-        ctx.clearRect(0, 0, this.canvashov.offsetWidth, this.canvashov.offsetHeight)
-        this.freqBox.draw()
-      }
+      this.infoPanel.redraw()
     }
 
     drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {

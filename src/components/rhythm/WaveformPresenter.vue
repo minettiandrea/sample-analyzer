@@ -33,7 +33,7 @@ import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
-import { Line, DrawToolkit } from '../../services/providers/draw-toolkit'
+import { Line, DrawToolkit, Drawer } from '../../services/providers/draw-toolkit'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 import { Quantizer } from '../../services/providers/quantizer'
 
@@ -55,7 +55,6 @@ export default class WaveformPresenter extends Vue {
   private dataArray : Uint8Array
   private data : number[]
   private samplerate:number
-  private context : CanvasRenderingContext2D | null
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
   private bars = 12000 // number of bars to plot
@@ -65,21 +64,18 @@ export default class WaveformPresenter extends Vue {
 
   private playingCursor:Line
   private mouseCursor:Line
-  private objects:Line[]
+
+  private infoPanel:Drawer
 
   mounted () { // access canvas
-    let canvas : HTMLCanvasElement = this.canvasdom
-    let ctx : CanvasRenderingContext2D | null = canvas.getContext('2d')
-    let canvasAlpha = this.canvasalpha
-    let ctxAlpha = canvasAlpha.getContext('2d')
-    if (ctx && ctxAlpha) {
-      this.context = ctx // ho cambiato perché le linee le disegni sul ctx alpha (quello trasparente)
-      this.playingCursor = new Line(ctxAlpha, 'orange', 3, 0, false)
-      this.mouseCursor = new Line(ctxAlpha, 'red', 3, 0, false)
-      this.objects = [this.playingCursor, this.mouseCursor] // ho spostato qui perche' viene creato un nuovo "puntatore" con il new, quindi i riferimenti che vi erano in object erano vecchi, funziona?
-    }
-    this.drawtoolkit.setUp(canvas, 1)
-    this.drawtoolkit.setUp(this.canvasalpha, this.GLOBALALPHA)
+    this.drawtoolkit.setUp(this.canvasdom, 1)
+    this.infoPanel = this.drawtoolkit.setUp(this.canvasalpha, this.GLOBALALPHA)
+
+    this.playingCursor = new Line('orange', 3, 0, false)
+    this.mouseCursor = new Line('red', 3, 0, false)
+    this.infoPanel.add(this.playingCursor)
+    this.infoPanel.add(this.mouseCursor)
+
     this.mouseHandler()
 
     this.store.sample().subscribe(s => {
@@ -95,11 +91,9 @@ export default class WaveformPresenter extends Vue {
         this.samplerate = s.sampleRate
         this.extractor.analyze(s).then(te => {
           te.peaks.forEach(peak => {
-            if (ctxAlpha) {
-              let xpos = (peak / this.samplerate) / s.duration
-              let o = new Line(ctxAlpha, 'blue', 2, xpos, true)
-              this.objects.push(o)
-            }
+            let xpos = (peak / this.samplerate) / s.duration
+            let o = new Line('blue', 2, xpos, true)
+            this.infoPanel.add(o)
           })
         })
         this.strokeCanvas()
@@ -122,27 +116,22 @@ export default class WaveformPresenter extends Vue {
   }
 
   redraw () { // chiamiamolo redraw cosi si distingue dal draw del line
-    let ctx = this.canvasalpha.getContext('2d')
-    if (ctx) {
-      ctx.clearRect(0, 0, this.canvasalpha.offsetWidth, this.canvasalpha.offsetHeight)
-      this.objects.forEach(o => o.draw())
-    }
+    this.infoPanel.redraw()
   }
 
   strokeCanvas () {
-    if (this.context) {
-      let canvas : HTMLCanvasElement = this.canvasdom
+    const ctx = this.canvasdom.getContext('2d')
+    if (ctx) {
+      ctx.translate(0, this.canvasdom.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
 
-      this.context.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
-
-      const width = canvas.offsetWidth / this.data.length
-      const height = canvas.offsetHeight
+      const width = this.canvasdom.offsetWidth / this.data.length
+      const height = this.canvasdom.offsetHeight
       const padding = 10
       for (let i = 0; i < this.data.length; i++) {
         let x = i * width
         let y = this.data[i] * (height / 2) - padding
 
-        this.drawLine(this.context, x, y)
+        this.drawLine(ctx, x, y)
       }
     }
   }
