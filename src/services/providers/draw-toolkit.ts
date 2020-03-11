@@ -1,7 +1,7 @@
 import { injectable } from 'inversify-props'
 
 export interface Drawable {
-  draw(ctx:CanvasRenderingContext2D):void;
+  draw(ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement):void;
 }
 
 export interface DrawToolkit {
@@ -27,7 +27,7 @@ export class PanelImpl implements Panel {
     const ctx = this.canvas.getContext('2d')
     if (ctx) {
       ctx.clearRect(0, 0, this.canvas.offsetWidth, this.canvas.offsetHeight)
-      this.elements.forEach(d => d.draw(ctx))
+      this.elements.forEach(d => d.draw(ctx, this.canvas))
     }
   }
 
