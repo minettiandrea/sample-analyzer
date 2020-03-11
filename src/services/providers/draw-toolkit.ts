@@ -45,10 +45,14 @@ export class FreqBox {
     this.visible = visible
   }
 
-  draw () {
+  draw (offset:number) {
     if (this.visible) {
       this.ctx.font = '10px verdana'
-      this.ctx.fillText(this.freq, this.xpos + 10, this.ypos + 10)
+      if (this.xpos + 0.15 * this.xpos <= offset) {
+        this.ctx.fillText(this.freq, this.xpos + 0.1 * this.xpos, this.ypos + 15)
+      } else {
+        this.ctx.fillText(this.freq, this.xpos - 0.1 * this.xpos, this.ypos + 15)
+      }
     }
   }
 }
