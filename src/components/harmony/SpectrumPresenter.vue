@@ -28,6 +28,7 @@ import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-e
 import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
 import { Spectra } from '../../drawables/spectra'
+import { Axis } from '../../drawables/axis'
 import { Quantizer, LogPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 
@@ -55,9 +56,11 @@ export default class SpectrumPresenter extends Vue {
     private mainPanel: Panel
 
     mounted () {
+      this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
       this.store.sample().subscribe(ab => {
         if (ab) {
           this.mainPanel.reset()
+
           this.sample = ab
           const i = ab.numberOfChannels
           var data = ab.getChannelData(0) // first channel in order to initialize channel variable
@@ -67,15 +70,17 @@ export default class SpectrumPresenter extends Vue {
           }
 
           this.FFT = this.fft.of(data)
-          this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, this.sample.sampleRate)
+          this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
 
           let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
           this.mainPanel.add(spectra)
+          let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
+          this.mainPanel.add(axis)
+
           this.mainPanel.redraw()
         }
       })
 
-      this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
       this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
       this.freqBox = new FreqBox('', '', 0, 0, false)
       this.infoPanel.add(this.freqBox)
@@ -99,10 +104,9 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
         let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
-        console.log('canvas width: ' + this.canvashov.offsetWidth + ' mouse:' + e.offsetX + ' id:' + idx)
+        // console.log('canvas width: ' + this.canvashov.offsetWidth + ' mouse:' + e.offsetX + ' id:' + idx)
         let f = this.quantizedFFT[idx].frequency
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
-        this.freqBox.amplitude = '200'
 
         this.redraw()
       }
