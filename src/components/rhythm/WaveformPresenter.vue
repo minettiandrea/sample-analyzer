@@ -35,6 +35,8 @@ import { AudioContextProvider } from '../../services/providers/context-provider'
 import { TimeInterval } from 'rxjs'
 import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { Line } from '@/drawables/line'
+import { Waveform } from '@/drawables/waveform'
+import { Axis } from '@/drawables/axis'
 import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
 import { Quantizer } from '../../services/providers/quantizer'
 
@@ -59,27 +61,25 @@ export default class WaveformPresenter extends Vue {
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
   private bars = 12000 // number of bars to plot
-
   private previousInterval : NodeJS.Timeout
   private previousblock : number = 0
-
   private playingCursor:Line
   private mouseCursor:Line
-
+  private mainPanel:Panel
   private infoPanel:Panel
 
   mounted () { // access canvas
-    this.drawtoolkit.setUp(this.canvasdom, 1)
+    this.mainPanel = this.drawtoolkit.setUp(this.canvasdom, 1)
     this.infoPanel = this.drawtoolkit.setUp(this.canvasalpha, this.GLOBALALPHA)
 
     this.playingCursor = new Line('orange', 3, 0, false)
     this.mouseCursor = new Line('red', 3, 0, false)
     this.infoPanel.add(this.playingCursor)
     this.infoPanel.add(this.mouseCursor)
-
     this.mouseHandler()
 
     this.store.sample().subscribe(s => {
+      this.mainPanel.reset()
       if (s) {
         let channel = s.getChannelData(0)
         for (let j = 1; j < s.numberOfChannels; j++) {
@@ -88,7 +88,6 @@ export default class WaveformPresenter extends Vue {
         }
 
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
-        // this.data = this.filterData(s)
         this.samplerate = s.sampleRate
         this.extractor.analyze(s).then(te => {
           te.peaks.forEach(peak => {
@@ -97,14 +96,16 @@ export default class WaveformPresenter extends Vue {
             this.infoPanel.add(o)
           })
         })
-        this.strokeCanvas()
+        let waveform = new Waveform(this.data)
+        this.mainPanel.add(waveform)
+        this.mainPanel.redraw()
       }
     })
 
     this.store.playing().subscribe(p => {
       this.playingCursor.x = p.elapsed / p.length
       this.playingCursor.visible = true
-      this.redraw()
+      this.infoPanel.redraw()
     })
 
     this.store.skipped().subscribe(p => {
@@ -115,40 +116,6 @@ export default class WaveformPresenter extends Vue {
       }
     })
   }
-
-  redraw () { // chiamiamolo redraw cosi si distingue dal draw del line
-    this.infoPanel.redraw()
-  }
-
-  strokeCanvas () {
-    const ctx = this.canvasdom.getContext('2d')
-    if (ctx) {
-      ctx.translate(0, this.canvasdom.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
-
-      const width = this.canvasdom.offsetWidth / this.data.length
-      const height = this.canvasdom.offsetHeight
-      const padding = 10
-      for (let i = 0; i < this.data.length; i++) {
-        let x = i * width
-        let y = this.data[i] * (height / 2) - padding
-
-        this.drawLine(ctx, x, y)
-      }
-    }
-  }
-
-  drawLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
-    ctx.lineWidth = 0.5
-    ctx.strokeStyle = '#1976D2'
-    ctx.beginPath()
-    ctx.moveTo(x, 0)
-    ctx.lineTo(x, -y)
-    ctx.lineTo(x, y)
-    ctx.stroke()
-  }
-
-  /// /////////////
-
   // ANIMATION WITH MOUSE OVER
   mouseHandler () {
     if (this.canvasWrapper) {
@@ -160,14 +127,14 @@ export default class WaveformPresenter extends Vue {
     if (this.hover) {
       this.mouseCursor.x = e.offsetX / this.canvasalpha.offsetWidth
       this.mouseCursor.visible = true
-      this.redraw()
+      this.infoPanel.redraw()
     }
   }
 
   hide () {
     this.mouseCursor.x = 0
     this.mouseCursor.visible = false
-    this.redraw()
+    this.infoPanel.redraw()
   }
 
   // click event managing, skips to another sample
@@ -176,7 +143,6 @@ export default class WaveformPresenter extends Vue {
     this.store.nextSkipped(pos)
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
