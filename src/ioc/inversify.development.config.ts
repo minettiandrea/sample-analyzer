@@ -12,10 +12,11 @@ import { DrawToolkit, DrawToolkitImpl } from '@/services/providers/draw-toolkit'
 import { NoteFrequencyProvider, NoteFrequencyProviderImpl } from '@/services/providers/note-frequency'
 import { Quantizer, QuantizerImpl } from '@/services/providers/quantizer'
 import { FFTKiss, FFT } from '@/services/providers/fft'
+import { EssentiaTimeExtractor } from '@/services/time-extractor/essentia-time-extractor'
 
 export default function () {
   container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
-  container.addSingleton<TimeExtractor>(DummyTimeExtractor, REGISTRY.TimeExtractor)
+  container.addSingleton<TimeExtractor>(EssentiaTimeExtractor, REGISTRY.TimeExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
   container.addSingleton<NoteFrequencyProvider>(NoteFrequencyProviderImpl, REGISTRY.NoteFrequencyProvider)
   container.addSingleton<SampleLoaderService>(SampleLoaderImpl, REGISTRY.SampleLoader)
