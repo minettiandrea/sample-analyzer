@@ -65,7 +65,8 @@ export class PreLoadedStore extends StoreImpl {
     constructor () {
       super()
       const cello = require('@/assets/cello.wav')
-      this.sampleLoader.loadFromUrl(cello).then(sample => {
+      const drums = require('@/assets/drums.wav')
+      this.sampleLoader.loadFromUrl(drums).then(sample => {
         this._sample.next(sample)
       })
     }
