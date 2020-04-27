@@ -13,12 +13,6 @@
             </v-col>
 
             <v-col cols="1">
-                <v-btn text icon color="#1976D2" @click='restart()'>
-                <v-icon x-small>fas fa-backward</v-icon>
-                </v-btn>
-            </v-col>
-
-            <v-col cols="1">
                 <v-btn text icon color="#1976D2" @click ='mute()'>
                 <v-icon x-small>fas fa-volume-up</v-icon>
                 </v-btn>
@@ -146,15 +140,6 @@ export default class AudioPlayer extends Vue {
       this.store.nextPlayEvent({ length: this.samplelng, status: false, elapsed: this.pausedAt })
 
       this.restore()
-    }
-
-    restart () {
-      this.pausedAt = 0
-      this.source.stop()
-      this.sampletime = 0
-      this.restore()
-      this.paused = false
-      this.play()
     }
 
     mute () {

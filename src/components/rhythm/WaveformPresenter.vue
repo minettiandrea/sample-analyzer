@@ -111,7 +111,9 @@ export default class WaveformPresenter extends Vue {
     this.store.skipped().subscribe(p => {
       if (p) {
         if (this.canvasalpha) {
-          this.playingCursor.x = p * this.canvasalpha.offsetWidth
+          this.playingCursor.visible = true
+          this.playingCursor.x = p / 100
+          console.log(this.playingCursor)
         }
       }
     })
