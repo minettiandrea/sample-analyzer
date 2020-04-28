@@ -14,5 +14,5 @@ export interface TimeAnalisis{
 }
 
 export interface TimeExtractor{
-    analyze(sample:AudioBuffer):Promise<TimeAnalisis>;
+    analyze(sample:Float32Array):Promise<TimeAnalisis>;
 }

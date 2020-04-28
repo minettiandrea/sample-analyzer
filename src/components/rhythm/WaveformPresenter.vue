@@ -37,7 +37,7 @@ import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { Line } from '@/drawables/line'
 import { Waveform } from '@/drawables/waveform'
 import { Axis } from '@/drawables/axis'
-import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extractor'
+import { EssentiaTimeExtractor } from '@/services/time-extractor/essentia-time-extractor'
 import { Quantizer } from '../../services/providers/quantizer'
 
 @Component({
@@ -47,7 +47,7 @@ import { Quantizer } from '../../services/providers/quantizer'
 })
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
-  @inject(REGISTRY.TimeExtractor) extractor:DummyTimeExtractor
+  @inject(REGISTRY.TimeExtractor) extractor:EssentiaTimeExtractor
   @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
   @inject(REGISTRY.Quantizer) quantizer:Quantizer
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
@@ -89,7 +89,7 @@ export default class WaveformPresenter extends Vue {
 
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
         this.samplerate = s.sampleRate
-        this.extractor.analyze(s).then(te => {
+        this.extractor.analyze(channel).then(te => { // pass 32float array
           te.peaks.forEach(peak => {
             let xpos = (peak / this.samplerate) / s.duration
             let o = new Line('green', 2, xpos, true)

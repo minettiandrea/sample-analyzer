@@ -1,6 +1,7 @@
 import { injectable } from 'inversify-props'
 import { TimeExtractor, TimeAnalisis } from './time-extractor'
 import Worker from 'worker-loader!../../workers/essentia'
+import { EssentiaMessage } from '@/workers/essentia-message'
 
 @injectable()
 export class EssentiaTimeExtractor implements TimeExtractor {
@@ -8,21 +9,26 @@ export class EssentiaTimeExtractor implements TimeExtractor {
     return Math.round(s * 44100)
   }
 
-  analyze (sample: AudioBuffer): Promise<TimeAnalisis> {
+  analyze (sample: Float32Array): Promise<TimeAnalisis> {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
-      worker.postMessage(this.normalize(Array.from(sample.getChannelData(0))))
+      let id = this.setID()
+      let msg = new EssentiaMessage(id, 'rhythm', this.normalize(Array.from(sample)))
+      worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
-        let pos:number[] = Array.from(event.data)
-        console.log(pos)
-        resolve({
-          start: 0,
-          end: this.secondToSamples(3),
-          peaks: pos.map(this.secondToSamples),
-          envelope: [],
-          attackSlope: 2,
-          decaySlope: 0.3
-        })
+        console.log(event.data)
+        if (event.data.ID === id) {
+          let pos:number[] = Array.from(event.data.payload)
+          console.log(pos)
+          resolve({
+            start: 0,
+            end: this.secondToSamples(3),
+            peaks: pos.map(this.secondToSamples),
+            envelope: [],
+            attackSlope: 2,
+            decaySlope: 0.3
+          })
+        }
       }
     })
   }
@@ -33,5 +39,9 @@ export class EssentiaTimeExtractor implements TimeExtractor {
     data.forEach(a => a - min / (max - min))
 
     return Float32Array.from(data)
+  }
+
+  setID ():string {
+    return '_' + Math.random().toString(36).substr(2, 9)
   }
 }
