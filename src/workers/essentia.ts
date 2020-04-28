@@ -12,13 +12,14 @@ let essentia = new EssentiaJS(wasm.EssentiaModule, false) as Essentia
 let types:string[] = ['rhythm', 'harmony']
 ctx.onmessage = (e) => {
   let t:string = e.data.type
-  console.log(e)
-  if (t === types[0]) {
+  if (t === types[0]) { // rhythm analysis
     const result = essentia.BeatTrackerDegara(essentia.arrayToVector(e.data.payload))
     let reply = new EssentiaMessage(e.data.ID, t, essentia.vectorToArray(result.ticks))
     ctx.postMessage(reply)
-  } else if (t === types[1]) {
-    const result = essentia.SpectralPeaks(essentia.arrayToVector(e.data.payload))
+  } else if (t === types[1]) { // spectral peaks
+    const spectra = essentia.Spectrum(essentia.arrayToVector(e.data.payload), e.data.payload.length)
+    const result = essentia.SpectralPeaks(spectra.spectrum, undefined, undefined, 10)
+    console.log(result.frequencies)
     let reply = new EssentiaMessage(e.data.ID, t, essentia.vectorToArray(result.frequencies))
     ctx.postMessage(reply)
   }

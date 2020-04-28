@@ -16,7 +16,6 @@ export class EssentiaTimeExtractor implements TimeExtractor {
       let msg = new EssentiaMessage(id, 'rhythm', this.normalize(Array.from(sample)))
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
-        console.log(event.data)
         if (event.data.ID === id) {
           let pos:number[] = Array.from(event.data.payload)
           console.log(pos)

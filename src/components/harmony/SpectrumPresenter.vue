@@ -24,17 +24,18 @@ import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
-import { DummySpectralExtractor } from '@/services/spectral-extractor/spectral-extractor-impl'
+import { EssentiaSpectralExtractor } from '@/services/spectral-extractor/essentia-spectral-extractor'
 import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
 import { Spectra } from '../../drawables/spectra'
 import { Axis } from '../../drawables/axis'
 import { Quantizer, LogPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
+import { Line } from '../../drawables/line'
 
 @Component
 export default class SpectrumPresenter extends Vue {
-    @inject(REGISTRY.SpectralExtractor) spectralExtractor: DummySpectralExtractor;
+    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor;
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
     @inject(REGISTRY.Quantizer) quantizer:Quantizer
@@ -66,17 +67,22 @@ export default class SpectrumPresenter extends Vue {
           var data = ab.getChannelData(0) // first channel in order to initialize channel variable
           for (let j = 1; j < i; j++) {
             var d = ab.getChannelData(j)
-            data.map((a, b) => (a + d[b]) / i)
+            data = data.map((a, b) => (a + d[b]) / i)
           }
 
           this.FFT = this.fft.of(data)
           this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
-
           let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
           this.mainPanel.add(spectra)
           let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
           this.mainPanel.add(axis)
-
+          this.spectralExtractor.analyze(data).then(se => {
+            se.peaks.forEach(peak => {
+              let xpos = 2 * peak / this.sample.sampleRate * this.canvashov.width
+              let o = new Line('red', 2, xpos, true)
+              this.infoPanel.add(o)
+            })
+          })
           this.mainPanel.redraw()
         }
       })

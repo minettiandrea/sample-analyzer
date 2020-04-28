@@ -13,9 +13,10 @@ import { NoteFrequencyProvider, NoteFrequencyProviderImpl } from '@/services/pro
 import { Quantizer, QuantizerImpl } from '@/services/providers/quantizer'
 import { FFTKiss, FFT } from '@/services/providers/fft'
 import { EssentiaTimeExtractor } from '@/services/time-extractor/essentia-time-extractor'
+import { EssentiaSpectralExtractor } from '@/services/spectral-extractor/essentia-spectral-extractor'
 
 export default function () {
-  container.addSingleton<SpectralExtractor>(DummySpectralExtractor, REGISTRY.SpectralExtractor)
+  container.addSingleton<SpectralExtractor>(EssentiaSpectralExtractor, REGISTRY.SpectralExtractor)
   container.addSingleton<TimeExtractor>(EssentiaTimeExtractor, REGISTRY.TimeExtractor)
   container.addSingleton<AudioContextProvider>(AudioContextProviderImpl, REGISTRY.AudioContextProvider)
   container.addSingleton<NoteFrequencyProvider>(NoteFrequencyProviderImpl, REGISTRY.NoteFrequencyProvider)

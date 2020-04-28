@@ -84,7 +84,7 @@ export default class WaveformPresenter extends Vue {
         let channel = s.getChannelData(0)
         for (let j = 1; j < s.numberOfChannels; j++) {
           let d = s.getChannelData(j)
-          channel.map((a, b) => (a + d[b]) / s.numberOfChannels)
+          channel = channel.map((a, b) => (a + d[b]) / s.numberOfChannels) // TO DO reduce
         }
 
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
@@ -96,6 +96,7 @@ export default class WaveformPresenter extends Vue {
             this.infoPanel.add(o)
           })
         })
+        this.infoPanel.redraw()
         let waveform = new Waveform(this.data)
         this.mainPanel.add(waveform)
         this.mainPanel.redraw()

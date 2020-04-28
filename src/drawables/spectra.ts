@@ -18,8 +18,8 @@ export class Spectra implements Drawable {
       let scaled = this.yaxis.map((a) => {
         return (a - minin) * (maxout - minout) / (maxin - minin) + minout
       })
-      const width = Math.round(canvas.width / scaled.length)
-      const height = canvas.height
+      const width = Math.ceil(canvas.width / scaled.length)
+      const height = canvas.offsetHeight
       const padding = 0
       for (let i = 0; i < scaled.length; i++) {
         let x = i * width
