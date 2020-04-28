@@ -113,7 +113,6 @@ export default class WaveformPresenter extends Vue {
         if (this.canvasalpha) {
           this.playingCursor.visible = true
           this.playingCursor.x = p / 100
-          console.log(this.playingCursor)
         }
       }
     })

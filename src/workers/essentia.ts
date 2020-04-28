@@ -8,17 +8,10 @@ const ctx: Worker = self as any
 
 // export as default for entry point to node package with the js wrapper
 let essentia = new EssentiaJS(wasm.EssentiaModule, false) as Essentia
-console.log(essentia)
-
 
 ctx.onmessage = (e) => {
-
-  const result = essentia.PeakDetection(essentia.arrayToVector(Array.from(e.data)))
-
-  ctx.postMessage(essentia.vectorToArray(result.positions))
-
+  const result = essentia.BeatTrackerMultiFeature(essentia.arrayToVector(e.data))
+  ctx.postMessage(essentia.vectorToArray(result.ticks))
 }
-
-
 
 // ctx.postMessage({"test": essentia})
