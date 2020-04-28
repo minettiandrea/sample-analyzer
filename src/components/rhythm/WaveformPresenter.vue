@@ -60,7 +60,7 @@ export default class WaveformPresenter extends Vue {
   private samplerate:number
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
-  private bars = 12000 // number of bars to plot
+  private bars = 800 // number of bars to plot
   private previousInterval : NodeJS.Timeout
   private previousblock : number = 0
   private playingCursor:Line
@@ -92,7 +92,7 @@ export default class WaveformPresenter extends Vue {
         this.extractor.analyze(s).then(te => {
           te.peaks.forEach(peak => {
             let xpos = (peak / this.samplerate) / s.duration
-            let o = new Line('blue', 2, xpos, true)
+            let o = new Line('green', 2, xpos, true)
             this.infoPanel.add(o)
           })
         })

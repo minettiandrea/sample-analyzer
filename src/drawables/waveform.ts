@@ -8,10 +8,11 @@ export class Waveform implements Drawable {
     }
 
     draw (ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
-      ctx.translate(0, canvas.offsetHeight / 2) // Set Y = 0 to be in the middle of the canvas
+      ctx.translate(0, canvas.height / 2) // Set Y = 0 to be in the middle of the canvas
 
-      const width = canvas.offsetWidth / this.data.length
-      const height = canvas.offsetHeight
+      const width = canvas.width / this.data.length
+      console.log(width)
+      const height = canvas.height
       const padding = 10
       for (let i = 0; i < this.data.length; i++) {
         let x = i * width
@@ -22,7 +23,7 @@ export class Waveform implements Drawable {
     }
 
     strokeLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
-      ctx.lineWidth = 0.5
+      ctx.lineWidth = 1
       ctx.strokeStyle = '#1976D2'
       ctx.beginPath()
       ctx.moveTo(x, 0)
