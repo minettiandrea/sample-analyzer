@@ -1,7 +1,9 @@
 import { Observable, BehaviorSubject } from 'rxjs'
+import { map } from 'rxjs/operators'
 import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
+import { TimeAnalisis, TimeExtractor } from '../time-extractor/time-extractor';
 
 export interface Example{
   name: string,
@@ -11,6 +13,8 @@ export interface Example{
 export interface Store{
     sample():Observable<AudioBuffer | null>
     nextSample(sample:AudioBuffer):void
+    timeAnalysis():Observable<TimeAnalisis | null>
+    channelData ():Float32Array
     playing ():Observable<PlayingEvent>
     resetPlayEvent ():void
     nextPlayEvent (pe:PlayingEvent):void
@@ -27,7 +31,10 @@ export interface PlayingEvent{
 
 @injectable()
 export class StoreImpl implements Store {
+    @inject(REGISTRY.TimeExtractor) extractor:TimeExtractor
+
     protected _sample:BehaviorSubject<AudioBuffer | null> = new BehaviorSubject<AudioBuffer | null>(null);
+    protected _timeAnalisis:BehaviorSubject<TimeAnalisis | null> = new BehaviorSubject<TimeAnalisis | null>(null);
 
     emptySampleEvent:PlayingEvent = { status: false, length: 0, elapsed: 0 }
 
@@ -39,8 +46,31 @@ export class StoreImpl implements Store {
       return this._sample
     }
 
+    private _channelData (s:AudioBuffer):Float32Array {
+      let channel = s.getChannelData(0)
+      for (let j = 1; j < s.numberOfChannels; j++) {
+        let d = s.getChannelData(j)
+        channel = channel.map((a, b) => (a + d[b]) / s.numberOfChannels)
+      }
+      return channel
+    }
+
+    channelData ():Float32Array {
+      return this._sample.value ? this._channelData(this._sample.value) : Float32Array.from([0])
+    }
+
+    timeAnalysis (): Observable<TimeAnalisis | null> {
+      return this._timeAnalisis
+    }
+
     nextSample (sample: AudioBuffer): void {
+      this._timeAnalisis.next(null)
       this._sample.next(sample)
+      console.log('nextSample')
+      this.extractor.analyze(this._channelData(sample)).then(a => {
+        console.log(a)
+        this._timeAnalisis.next(a)
+      })
     }
 
     playing ():Observable<PlayingEvent> {
