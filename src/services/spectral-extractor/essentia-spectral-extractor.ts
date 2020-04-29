@@ -9,13 +9,17 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
   analyze (sample: Float32Array): Promise<SpectralAnalisis> {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
+<<<<<<< HEAD
       let id = this.setID()
       let msg:EssentiaMessage = new EssentiaMessage(id, 'harmony', Array.from(sample))
+=======
+      let msg:EssentiaMessage = new EssentiaMessage(EssentiaMessage.HARMONY, Array.from(sample))
+      console.log(msg)
+>>>>>>> d39e078e1ca958b45e75d8e9a23b806db97206f6
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
-        if (event.data.ID === id) {
+        if (msg.isForMe(event.data)) {
           let pos:number[] = Array.from(event.data.payload)
-          console.log(pos)
           resolve(
             {
               peaks: pos,
@@ -30,6 +34,7 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
       }
     })
   }
+<<<<<<< HEAD
   setID ():string {
     return '_' + Math.random().toString(36).substr(2, 9)
   }
@@ -41,4 +46,6 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
 
     return Float32Array.from(data)
   }
+=======
+>>>>>>> d39e078e1ca958b45e75d8e9a23b806db97206f6
 }

@@ -12,11 +12,10 @@ export class EssentiaTimeExtractor implements TimeExtractor {
   analyze (sample: Float32Array): Promise<TimeAnalisis> {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
-      let id = this.setID()
-      let msg = new EssentiaMessage(id, 'rhythm', this.normalize(Array.from(this.normalize(sample))))
+      let msg = new EssentiaMessage(EssentiaMessage.RHYTHM, this.normalize(Array.from(sample)))
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
-        if (event.data.ID === id) {
+        if (msg.isForMe(event.data)) {
           let pos:number[] = Array.from(event.data.payload)
           resolve({
             start: 0,
@@ -37,9 +36,5 @@ export class EssentiaTimeExtractor implements TimeExtractor {
     data.forEach(a => a - min / (max - min))
 
     return Float32Array.from(data)
-  }
-
-  setID ():string {
-    return '_' + Math.random().toString(36).substr(2, 9)
   }
 }

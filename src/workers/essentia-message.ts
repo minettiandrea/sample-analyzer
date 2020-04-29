@@ -1,22 +1,45 @@
 export interface Message{
-    ID:string
     type:string
     payload:any
-    setID():string;
+    reply (payload:any):Message
+    isForMe(message:Message):boolean
 }
 
 export class EssentiaMessage implements Message {
-    ID:string;
+    static SPECTRUM = 'spectrum'
+    static RHYTHM = 'rhythm'
+    static HARMONY = 'harmony'
+
+    private ID:string;
     type:string;
     payload:any;
 
-    constructor (ID:string, type:string, payload:any) {
-      this.ID = ID
+    constructor (type:string, payload:any) {
+      this.ID = '_' + Math.random().toString(36).substr(2, 9)
       this.type = type
       this.payload = payload
     }
 
-    setID ():string {
-      return '_' + Math.random().toString(36).substr(2, 9)
+    static fromData (d:any) {
+      let clonedMessage = new EssentiaMessage(d.type, d.payload)
+      clonedMessage.setID(d.ID)
+      return clonedMessage
+    }
+
+    private setID (id:string) {
+      this.ID = id
+    }
+
+    reply (payload:any):Message {
+      let reply = new EssentiaMessage(this.type, payload)
+      reply.setID(this.ID)
+      return reply
+    }
+
+    isForMe (message: any): boolean {
+      if (message.ID) {
+        return message.ID === this.ID
+      }
+      return false
     }
 }

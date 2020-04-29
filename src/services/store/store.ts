@@ -3,6 +3,11 @@ import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
 
+export interface Example{
+  name: string,
+  url: string
+}
+
 export interface Store{
     sample():Observable<AudioBuffer | null>
     nextSample(sample:AudioBuffer):void
@@ -11,6 +16,7 @@ export interface Store{
     nextPlayEvent (pe:PlayingEvent):void
     skipped():Observable<number | null>
     nextSkipped(skipped:number):void
+    sampleExamples():Example[]
 }
 
 export interface PlayingEvent{
@@ -55,6 +61,13 @@ export class StoreImpl implements Store {
 
     nextSkipped (skipped : number): void {
       this._skipped.next(skipped)
+    }
+
+    sampleExamples (): Example[] {
+      return [
+        { name: 'cello', url: require('@/assets/cello.wav') },
+        { name: 'drums', url: require('@/assets/drums.wav') }
+      ]
     }
 }
 
