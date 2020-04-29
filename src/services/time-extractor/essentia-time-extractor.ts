@@ -5,9 +5,7 @@ import { EssentiaMessage } from '@/workers/essentia-message'
 
 @injectable()
 export class EssentiaTimeExtractor implements TimeExtractor {
-  private secondToSamples (s:number):number {
-    return Math.round(s * 44100)
-  }
+
 
   analyze (sample: Float32Array): Promise<TimeAnalisis> {
     return new Promise((resolve, reject) => {
@@ -19,8 +17,8 @@ export class EssentiaTimeExtractor implements TimeExtractor {
           let pos:number[] = Array.from(event.data.payload)
           resolve({
             start: 0,
-            end: this.secondToSamples(3),
-            peaks: pos.map(this.secondToSamples),
+            end: 3,
+            peaks: pos,
             envelope: [],
             attackSlope: 2,
             decaySlope: 0.3
