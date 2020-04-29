@@ -3,7 +3,6 @@ import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
 
-
 export interface Example{
   name: string,
   url: string
