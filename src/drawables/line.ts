@@ -18,7 +18,7 @@ export class Line implements Drawable {
       ctx.strokeStyle = this.color
       ctx.lineWidth = this.width
       ctx.beginPath()
-      let posx = Math.floor(ctx.canvas.offsetWidth * this.x)
+      let posx = Math.floor(ctx.canvas.width * this.x)
       ctx.moveTo(posx, 0)
       ctx.lineTo(posx, ctx.canvas.offsetHeight)
       ctx.stroke()

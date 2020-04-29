@@ -39,6 +39,7 @@ import { Waveform } from '@/drawables/waveform'
 import { Axis } from '@/drawables/axis'
 import { EssentiaTimeExtractor } from '@/services/time-extractor/essentia-time-extractor'
 import { Quantizer } from '../../services/providers/quantizer'
+import { TimeExtractor } from '../../services/time-extractor/time-extractor'
 
 @Component({
   components: { AudioPlayer,
@@ -47,7 +48,6 @@ import { Quantizer } from '../../services/providers/quantizer'
 })
 export default class WaveformPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
-  @inject(REGISTRY.TimeExtractor) extractor:EssentiaTimeExtractor
   @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
   @inject(REGISTRY.Quantizer) quantizer:Quantizer
   @Ref('waveform') readonly canvasdom!: HTMLCanvasElement
@@ -79,25 +79,22 @@ export default class WaveformPresenter extends Vue {
       this.setUpInfoPanel()
       this.infoPanel.redraw()
       if (s) {
-        let channel = s.getChannelData(0)
-        for (let j = 1; j < s.numberOfChannels; j++) {
-          let d = s.getChannelData(j)
-          channel = channel.map((a, b) => (a + d[b]) / s.numberOfChannels) // TO DO reduce
-        }
-
+        const channel = this.store.channelData()
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
         let waveform = new Waveform(this.data)
         this.mainPanel.add(waveform)
         this.mainPanel.redraw()
 
         this.samplerate = s.sampleRate
-        this.extractor.analyze(channel).then(te => { // pass 32float array
-          te.peaks.forEach(peak => {
-            let xpos = (peak / this.samplerate) / s.duration
-            let o = new Line('green', 2, xpos, true)
-            this.infoPanel.add(o)
-          })
-          this.infoPanel.redraw()
+        this.store.timeAnalysis().subscribe(te => {
+          if (te) { // pass 32float array
+            te.peaks.forEach(peak => {
+              let xpos = (peak / this.samplerate) / s.duration
+              let o = new Line('green', 2, xpos, true)
+              this.infoPanel.add(o)
+            })
+            this.infoPanel.redraw()
+          }
         })
       }
     })

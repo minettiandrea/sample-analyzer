@@ -18,8 +18,21 @@
 <script lang="ts">
 import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
+import { inject } from 'inversify-props'
+import { REGISTRY } from '@/ioc/registry'
+import { Store } from '@/services/store/store'
+import { TimeExtractor } from '@/services/time-extractor/time-extractor'
 
 @Component
 export default class SignaturePresenter extends Vue {
+  @inject(REGISTRY.Store) store:Store
+  @inject(REGISTRY.TimeExtractor) extractor:TimeExtractor
+
+  created () {
+    this.store.sample().subscribe(s => {
+      //this.extractor.analyze()
+    })
+  }
+
 }
 </script>
