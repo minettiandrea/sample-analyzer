@@ -11,7 +11,6 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
       const worker = new Worker()
       let id = this.setID()
       let msg:EssentiaMessage = new EssentiaMessage(id, 'harmony', Array.from(sample))
-      console.log(msg)
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
         if (event.data.ID === id) {
@@ -19,7 +18,7 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
           console.log(pos)
           resolve(
             {
-              peaks: [440, 880, 900],
+              peaks: pos,
               harmonicPeaks: [440, 880],
               inharmonicPeaks: [900],
               fundamental: 440,
@@ -33,5 +32,13 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
   }
   setID ():string {
     return '_' + Math.random().toString(36).substr(2, 9)
+  }
+
+  normalize (data:number[]):Float32Array {
+    let max = Math.max.apply(data)
+    let min = Math.min.apply(data)
+    data.forEach(a => a - min / (max - min))
+
+    return Float32Array.from(data)
   }
 }

@@ -17,12 +17,12 @@ ctx.onmessage = (e) => {
     let reply = new EssentiaMessage(e.data.ID, t, essentia.vectorToArray(result.ticks))
     ctx.postMessage(reply)
   } else if (t === types[1]) { // spectral peaks
-    const spectra = essentia.Spectrum(essentia.arrayToVector(e.data.payload), e.data.payload.length)
-    const result = essentia.SpectralPeaks(spectra.spectrum, undefined, undefined, 10)
-    console.log(result.frequencies)
+    let signal = e.data.payload
+    const spectra = essentia.Spectrum(essentia.arrayToVector(signal), signal.length)
+    const logspectra = essentia.LogSpectrum(spectra.spectrum, undefined, undefined, undefined, 44100)
+    const result = essentia.SpectralPeaks(logspectra.logFreqSpectrum, -5, undefined, 10)
     let reply = new EssentiaMessage(e.data.ID, t, essentia.vectorToArray(result.frequencies))
     ctx.postMessage(reply)
   }
 }
-
 // ctx.postMessage({"test": essentia})

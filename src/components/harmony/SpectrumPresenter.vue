@@ -78,14 +78,16 @@ export default class SpectrumPresenter extends Vue {
           this.mainPanel.add(axis)
           this.spectralExtractor.analyze(data).then(se => {
             se.peaks.forEach(peak => {
-              let xpos = 2 * peak / this.sample.sampleRate * this.canvashov.width
+              let xpos = Math.log10(2 * peak) / Math.log10(this.sample.sampleRate)
               let o = new Line('red', 2, xpos, true)
               this.infoPanel.add(o)
             })
-          })
-          this.mainPanel.redraw()
+          }
+          )
+          this.infoPanel.redraw()
         }
       })
+      this.mainPanel.redraw()
 
       this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
       this.freqBox = new FreqBox('', '', 0, 0, false)
@@ -109,7 +111,7 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.xpos = e.offsetX
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
-        let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
+        let idx = Math.ceil(e.offsetX / this.canvashov.width * this.quantizedFFT.length)
         // console.log('canvas width: ' + this.canvashov.offsetWidth + ' mouse:' + e.offsetX + ' id:' + idx)
         let f = this.quantizedFFT[idx].frequency
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'

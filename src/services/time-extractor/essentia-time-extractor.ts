@@ -13,12 +13,11 @@ export class EssentiaTimeExtractor implements TimeExtractor {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
       let id = this.setID()
-      let msg = new EssentiaMessage(id, 'rhythm', this.normalize(Array.from(sample)))
+      let msg = new EssentiaMessage(id, 'rhythm', this.normalize(Array.from(this.normalize(sample))))
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
         if (event.data.ID === id) {
           let pos:number[] = Array.from(event.data.payload)
-          console.log(pos)
           resolve({
             start: 0,
             end: this.secondToSamples(3),
