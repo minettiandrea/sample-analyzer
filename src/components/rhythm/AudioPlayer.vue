@@ -76,6 +76,7 @@ export default class AudioPlayer extends Vue {
       this.store.skipped().subscribe(p => {
         if (p) {
           if (this.playing) {
+            this.pause()
             this.onEnd()
             this.sampletime = p
             this.pausedAt = this.samplelng * p / 100
@@ -90,8 +91,13 @@ export default class AudioPlayer extends Vue {
     }
     private newSample (ab:AudioBuffer | null) {
       if (ab) {
+        if (this.playing) {
+          this.pause()
+        }
+        this.sampletime = 0
+        this.pausedAt = 0
         this.sample = ab
-        this.source.buffer = ab
+        this.restore()
         this.samplelng = ab.length / this.rate
       }
     }

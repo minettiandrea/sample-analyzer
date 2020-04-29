@@ -72,14 +72,12 @@ export default class WaveformPresenter extends Vue {
     this.mainPanel = this.drawtoolkit.setUp(this.canvasdom, 1)
     this.infoPanel = this.drawtoolkit.setUp(this.canvasalpha, this.GLOBALALPHA)
 
-    this.playingCursor = new Line('orange', 3, 0, false)
-    this.mouseCursor = new Line('red', 3, 0, false)
-    this.infoPanel.add(this.playingCursor)
-    this.infoPanel.add(this.mouseCursor)
     this.mouseHandler()
 
     this.store.sample().subscribe(s => {
       this.mainPanel.reset()
+      this.setUpInfoPanel()
+      this.infoPanel.redraw()
       if (s) {
         let channel = s.getChannelData(0)
         for (let j = 1; j < s.numberOfChannels; j++) {
@@ -88,6 +86,10 @@ export default class WaveformPresenter extends Vue {
         }
 
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
+        let waveform = new Waveform(this.data)
+        this.mainPanel.add(waveform)
+        this.mainPanel.redraw()
+
         this.samplerate = s.sampleRate
         this.extractor.analyze(channel).then(te => { // pass 32float array
           te.peaks.forEach(peak => {
@@ -95,11 +97,8 @@ export default class WaveformPresenter extends Vue {
             let o = new Line('green', 2, xpos, true)
             this.infoPanel.add(o)
           })
+          this.infoPanel.redraw()
         })
-        this.infoPanel.redraw()
-        let waveform = new Waveform(this.data)
-        this.mainPanel.add(waveform)
-        this.mainPanel.redraw()
       }
     })
 
@@ -118,6 +117,15 @@ export default class WaveformPresenter extends Vue {
       }
     })
   }
+
+  private setUpInfoPanel () {
+    this.infoPanel.reset()
+    this.playingCursor = new Line('orange', 3, 0, false)
+    this.mouseCursor = new Line('red', 3, 0, false)
+    this.infoPanel.add(this.playingCursor)
+    this.infoPanel.add(this.mouseCursor)
+  }
+
   // ANIMATION WITH MOUSE OVER
   mouseHandler () {
     if (this.canvasWrapper) {

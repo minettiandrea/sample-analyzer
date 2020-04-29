@@ -20,6 +20,7 @@ export class Waveform implements Drawable {
 
         this.strokeLine(ctx, x, y)
       }
+      ctx.translate(0, -(canvas.height / 2)) // Bring back Y = 0 to be in top of the canvas to match standards
     }
 
     strokeLine (ctx : CanvasRenderingContext2D, x : number, y : number) {
