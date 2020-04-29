@@ -3,6 +3,12 @@ import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
 
+
+export interface Example{
+  name: string,
+  url: string
+}
+
 export interface Store{
     sample():Observable<AudioBuffer | null>
     nextSample(sample:AudioBuffer):void
@@ -11,6 +17,7 @@ export interface Store{
     nextPlayEvent (pe:PlayingEvent):void
     skipped():Observable<number | null>
     nextSkipped(skipped:number):void
+    sampleExamples():Example[]
 }
 
 export interface PlayingEvent{
@@ -21,6 +28,7 @@ export interface PlayingEvent{
 
 @injectable()
 export class StoreImpl implements Store {
+
     protected _sample:BehaviorSubject<AudioBuffer | null> = new BehaviorSubject<AudioBuffer | null>(null);
 
     emptySampleEvent:PlayingEvent = { status: false, length: 0, elapsed: 0 }
@@ -56,6 +64,13 @@ export class StoreImpl implements Store {
     nextSkipped (skipped : number): void {
       this._skipped.next(skipped)
     }
+
+    sampleExamples (): Example[] {
+      return [
+        { name: 'cello', url: require('@/assets/cello.wav')},
+        { name: 'drums', url: require('@/assets/drums.wav')}
+      ]
+    }
 }
 
 @injectable()
@@ -64,9 +79,7 @@ export class PreLoadedStore extends StoreImpl {
 
     constructor () {
       super()
-      const cello = require('@/assets/cello.wav')
-      const drums = require('@/assets/drums.wav')
-      this.sampleLoader.loadFromUrl(drums).then(sample => {
+      this.sampleLoader.loadFromUrl(this.sampleExamples()[0].url).then(sample => {
         this._sample.next(sample)
       })
     }
