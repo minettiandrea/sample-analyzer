@@ -11,7 +11,7 @@ import { DummyTimeExtractor } from '@/services/time-extractor/dummy-time-extract
 import { DrawToolkit, DrawToolkitImpl } from '@/services/providers/draw-toolkit'
 import { NoteFrequencyProvider, NoteFrequencyProviderImpl } from '@/services/providers/note-frequency'
 import { Quantizer, QuantizerImpl } from '@/services/providers/quantizer'
-import { FFTKiss, FFT } from '@/services/providers/fft'
+import { FFTEssentia } from '@/services/providers/fft'
 import { EssentiaTimeExtractor } from '@/services/time-extractor/essentia-time-extractor'
 import { EssentiaSpectralExtractor } from '@/services/spectral-extractor/essentia-spectral-extractor'
 
@@ -24,5 +24,5 @@ export default function () {
   container.addSingleton<Store>(PreLoadedStore, REGISTRY.Store)
   container.addSingleton<DrawToolkit>(DrawToolkitImpl, REGISTRY.DrawToolkit)
   container.addSingleton<Quantizer>(QuantizerImpl, REGISTRY.Quantizer)
-  container.addSingleton<FFT>(FFTKiss, REGISTRY.FFT)
+  container.addSingleton<FFTEssentia>(FFTEssentia, REGISTRY.FFT)
 };

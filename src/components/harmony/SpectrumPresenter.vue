@@ -70,21 +70,23 @@ export default class SpectrumPresenter extends Vue {
             data = data.map((a, b) => (a + d[b]) / i)
           }
 
-          this.FFT = this.fft.of(data)
-          this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
-          let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
-          this.mainPanel.add(spectra)
+          this.fft.of(data).then((spectrum:number[]) => {
+            this.FFT = spectrum
+            this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
+            let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
+            this.mainPanel.add(spectra)
+          })
           let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
           this.mainPanel.add(axis)
           this.spectralExtractor.analyze(data).then(se => {
             se.peaks.forEach(peak => {
-              let xpos = Math.log10(2 * peak) / Math.log10(this.sample.sampleRate)
+              let xpos = Math.log2(peak) / Math.log2(this.sample.sampleRate)
               let o = new Line('red', 2, xpos, true)
               this.infoPanel.add(o)
             })
-            this.infoPanel.redraw()
           }
           )
+          this.infoPanel.redraw()
         }
       })
       this.mainPanel.redraw()

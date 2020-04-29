@@ -33,7 +33,7 @@ export class QuantizerImpl implements Quantizer {
   }
 
   log (array: number[], step: number, minFrequency:number, fs:number):LogPoint[] {
-    // calculate the centroid of bins in log2 scale
+    // calculate the centroid of bins in log2 scale //// WHY NOT LOG10?
     let steps = []
     for (let j = 0; Math.pow(2, j * step) < fs / 2; j++) {
       let f = Math.pow(2, j * step)
