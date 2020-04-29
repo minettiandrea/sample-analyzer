@@ -47,5 +47,5 @@ export interface SpectralExtractor {
      * Perform spectral analysis on the sample
      * @param sample sample to analyze
      */
-    analyze(sample:Float32Array): Promise<SpectralAnalisis>;
+    analyze(sample:number[]): Promise<SpectralAnalisis>;
 }

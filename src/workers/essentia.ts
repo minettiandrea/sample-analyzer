@@ -18,8 +18,7 @@ function handleRhythm (msg:EssentiaMessage) {
 
 function handleHarmony (msg:EssentiaMessage) {
   let signal = msg.payload
-  const spectra = essentia.Spectrum(essentia.arrayToVector(signal), signal.length)
-  const logspectra = essentia.LogSpectrum(spectra.spectrum, undefined, undefined, undefined, 44100)
+  const logspectra = essentia.LogSpectrum(essentia.arrayToVector(signal), undefined, undefined, undefined, 44100)
   const result = essentia.SpectralPeaks(logspectra.logFreqSpectrum, -5, undefined, 10)
   let reply = msg.reply(essentia.vectorToArray(result.frequencies))
   ctx.postMessage(reply)

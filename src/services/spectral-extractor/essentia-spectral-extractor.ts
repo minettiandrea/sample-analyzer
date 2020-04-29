@@ -6,10 +6,10 @@ import { EssentiaMessage } from '@/workers/essentia-message'
 
 @injectable()
 export class EssentiaSpectralExtractor implements SpectralExtractor {
-  analyze (sample: Float32Array): Promise<SpectralAnalisis> {
+  analyze (sample: number[]): Promise<SpectralAnalisis> {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
-      let msg:EssentiaMessage = new EssentiaMessage(EssentiaMessage.HARMONY, Array.from(sample))
+      let msg:EssentiaMessage = new EssentiaMessage(EssentiaMessage.HARMONY, sample)
       console.log(msg)
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {

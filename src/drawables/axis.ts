@@ -18,7 +18,7 @@ export class Axis implements Drawable {
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, 0)
-      ctx.lineTo(canvas.offsetWidth - 1, 0)
+      ctx.lineTo(canvas.width - 1, 0)
       ctx.stroke()
       ctx.moveTo(0, 0)
       ctx.lineTo(1, -canvas.offsetHeight + 1)
@@ -26,7 +26,7 @@ export class Axis implements Drawable {
       // frequency bins
       for (let j = 0; j < this.graphicFreq.length; j++) {
         if (this.graphicFreq[j] < this.max) {
-          let widthpx = canvas.offsetWidth // px width
+          let widthpx = canvas.width // px width
 
           let minDelta = Math.min(...this.q.map(x => Math.abs(x.frequency - this.graphicFreq[j])))
           let idx = this.q.findIndex(x => x.frequency + minDelta === this.graphicFreq[j] || x.frequency - minDelta === this.graphicFreq[j])

@@ -51,47 +51,47 @@ export default class SpectrumPresenter extends Vue {
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
     private freqbounds:number[] = [20, 20000]
-    public hover : boolean
+    public hover : boolean = true
     private freqBox : FreqBox
     private infoPanel: Panel
     private mainPanel: Panel
 
     mounted () {
       this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
+      this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
+
       this.store.sample().subscribe(ab => {
         if (ab) {
           this.mainPanel.reset()
-
           this.sample = ab
           const i = ab.numberOfChannels
           var data = ab.getChannelData(0) // first channel in order to initialize channel variable
           for (let j = 1; j < i; j++) {
             var d = ab.getChannelData(j)
-            data = data.map((a, b) => (a + d[b]) / i)
+            data.map((a, b) => (a + d[b]) / i)
           }
-
           this.fft.of(data).then((spectrum:number[]) => {
             this.FFT = spectrum
-            this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
+            this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 128, 40, ab.sampleRate)
             let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
             this.mainPanel.add(spectra)
-          })
-          let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
-          this.mainPanel.add(axis)
-          this.spectralExtractor.analyze(data).then(se => {
-            se.peaks.forEach(peak => {
-              let xpos = Math.log2(peak) / Math.log2(this.sample.sampleRate)
-              let o = new Line('red', 2, xpos, true)
-              this.infoPanel.add(o)
+            let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
+            this.mainPanel.add(axis)
+            this.mainPanel.redraw()
+
+            // if spectrum has been computed, analyze it
+            this.spectralExtractor.analyze(spectrum).then(se => {
+              se.peaks.forEach(peak => {
+                let xpos = Math.log2(peak) / Math.log2(this.sample.sampleRate)
+                let o = new Line('red', 2, xpos, true)
+                this.infoPanel.add(o)
+              })
             })
           }
           )
-          this.infoPanel.redraw()
         }
       })
-      this.mainPanel.redraw()
 
-      this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
       this.freqBox = new FreqBox('', '', 0, 0, false)
       this.infoPanel.add(this.freqBox)
       this.mouseHandler()
@@ -113,7 +113,7 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.xpos = e.offsetX
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
-        let idx = Math.ceil(e.offsetX / this.canvashov.width * this.quantizedFFT.length)
+        let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
         // console.log('canvas width: ' + this.canvashov.offsetWidth + ' mouse:' + e.offsetX + ' id:' + idx)
         let f = this.quantizedFFT[idx].frequency
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
