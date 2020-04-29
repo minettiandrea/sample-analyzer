@@ -66,9 +66,7 @@ export class StoreImpl implements Store {
     nextSample (sample: AudioBuffer): void {
       this._timeAnalisis.next(null)
       this._sample.next(sample)
-      console.log('nextSample')
       this.extractor.analyze(this._channelData(sample)).then(a => {
-        console.log(a)
         this._timeAnalisis.next(a)
       })
     }
@@ -110,7 +108,7 @@ export class PreLoadedStore extends StoreImpl {
       const cello = require('@/assets/cello.wav')
       const drums = require('@/assets/drums.wav')
       this.sampleLoader.loadFromUrl(cello).then(sample => {
-        this._sample.next(sample)
+        this.nextSample(sample)
       })
     }
 }

@@ -76,8 +76,6 @@ export default class WaveformPresenter extends Vue {
 
     this.store.sample().subscribe(s => {
       this.mainPanel.reset()
-      this.setUpInfoPanel()
-      this.infoPanel.redraw()
       if (s) {
         const channel = this.store.channelData()
         this.data = this.quantizer.lin(Array.from(channel), this.bars)
@@ -87,14 +85,15 @@ export default class WaveformPresenter extends Vue {
 
         this.samplerate = s.sampleRate
         this.store.timeAnalysis().subscribe(te => {
+          this.setUpInfoPanel()
           if (te) { // pass 32float array
             te.peaks.forEach(peak => {
               let xpos = (peak / this.samplerate) / s.duration
               let o = new Line('green', 2, xpos, true)
               this.infoPanel.add(o)
             })
-            this.infoPanel.redraw()
           }
+          this.infoPanel.redraw()
         })
       }
     })
