@@ -88,7 +88,7 @@ export default class WaveformPresenter extends Vue {
           this.setUpInfoPanel()
           if (te) { // pass 32float array
             te.peaks.forEach(peak => {
-              let xpos = (peak / this.samplerate) / s.duration
+              let xpos = peak / s.duration
               let o = new Line('green', 2, xpos, true)
               this.infoPanel.add(o)
             })
