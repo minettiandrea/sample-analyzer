@@ -82,9 +82,9 @@ export default class SpectrumPresenter extends Vue {
               let o = new Line('red', 2, xpos, true)
               this.infoPanel.add(o)
             })
+            this.infoPanel.redraw()
           }
           )
-          this.infoPanel.redraw()
         }
       })
       this.mainPanel.redraw()
