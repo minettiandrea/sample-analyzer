@@ -17,16 +17,18 @@ function handleRhythm (msg:EssentiaMessage) {
 }
 
 function handleHarmony (msg:EssentiaMessage) {
-  let signal = msg.payload
-  const logspectra = essentia.LogSpectrum(essentia.arrayToVector(signal), undefined, undefined, undefined, 44100)
-  const result = essentia.SpectralPeaks(logspectra.logFreqSpectrum, -5, undefined, 10)
+  let signal = essentia.arrayToVector(msg.payload)
+  const result = essentia.SpectralPeaks(signal, undefined, 20000, 10)
   let reply = msg.reply(essentia.vectorToArray(result.frequencies))
+  // console.log(essentia.vectorToArray(logspectra.logFreqSpectrum))
   ctx.postMessage(reply)
 }
 
 function handleSpectrum (msg:EssentiaMessage) {
   const result = essentia.Spectrum(essentia.arrayToVector(msg.payload))
-  let reply = msg.reply(essentia.vectorToArray(result.spectrum))
+  // console.log(result)
+  let logresult = essentia.LogSpectrum(result.spectrum)
+  let reply = msg.reply(essentia.vectorToArray(logresult.logFreqSpectrum))
   ctx.postMessage(reply)
 }
 

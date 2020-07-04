@@ -18,11 +18,12 @@ export class Spectra implements Drawable {
       let scaled = this.yaxis.map((a) => {
         return (a - minin) * (maxout - minout) / (maxin - minin) + minout
       })
-      const width = Math.ceil(canvas.width / this.xaxis.length)
+      const width = canvas.width
       const height = canvas.height
       const padding = -5
       for (let i = 0; i < this.xaxis.length; i++) {
-        let x = i * width
+        let x = Math.floor(Math.log10(this.xaxis[i]) / Math.log10(44100) * width)
+        console.log(x)
         let y = Math.log10(scaled[i]) * height - padding
 
         // drawing the line

@@ -14,9 +14,13 @@ import Vue from 'vue'
 import { Component, Ref } from 'vue-property-decorator'
 import * as Vex from 'vexflow'
 import { NoteElement, QuarterRythm, Note } from '@/model/note'
+import { inject } from 'inversify-props'
+import { REGISTRY } from '@/ioc/registry'
+import { Store } from '@/services/store/store'
 
 @Component
 export default class SchemaPresenter extends Vue {
+  @inject(REGISTRY.Store) store:Store
   @Ref('score') score!:HTMLDivElement
 
   mounted () {
