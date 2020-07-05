@@ -1,9 +1,9 @@
-import { Observable, BehaviorSubject } from 'rxjs'
+import { Observable, BehaviorSubject, AsyncSubject } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
-import { TimeAnalisis, TimeExtractor } from '../time-extractor/time-extractor';
+import { TimeAnalisis, TimeExtractor } from '../time-extractor/time-extractor'
 
 export interface Example{
   name: string,
@@ -21,6 +21,8 @@ export interface Store{
     skipped():Observable<number | null>
     nextSkipped(skipped:number):void
     sampleExamples():Example[]
+    getPolyLine ():Observable<number>
+    addPolyLine (number:number):void
 }
 
 export interface PlayingEvent{
@@ -41,6 +43,8 @@ export class StoreImpl implements Store {
     private _playing:BehaviorSubject<PlayingEvent> = new BehaviorSubject<PlayingEvent>(this.emptySampleEvent);
 
     protected _skipped:BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
+
+    private _polyAdded = new AsyncSubject<number>();
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -97,6 +101,9 @@ export class StoreImpl implements Store {
         { name: 'drums', url: require('@/assets/drums.wav') }
       ]
     }
+
+    getPolyLine ():Observable<number> { return this._polyAdded }
+    addPolyLine (number:number) { this._polyAdded.next(number) }
 }
 
 @injectable()

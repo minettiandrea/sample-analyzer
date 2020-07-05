@@ -7,7 +7,6 @@
     <v-row>
       <SignaturesPresenter />
       </v-row>
-
 </v-container>
 </template>
 

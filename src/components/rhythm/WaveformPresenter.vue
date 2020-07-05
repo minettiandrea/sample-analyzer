@@ -58,6 +58,7 @@ export default class WaveformPresenter extends Vue {
   private dataArray : Uint8Array
   private data : number[]
   private samplerate:number
+  private inverseRatio:number
   public hover : boolean
   private GLOBALALPHA : number = 0.7;
   private bars = 800 // number of bars to plot
@@ -84,11 +85,12 @@ export default class WaveformPresenter extends Vue {
         this.mainPanel.redraw()
 
         this.samplerate = s.sampleRate
+        this.inverseRatio = 1 / s.duration
         this.store.timeAnalysis().subscribe(te => {
           this.setUpInfoPanel()
           if (te) { // pass 32float array
             te.peaks.forEach(peak => {
-              let xpos = peak / s.duration
+              let xpos = peak * this.inverseRatio
               let o = new Line('green', 2, xpos, true)
               this.infoPanel.add(o)
             })
@@ -109,6 +111,16 @@ export default class WaveformPresenter extends Vue {
         if (this.canvasalpha) {
           this.playingCursor.visible = true
           this.playingCursor.x = p / 100
+        }
+      }
+    })
+
+    this.store.getPolyLine().subscribe(val => {
+      if (val) {
+        if (this.canvasalpha) {
+          console.log('msg received')
+          let xpos = val * this.inverseRatio
+          let l = new Line('red', 2, xpos, true)
         }
       }
     })

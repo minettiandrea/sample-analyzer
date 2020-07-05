@@ -4,8 +4,11 @@
       <v-icon large left></v-icon>
       <span class="title font-weight-light">Rythmic schema</span>
     </v-card-title>
-    <v-card-text>Show rhythmic schema.</v-card-text>
     <div style="background-color:white" ref="score"></div>
+    <v-card-text>4 against :<input v-model.number="subdivisions" placeholder="?" class="text-center">
+    <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
+    </v-card-text>
+
   </v-card>
 </template>
 
@@ -13,7 +16,7 @@
 import Vue from 'vue'
 import { Component, Ref } from 'vue-property-decorator'
 import * as Vex from 'vexflow'
-import { NoteElement, QuarterRythm, Note } from '@/model/note'
+import { NoteElement, QuarterRythm, Note, Quarter } from '@/model/note'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
@@ -23,30 +26,66 @@ export default class SchemaPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('score') score!:HTMLDivElement
 
+  subdivisions:number;
+  peaks:number[] = [];
+  notes: any[] = [];
+  renderer:Vex.Flow.Renderer;
+
   mounted () {
-    const renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
+    this.freshSVG()
+    this.store.timeAnalysis().subscribe(ta => {
+      if (ta) {
+        this.peaks = ta.peaks
+        this.peaks.forEach(() => this.notes.push(QuarterRythm))
+
+        this.drawRhythm(this.renderer.getContext())
+      }
+    })
+  }
+
+  private freshSVG () {
+    let renderers = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
+    this.renderer = renderers
 
     // Size our svg:
-    renderer.resize(1400, 300)
+    this.renderer.resize(1400, 300)
 
     // And get a drawing context:
-    const context = renderer.getContext()
+    return this.renderer.getContext()
+  }
 
-    const notes = [QuarterRythm, QuarterRythm, QuarterRythm, QuarterRythm, QuarterRythm, QuarterRythm]
-    const bars = this.splitBars(notes)
-    console.log(bars)
+  private drawRhythm (ctx:Vex.IRenderContext) {
+    const bars = this.splitBars(this.notes)
     const width = 400
     bars.forEach((bar, i) => {
       if (i === 0) {
-        this.drawBar(bar, 10, context, stave => stave.addClef('percussion').addTimeSignature('4/4'))
+        this.drawBar(bar, 10, ctx, stave => stave.addClef('percussion').addTimeSignature('4/4'))
       } else if (i === (bars.length - 1)) {
-        this.drawBar(bar, i * width + 10, context, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
+        this.drawBar(bar, i * width + 10, ctx, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
       } else {
-        this.drawBar(bar, i * width + 10, context)
+        this.drawBar(bar, i * width + 10, ctx)
       }
     })
 
-    this.drawBar([], 410, context)
+    this.drawBar([], 410, ctx)
+  }
+
+  private addPoly () { // add beats representing polyrythm? possibility to switch some parameters maybe
+  // dummy 4:3
+
+  }
+
+  private drawPoly () {
+    console.log('msg send')
+    let lng = this.peaks.length
+    let beat = this.peaks[3] // 4th peak is the length of the full beat
+    let subd = beat / this.subdivisions
+    let idx = 0
+    let delta4 = this.peaks[1] - this.peaks[0]
+    while (idx * subd <= delta4 * (lng - 1)) {
+      this.store.addPolyLine(idx * subd)
+      idx++
+    }
   }
 
   private splitBars (notes:NoteElement[]):NoteElement[][] {
