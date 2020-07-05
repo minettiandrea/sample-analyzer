@@ -21,8 +21,8 @@ export interface Store{
     skipped():Observable<number | null>
     nextSkipped(skipped:number):void
     sampleExamples():Example[]
-    getPolyLine ():Observable<number>
-    addPolyLine (number:number):void
+    getPolyLine ():Observable<number[] | null>
+    addPolyLine (number:number[]):void
 }
 
 export interface PlayingEvent{
@@ -44,7 +44,7 @@ export class StoreImpl implements Store {
 
     protected _skipped:BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
 
-    private _polyAdded = new AsyncSubject<number>();
+    private _polyAdded = new BehaviorSubject<number[] | null>(null);
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -102,8 +102,8 @@ export class StoreImpl implements Store {
       ]
     }
 
-    getPolyLine ():Observable<number> { return this._polyAdded }
-    addPolyLine (number:number) { this._polyAdded.next(number) }
+    getPolyLine ():Observable<number[] | null> { return this._polyAdded }
+    addPolyLine (n : number[]) { this._polyAdded.next(n) }
 }
 
 @injectable()

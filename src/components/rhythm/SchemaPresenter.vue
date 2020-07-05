@@ -7,6 +7,7 @@
     <div style="background-color:white" ref="score"></div>
     <v-card-text>4 against :<input v-model.number="subdivisions" placeholder="?" class="text-center">
     <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
+    <v-btn @click="clearPoly"> Clear all </v-btn>
     </v-card-text>
 
   </v-card>
@@ -76,16 +77,17 @@ export default class SchemaPresenter extends Vue {
   }
 
   private drawPoly () {
-    console.log('msg send')
     let lng = this.peaks.length
     let beat = this.peaks[3] // 4th peak is the length of the full beat
     let subd = beat / this.subdivisions
     let idx = 0
-    let delta4 = this.peaks[1] - this.peaks[0]
-    while (idx * subd <= delta4 * (lng - 1)) {
-      this.store.addPolyLine(idx * subd)
+    let array = []
+    let delta4 = this.peaks[1] - this.peaks[0] // separation between beats in a 4:4 time signature
+    while (idx * subd <= delta4 * (lng)) {
+      array.push(idx * subd)
       idx++
     }
+    this.store.addPolyLine(array)
   }
 
   private splitBars (notes:NoteElement[]):NoteElement[][] {

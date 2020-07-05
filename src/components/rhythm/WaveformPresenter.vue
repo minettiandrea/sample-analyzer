@@ -118,9 +118,11 @@ export default class WaveformPresenter extends Vue {
     this.store.getPolyLine().subscribe(val => {
       if (val) {
         if (this.canvasalpha) {
-          console.log('msg received')
-          let xpos = val * this.inverseRatio
-          let l = new Line('red', 2, xpos, true)
+          val.forEach(v => {
+            let xpos = v * this.inverseRatio
+            let l = new Line('yellow', 3, xpos, true)
+            this.infoPanel.add(l)
+          })
         }
       }
     })
