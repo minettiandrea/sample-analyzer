@@ -23,10 +23,12 @@
 
         <v-card-text>
             <v-list-item color='blue'>
-              <v-icon color='blue' class='fas fa-square-full'></v-icon>
+              <v-icon color='green' class='fas fa-square-full'></v-icon>
               <v-list-item-title>  Peaks </v-list-item-title>
               <v-icon color='red' class='fas fa-square-full'></v-icon>
-              <v-list-item-title>  Actual Sample </v-list-item-title>
+              <v-list-item-title>  Playing sample </v-list-item-title>
+              <v-icon color='yellow' class='fas fa-square-full'></v-icon>
+              <v-list-item-title>  Polyrhythm </v-list-item-title>
 
             </v-list-item>
         </v-card-text>

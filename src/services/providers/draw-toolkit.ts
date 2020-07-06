@@ -14,6 +14,7 @@ export interface Panel {
   redraw():void;
   add(d:Drawable):void;
   reset():void
+  remove():void;
 }
 
 export class PanelImpl implements Panel {
@@ -34,6 +35,10 @@ export class PanelImpl implements Panel {
 
   add (d:Drawable):void {
     this.elements.push(d)
+  }
+
+  remove ():void{
+    this.elements.pop()
   }
 
   reset ():void{

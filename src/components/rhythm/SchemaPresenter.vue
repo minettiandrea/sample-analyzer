@@ -130,5 +130,9 @@ export default class SchemaPresenter extends Vue {
     Vex.Flow.Formatter.FormatAndDraw(context, stave, _notes)
     beams.forEach(function (b) { b.setContext(context).draw() })
   }
+
+  private clearPoly ():void{
+    this.$root.$emit('clearpoly')
+  }
 }
 </script>

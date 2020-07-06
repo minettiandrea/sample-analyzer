@@ -6,7 +6,8 @@
       ref='canvas-wrapper'
       @mouseover="hover = true"
       @mouseleave="hide"
-      @click='skip'>
+      @click='skip'
+>
       <canvas ref='waveform' class='waveform'>
       </canvas>
       <canvas ref='waveformchild'
@@ -68,6 +69,7 @@ export default class WaveformPresenter extends Vue {
   private mouseCursor:Line
   private mainPanel:Panel
   private infoPanel:Panel
+  private polyLines:number = 0
 
   mounted () { // access canvas
     this.mainPanel = this.drawtoolkit.setUp(this.canvasdom, 1)
@@ -118,19 +120,30 @@ export default class WaveformPresenter extends Vue {
     this.store.getPolyLine().subscribe(val => {
       if (val) {
         if (this.canvasalpha) {
+          this.polyLines += val.length
           val.forEach(v => {
             let xpos = v * this.inverseRatio
             let l = new Line('yellow', 3, xpos, true)
             this.infoPanel.add(l)
           })
+          this.infoPanel.redraw()
         }
       }
+    })
+
+    this.$root.$on('clearpoly', () => {
+      if (this.polyLines > 0) { // custom event to clear polyrythmic canvas
+        for (let i = 0; i <= this.polyLines; i++) {
+          this.infoPanel.remove()
+        }
+      }
+      this.polyLines = 0
     })
   }
 
   private setUpInfoPanel () {
     this.infoPanel.reset()
-    this.playingCursor = new Line('orange', 3, 0, false)
+    this.playingCursor = new Line('red', 3, 0, false)
     this.mouseCursor = new Line('red', 3, 0, false)
     this.infoPanel.add(this.playingCursor)
     this.infoPanel.add(this.mouseCursor)
@@ -161,6 +174,10 @@ export default class WaveformPresenter extends Vue {
   skip (e: MouseEvent) {
     let pos = Math.floor(e.offsetX / this.canvasalpha.offsetWidth * 100)
     this.store.nextSkipped(pos)
+  }
+
+  clearPoly () {
+    console.log('marò')
   }
 }
 </script>
