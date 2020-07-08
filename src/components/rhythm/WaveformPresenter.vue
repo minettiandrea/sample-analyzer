@@ -138,6 +138,7 @@ export default class WaveformPresenter extends Vue {
         }
       }
       this.polyLines = 0
+      this.infoPanel.redraw()
     })
   }
 
@@ -174,10 +175,6 @@ export default class WaveformPresenter extends Vue {
   skip (e: MouseEvent) {
     let pos = Math.floor(e.offsetX / this.canvasalpha.offsetWidth * 100)
     this.store.nextSkipped(pos)
-  }
-
-  clearPoly () {
-    console.log('marò')
   }
 }
 </script>

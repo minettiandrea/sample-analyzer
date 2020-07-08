@@ -36,7 +36,9 @@ export default class SchemaPresenter extends Vue {
     this.freshSVG()
     this.store.timeAnalysis().subscribe(ta => {
       if (ta) {
+        this.renderer.getContext().clear()
         this.peaks = ta.peaks
+        console.log(this.peaks)
         this.peaks.forEach(() => this.notes.push(QuarterRythm))
 
         this.drawRhythm(this.renderer.getContext())
