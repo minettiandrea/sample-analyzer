@@ -21,9 +21,9 @@ export class Spectra implements Drawable {
       const width = canvas.width
       const height = canvas.height
       const padding = -5
-      for (let i = 0; i < this.xaxis.length; i++) {
-        let x = Math.floor(Math.log10(this.xaxis[i]) / Math.log10(44100) * width)
-        console.log(x)
+      const nblocks = this.xaxis.length
+      for (let i = 0; i < nblocks; i++) {
+        let x = i / nblocks * width
         let y = Math.log10(scaled[i]) * height - padding
 
         // drawing the line

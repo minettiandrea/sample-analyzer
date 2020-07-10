@@ -60,7 +60,7 @@ export default class SpectrumPresenter extends Vue {
       this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
       this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
 
-      this.store.sample().subscribe(ab => {
+      this.store.sample().subscribe(ab => { // subscribe to sample
         if (ab) {
           this.mainPanel.reset()
           this.sample = ab
@@ -70,13 +70,13 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-          this.fft.of(data).then((spectrum:number[]) => {
+          this.fft.of(data).then((spectrum:number[]) => { // try fft
             this.FFT = spectrum
             // this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
             this.quantizedFFT = spectrum.map((x, i) => {
-              return { magnitude: x, frequency: Math.pow(10, i / spectrum.length * (this.sample.sampleRate / 2)) }
+              return { magnitude: x, frequency: i / (spectrum.length) * (this.sample.sampleRate / 2) }
             })
-            console.log(this.quantizedFFT)
+
             let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
             this.mainPanel.add(spectra)
             let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
