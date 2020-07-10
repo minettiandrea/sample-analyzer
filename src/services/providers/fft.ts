@@ -1,4 +1,5 @@
 import { injectable } from 'inversify-props'
+// @ts-ignore
 import Worker from 'worker-loader!../../workers/essentia'
 import { EssentiaMessage } from '@/workers/essentia-message'
 

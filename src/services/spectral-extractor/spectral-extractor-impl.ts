@@ -1,11 +1,10 @@
 import { SpectralExtractor, SpectralAnalisis } from './spectral-extractor'
 import { injectable } from 'inversify-props'
 import { ConstNote } from '@/model/note'
-import Worker from 'worker-loader!../../workers/essentia'
 
 @injectable()
 export class DummySpectralExtractor implements SpectralExtractor {
-  analyze (sample: AudioBuffer): Promise<SpectralAnalisis> {
+  analyze (sample: number[]): Promise<SpectralAnalisis> {
     return new Promise((resolve, reject) => resolve({
       peaks: [440, 880, 900],
       harmonicPeaks: [440, 880],

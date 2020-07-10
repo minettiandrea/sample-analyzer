@@ -1,6 +1,7 @@
 import { SpectralExtractor, SpectralAnalisis } from './spectral-extractor'
 import { injectable } from 'inversify-props'
 import { ConstNote } from '@/model/note'
+// @ts-ignore
 import Worker from 'worker-loader!../../workers/essentia'
 import { EssentiaMessage } from '@/workers/essentia-message'
 

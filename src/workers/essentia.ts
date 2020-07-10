@@ -1,4 +1,6 @@
+// @ts-ignore
 import * as wasm from 'essentia.js/dist/essentia-wasm.module'
+// @ts-ignore
 import EssentiaJS from 'essentia.js/dist/essentia.js-core.es'
 import Essentia from 'essentia.js/dist/core_api'
 import { EssentiaMessage } from '@/workers/essentia-message'

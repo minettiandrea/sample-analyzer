@@ -7,7 +7,7 @@ export class DummyTimeExtractor implements TimeExtractor {
     return Math.floor(s * 44100)
   }
 
-  analyze (sample: AudioBuffer): Promise<TimeAnalisis> {
+  analyze (sample: Float32Array): Promise<TimeAnalisis> {
     return new Promise((resolve, reject) => resolve({
       start: this.secondToSamples(0.5),
       end: this.secondToSamples(3),

@@ -1,5 +1,6 @@
 import { injectable } from 'inversify-props'
 import { TimeExtractor, TimeAnalisis } from './time-extractor'
+// @ts-ignore
 import Worker from 'worker-loader!../../workers/essentia'
 import { EssentiaMessage } from '@/workers/essentia-message'
 
