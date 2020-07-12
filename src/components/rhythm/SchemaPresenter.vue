@@ -5,7 +5,8 @@
       <span class="title font-weight-light">Rythmic schema</span>
     </v-card-title>
     <div style="background-color:white" ref="score"></div>
-    <v-card-text>4 against :<input v-model.number="subdivisions" placeholder="?" class="text-center">
+    <v-card-text>
+      <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
     <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
     <v-btn @click="clearPoly"> Clear all </v-btn>
     </v-card-text>
@@ -27,15 +28,19 @@ export default class SchemaPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('score') score!:HTMLDivElement
 
-  subdivisions:number;
+  r1 :number = 4;
+  r2 :number = 4;
   peaks:number[] = [];
   notes: any[] = [];
   renderer:Vex.Flow.Renderer;
+  cvs:any
 
   mounted () {
-    this.freshSVG()
+    this.cvs = this.freshSVG()
     this.store.timeAnalysis().subscribe(ta => {
       if (ta) {
+        this.notes = [QuarterRythm] // clear notes with just initial beat
+        this.cvs.clear()
         this.renderer.getContext().clear()
         this.peaks = ta.peaks
         this.peaks.forEach(() => this.notes.push(QuarterRythm))
@@ -61,7 +66,7 @@ export default class SchemaPresenter extends Vue {
     const width = 400
     bars.forEach((bar, i) => {
       if (i === 0) {
-        this.drawBar(bar, 10, ctx, stave => stave.addClef('percussion').addTimeSignature('4/4'))
+        this.drawBar(bar, 10, ctx, stave => stave.addClef('percussion').addTimeSignature(this.r1.toString() + '/' + this.r2.toString()))
       } else if (i === (bars.length - 1)) {
         this.drawBar(bar, i * width + 10, ctx, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
       } else {
@@ -72,15 +77,15 @@ export default class SchemaPresenter extends Vue {
     this.drawBar([], 410, ctx)
   }
 
-  private addPoly () { // add beats representing polyrythm? possibility to switch some parameters maybe
-  // dummy 4:3
-
+  private addPoly () {
+    let polystev = new Vex.Flow.Stave(10, 120, 800)
+    polystev.addClef('percussion')
   }
 
   private drawPoly () {
     let lng = this.peaks.length
-    let beat = this.peaks[3] // 4th peak is the length of the full beat
-    let subd = beat / this.subdivisions
+    let beat = this.peaks[this.r1 - 1] // 4th peak in 4against... , 3rd peak in 3 against
+    let subd = beat / this.r2
     let idx = 0
     let array = []
     let delta4 = this.peaks[1] - this.peaks[0] // separation between beats in a 4:4 time signature
