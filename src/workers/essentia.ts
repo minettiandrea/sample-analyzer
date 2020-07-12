@@ -4,6 +4,8 @@ import * as wasm from 'essentia.js/dist/essentia-wasm.module'
 import EssentiaJS from 'essentia.js/dist/essentia.js-core.es'
 import Essentia from 'essentia.js/dist/core_api'
 import { EssentiaMessage } from '@/workers/essentia-message'
+import { FFTResponse } from '@/services/providers/fft'
+import { SpectralAnalisis } from '@/services/spectral-extractor/spectral-extractor'
 
 const ctx: Worker = self as any
 
@@ -20,8 +22,17 @@ function handleRhythm (msg:EssentiaMessage) {
 
 function handleHarmony (msg:EssentiaMessage) {
   let signal = essentia.arrayToVector(msg.payload)
-  const result = essentia.SpectralPeaks(signal, 80, 5000, 10, 20, 'frequency', 44100)
-  let reply = msg.reply(essentia.vectorToArray(result.frequencies))
+  let peaks = essentia.SpectralPeaks(signal, undefined, 20000, 8)
+  let hpcp = essentia.HPCP(peaks.frequencies, peaks.magnitudes)
+  const msgResponse:SpectralAnalisis = {
+    peaks: {
+      frequencies: Array.from(essentia.vectorToArray(peaks.frequencies)),
+      magnitudes:  Array.from(essentia.vectorToArray(peaks.magnitudes))
+    },
+    hpcp: Array.from(essentia.vectorToArray(hpcp.hpcp))
+  } 
+  let reply = msg.reply(msgResponse)
+  console.log(reply)
   ctx.postMessage(reply)
 }
 
@@ -38,7 +49,7 @@ function handleSpectrum (msg:EssentiaMessage) {
   subsampled = subsampled.map(x => x / Math.floor(divider))
   // subsampled = spectrumResult
   let logresult = essentia.LogSpectrum(essentia.arrayToVector(subsampled))
-  let replyMsg = {log: essentia.vectorToArray(logresult.logFreqSpectrum), linear:  subsampled}
+  let replyMsg:FFTResponse = {log: Array.from(essentia.vectorToArray(logresult.logFreqSpectrum)), linear: Array.from(subsampled)}
   const reply = msg.reply(replyMsg)
   ctx.postMessage(reply)
 }

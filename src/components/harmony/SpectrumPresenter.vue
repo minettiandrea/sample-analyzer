@@ -99,7 +99,7 @@ export default class SpectrumPresenter extends Vue {
 
             // if spectrum has been computed, analyze it
             this.spectralExtractor.analyze(spectrum.linear).then(se => {
-              se.peaks.forEach(peak => {
+              se.peaks.frequencies.forEach(peak => {
                 // peak is in Hz, convert to log position
                 const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) //select next bin
                 const xpos  = xbin / this.quantizedFFT.length
