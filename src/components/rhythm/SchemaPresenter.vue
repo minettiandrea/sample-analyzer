@@ -38,7 +38,6 @@ export default class SchemaPresenter extends Vue {
       if (ta) {
         this.renderer.getContext().clear()
         this.peaks = ta.peaks
-        console.log(this.peaks)
         this.peaks.forEach(() => this.notes.push(QuarterRythm))
 
         this.drawRhythm(this.renderer.getContext())
@@ -124,7 +123,6 @@ export default class SchemaPresenter extends Vue {
     stave.setContext(context).draw()
 
     const _notes = notes.map(note => {
-      console.log((note.duration.toString() + 'd'))
       return new Vex.Flow.StaveNote({ clef: 'percussion', keys: ['b/4/x2'], duration: this.toVexDuration(note.duration) })
     })
 

@@ -20,9 +20,10 @@ function handleRhythm (msg:EssentiaMessage) {
 
 function handleHarmony (msg:EssentiaMessage) {
   let signal = essentia.arrayToVector(msg.payload)
-  const result = essentia.SpectralPeaks(signal, undefined, 20000, 10)
-  let reply = msg.reply(essentia.vectorToArray(result.frequencies))
-  // console.log(essentia.vectorToArray(logspectra.logFreqSpectrum))
+  let peaks = essentia.SpectralPeaks(signal, undefined, 20000, 8)
+  let hpcp = essentia.HPCP(peaks.frequencies, peaks.magnitudes)
+  let reply = msg.reply([essentia.vectorToArray(hpcp.hpcp), [essentia.vectorToArray(peaks.frequencies), essentia.vectorToArray(peaks.magnitudes)]])
+  console.log(reply)
   ctx.postMessage(reply)
 }
 

@@ -11,14 +11,13 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
       let msg:EssentiaMessage = new EssentiaMessage(EssentiaMessage.HARMONY, sample)
-      console.log(msg)
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
         if (msg.isForMe(event.data)) {
-          let pos:number[] = Array.from(event.data.payload)
+          let pos:any[][] = event.data.payload
           resolve(
             {
-              peaks: pos,
+              peaks: pos[1][0],
               harmonicPeaks: [440, 880],
               inharmonicPeaks: [900],
               fundamental: 440,
