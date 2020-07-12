@@ -15,6 +15,7 @@ export class Axis implements Drawable {
     }
 
     draw (ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
+      ctx.translate(0, canvas.offsetHeight - 20)
       ctx.lineWidth = 1
       ctx.beginPath()
       ctx.moveTo(0, 0)
@@ -43,5 +44,6 @@ export class Axis implements Drawable {
           ctx.strokeText(this.textFreq[j], pos - 5, 15)
         }
       }
+      ctx.translate(0, -(canvas.offsetHeight - 20)) // Bring back Y = 0 to be in top of the canvas to match standard
     }
 }

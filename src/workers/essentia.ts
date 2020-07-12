@@ -20,17 +20,26 @@ function handleRhythm (msg:EssentiaMessage) {
 
 function handleHarmony (msg:EssentiaMessage) {
   let signal = essentia.arrayToVector(msg.payload)
-  const result = essentia.SpectralPeaks(signal, undefined, 20000, 10)
+  const result = essentia.SpectralPeaks(signal, 80, 5000, 10, 20, 'frequency', 44100)
   let reply = msg.reply(essentia.vectorToArray(result.frequencies))
-  // console.log(essentia.vectorToArray(logspectra.logFreqSpectrum))
   ctx.postMessage(reply)
 }
 
 function handleSpectrum (msg:EssentiaMessage) {
-  const result = essentia.Spectrum(essentia.arrayToVector(msg.payload))
-  // console.log(result)
-  let logresult = essentia.LogSpectrum(result.spectrum)
-  let reply = msg.reply(essentia.vectorToArray(logresult.logFreqSpectrum))
+  const result = essentia.Spectrum(essentia.arrayToVector(msg.payload),msg.payload.length)
+
+  const FRAME_SIZE = 2048
+  const spectrumResult = essentia.vectorToArray(result.spectrum)
+  let subsampled:number[] = []
+  const divider = spectrumResult.length / 2048;
+  spectrumResult.forEach((el:number,i:number) => {
+    subsampled[Math.floor(i/divider)] = subsampled[Math.floor(i/divider)] ? subsampled[Math.floor(i/divider)] + el : el
+  });
+  subsampled = subsampled.map(x => x / Math.floor(divider))
+  // subsampled = spectrumResult
+  let logresult = essentia.LogSpectrum(essentia.arrayToVector(subsampled))
+  let replyMsg = {log: essentia.vectorToArray(logresult.logFreqSpectrum), linear:  subsampled}
+  const reply = msg.reply(replyMsg)
   ctx.postMessage(reply)
 }
 

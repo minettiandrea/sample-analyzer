@@ -11,7 +11,6 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
     return new Promise((resolve, reject) => {
       const worker = new Worker()
       let msg:EssentiaMessage = new EssentiaMessage(EssentiaMessage.HARMONY, sample)
-      console.log(msg)
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
         if (msg.isForMe(event.data)) {

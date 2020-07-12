@@ -11,7 +11,6 @@
           <canvas ref='spectrum' class='spectrum'>
           </canvas>
         </div>
-
     </v-card>
   </v-row>
 </v-container>
@@ -46,7 +45,6 @@ export default class SpectrumPresenter extends Vue {
 
     private sample:AudioBuffer
     private data:Float64Array
-    private FFT:number[]
     private quantizedFFT:LogPoint[]
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
@@ -64,6 +62,14 @@ export default class SpectrumPresenter extends Vue {
       this.store.sample().subscribe(ab => {
         if (ab) {
           this.mainPanel.reset()
+          this.infoPanel.reset()
+          this.mainPanel.redraw()
+          this.infoPanel.redraw()
+
+          this.freqBox = new FreqBox('', '', 0, 0, false)
+          this.infoPanel.add(this.freqBox)
+          this.mouseHandler()
+
           this.sample = ab
           const i = ab.numberOfChannels
           var data = ab.getChannelData(0) // first channel in order to initialize channel variable
@@ -71,37 +77,44 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-          this.fft.of(data).then((spectrum:number[]) => {
-            this.FFT = spectrum
-            // this.quantizedFFT = this.quantizer.log(this.FFT, 1 / 64, 40, ab.sampleRate)
-            this.quantizedFFT = spectrum.map((x, i) => {
-              return { magnitude: x, frequency: Math.log10(i / spectrum.length * (this.sample.sampleRate / 2)) }
-            })
-            console.log(this.quantizedFFT)
+          this.fft.of(data).then((spectrum:{log:number[], linear:number[]}) => {
+            // this.quantizedFFT = spectrum.log.map((x, i) => {
+            //   // i must me between 0Hz and sampleRate/2 Hz logarithmically distributed, that means i=256 => frequency 22050
+            //   const max = this.sample.sampleRate / 2;
+            //   if(i == 0 ) return {magnitude: 0, frequency: 0}
+            //   const freq = Math.pow(max,i/spectrum.log.length)
+            //   console.log(freq)
+            //   return { magnitude: x, frequency: freq }
+            // }).filter(x => x.frequency > 20); // ignore lower part of the spectrum, not intresting
+            //this.quantizedFFT =  this.quantizer.log(spectrum.linear,2048,this.sample.sampleRate).filter(x => x.frequency > 20);
+            this.quantizedFFT = spectrum.linear.map((x,i) => {
+              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2)/spectrum.linear.length) }
+            }).filter(x => x.frequency > 50 && x.frequency < 5000); //linear works, checked with Matlab
             let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
             this.mainPanel.add(spectra)
             let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
+            this.freqbounds = [this.quantizedFFT[0].frequency,this.quantizedFFT[this.quantizedFFT.length-1].frequency]
             this.mainPanel.add(axis)
             this.mainPanel.redraw()
 
             // if spectrum has been computed, analyze it
-            this.spectralExtractor.analyze(spectrum).then(se => {
+            this.spectralExtractor.analyze(spectrum.linear).then(se => {
               se.peaks.forEach(peak => {
                 // peak is in Hz, convert to log position
-                let xpos = Math.log10(peak) / Math.log10(this.sample.sampleRate)
-                let o = new Line('red', 2, xpos, true)
+                const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) //select next bin
+                const xpos  = xbin / this.quantizedFFT.length
+                const o = new Line('red', 2, xpos, true)
                 this.infoPanel.add(o)
                 this.sampleON = true
               })
+              this.infoPanel.redraw()              
             })
           }
           )
         }
       })
 
-      this.freqBox = new FreqBox('', '', 0, 0, false)
-      this.infoPanel.add(this.freqBox)
-      this.mouseHandler()
+      
     }
 
     redraw () {
