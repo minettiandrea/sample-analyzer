@@ -14,17 +14,7 @@ export class EssentiaSpectralExtractor implements SpectralExtractor {
       worker.postMessage(msg)
       worker.onmessage = (event:MessageEvent) => {
         if (msg.isForMe(event.data)) {
-          let pos:any[][] = event.data.payload
-          resolve(
-            {
-              peaks: pos[1][0],
-              harmonicPeaks: [440, 880],
-              inharmonicPeaks: [900],
-              fundamental: 440,
-              fundamentalNote: ConstNote,
-              overtones: [ConstNote, ConstNote],
-              fft: []
-            })
+          resolve(event.data.payload)
         }
       }
     })

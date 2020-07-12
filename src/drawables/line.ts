@@ -3,7 +3,7 @@ import { Drawable } from '@/services/providers/draw-toolkit'
 export class Line implements Drawable {
   color:string
   width:number
-  x: number // expressed in %
+  x: number // expressed in %, from 0 to 1
   visible: boolean
 
   constructor (color:string, width:number, x: number, visible: boolean) {

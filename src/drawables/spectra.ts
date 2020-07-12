@@ -34,5 +34,6 @@ export class Spectra implements Drawable {
         ctx.lineTo(x, -y)
         ctx.stroke()
       }
+      ctx.translate(0, -(canvas.offsetHeight - 20)) // Bring back Y = 0 to be in top of the canvas to match standard
     }
 }
