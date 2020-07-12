@@ -39,7 +39,7 @@ function handleHarmony (msg:EssentiaMessage) {
 function handleSpectrum (msg:EssentiaMessage) {
   const result = essentia.Spectrum(essentia.arrayToVector(msg.payload),msg.payload.length)
 
-  const FRAME_SIZE = 2048
+  const FRAME_SIZE = 4096
   const spectrumResult = essentia.vectorToArray(result.spectrum)
   let subsampled:number[] = []
   const divider = spectrumResult.length / 2048;
@@ -48,8 +48,8 @@ function handleSpectrum (msg:EssentiaMessage) {
   });
   subsampled = subsampled.map(x => x / Math.floor(divider))
   // subsampled = spectrumResult
-  let logresult = essentia.LogSpectrum(essentia.arrayToVector(subsampled))
-  let replyMsg:FFTResponse = {log: Array.from(essentia.vectorToArray(logresult.logFreqSpectrum)), linear: Array.from(subsampled)}
+  //let logresult = essentia.LogSpectrum(essentia.arrayToVector(subsampled))
+  let replyMsg:FFTResponse = {log: [], linear: Array.from(subsampled)}
   const reply = msg.reply(replyMsg)
   ctx.postMessage(reply)
 }

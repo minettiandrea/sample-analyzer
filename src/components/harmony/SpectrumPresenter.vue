@@ -28,7 +28,7 @@ import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
 import { Spectra } from '../../drawables/spectra'
 import { Axis } from '../../drawables/axis'
-import { Quantizer, LogPoint } from '../../services/providers/quantizer'
+import { Quantizer, SpectrumPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 import { Line } from '../../drawables/line'
 
@@ -45,7 +45,7 @@ export default class SpectrumPresenter extends Vue {
 
     private sample:AudioBuffer
     private data:Float64Array
-    private quantizedFFT:LogPoint[]
+    private quantizedFFT:SpectrumPoint[]
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
     private freqbounds:number[] = [20, 20000]
@@ -89,8 +89,8 @@ export default class SpectrumPresenter extends Vue {
             //this.quantizedFFT =  this.quantizer.log(spectrum.linear,2048,this.sample.sampleRate).filter(x => x.frequency > 20);
             this.quantizedFFT = spectrum.linear.map((x,i) => {
               return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2)/spectrum.linear.length) }
-            }).filter(x => x.frequency > 50 && x.frequency < 5000); //linear works, checked with Matlab
-            let spectra = new Spectra(this.quantizedFFT.map(x => x.magnitude), this.quantizedFFT.map(x => x.frequency))
+            }); //linear works, checked with Matlab
+            let spectra = new Spectra(this.quantizedFFT)
             this.mainPanel.add(spectra)
             let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
             this.freqbounds = [this.quantizedFFT[0].frequency,this.quantizedFFT[this.quantizedFFT.length-1].frequency]

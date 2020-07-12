@@ -1,13 +1,16 @@
 import { Drawable } from '@/services/providers/draw-toolkit'
-import { LogPoint } from '@/services/providers/quantizer'
+import { SpectrumPoint } from '@/services/providers/quantizer'
+import { of } from 'rxjs'
 
 export class Axis implements Drawable {
     textFreq:string[]
     graphicFreq: number[]
-    q:LogPoint[]
+    q:SpectrumPoint[]
     max:number
+    logX = true
+    min = 40
 
-    constructor (t:string[], n:number[], q:LogPoint[], max:number) {
+    constructor (t:string[], n:number[], q:SpectrumPoint[], max:number) {
       this.textFreq = t
       this.graphicFreq = n
       this.q = q
@@ -31,8 +34,15 @@ export class Axis implements Drawable {
 
           let minDelta = Math.min(...this.q.map(x => Math.abs(x.frequency - this.graphicFreq[j])))
           let idx = this.q.findIndex(x => x.frequency + minDelta === this.graphicFreq[j] || x.frequency - minDelta === this.graphicFreq[j])
+         
+          let pos = 0;
 
-          let pos = Math.floor(idx / this.q.length * widthpx)
+          if(this.logX) {
+            const minFreqIndex = this.q.findIndex(x => x.frequency > this.min)
+            pos = canvas.width + Math.log((idx+minFreqIndex)/this.q.length) / Math.log(widthpx) * widthpx
+          } else {
+            pos = Math.floor(idx / this.q.length * widthpx)
+          }
           ctx.lineWidth = 3
           ctx.strokeStyle = 'black'
           ctx.beginPath()
