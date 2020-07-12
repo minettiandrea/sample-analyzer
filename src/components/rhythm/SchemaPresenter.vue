@@ -27,7 +27,7 @@ export default class SchemaPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('score') score!:HTMLDivElement
 
-  subdivisions:number;
+  subdivisions:number =0;
   peaks:number[] = [];
   notes: any[] = [];
   renderer:Vex.Flow.Renderer;
