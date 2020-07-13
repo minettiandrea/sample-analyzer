@@ -15,7 +15,7 @@ export class Spectra implements Drawable {
 
     draw (ctx: CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
       
-      ctx.translate(0, canvas.offsetHeight - 20) // canvas y axis to be on the bottom of the canvas |_|
+      ctx.translate(0, canvas.height - 20) // canvas y axis to be on the bottom of the canvas |_|
       
       const maxin = Math.max(...this.spectrum.map(x => x.magnitude))
       const minin = Math.min(...this.spectrum.map(x => x.magnitude))
@@ -24,7 +24,7 @@ export class Spectra implements Drawable {
       let scaled = this.spectrum.map(x => x.magnitude).map((a) => {
         return (a - minin) * (maxout - minout) / (maxin - minin) + minout
       })
-      let width = canvas.offsetWidth
+      let width = canvas.width
       const height = canvas.height
       const padding = -5
       const nblocks = this.spectrum.length
@@ -33,7 +33,7 @@ export class Spectra implements Drawable {
       if(this.log) {
         const minFreqIndex = this.spectrum.findIndex(x => x.frequency > this.min)
         start = minFreqIndex
-        const sizing = virtualCanvas(canvas.offsetWidth,start,nblocks)
+        const sizing = virtualCanvas(canvas.width,start,nblocks)
         offsetX = sizing.offset
         width = sizing.width
       }
@@ -55,6 +55,6 @@ export class Spectra implements Drawable {
         ctx.lineTo(x, -y)
         ctx.stroke()
       }
-      ctx.translate(0, -(canvas.offsetHeight - 20)) // Bring back Y = 0 to be in top of the canvas to match standard
+      ctx.translate(0, -(canvas.height - 20)) // Bring back Y = 0 to be in top of the canvas to match standard
     }
 }

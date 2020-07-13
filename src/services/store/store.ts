@@ -4,6 +4,9 @@ import { injectable, inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { SampleLoaderService } from '../sample-loader/sample-loader'
 import { TimeAnalisis, TimeExtractor } from '../time-extractor/time-extractor'
+import { FFT, FFTResponse } from '../providers/fft'
+import { EssentiaSpectralExtractor } from '../spectral-extractor/essentia-spectral-extractor'
+import { SpectrumPoint } from '../providers/quantizer'
 
 export interface Example{
   name: string,
@@ -24,7 +27,10 @@ export interface Store{
     getPolyLine ():Observable<number[] | null>
     addPolyLine (number:number[]):void
     getSpectralPeaks ():Observable<number[] | null>
-    addSpectralPeaks (number:number[]):void
+    getHCPC ():Observable<number[] | null>
+    getFFT():Observable<SpectrumPoint[] | null>
+    loading():Observable<boolean>
+    setLoading():void
 }
 
 export interface PlayingEvent{
@@ -35,7 +41,10 @@ export interface PlayingEvent{
 
 @injectable()
 export class StoreImpl implements Store {
+    
+    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor
     @inject(REGISTRY.TimeExtractor) extractor:TimeExtractor
+    @inject(REGISTRY.FFT) fft:FFT
 
     protected _sample:BehaviorSubject<AudioBuffer | null> = new BehaviorSubject<AudioBuffer | null>(null);
     protected _timeAnalisis:BehaviorSubject<TimeAnalisis | null> = new BehaviorSubject<TimeAnalisis | null>(null);
@@ -48,6 +57,10 @@ export class StoreImpl implements Store {
 
     private _polyAdded = new BehaviorSubject<number[] | null>(null);
     private _spectralpeaks = new BehaviorSubject<number[] | null>(null)
+    private _hpcp = new BehaviorSubject<number[] | null>(null)
+    private _fft = new BehaviorSubject<SpectrumPoint[] | null>(null)
+    private _loading = new BehaviorSubject<boolean>(true)
+
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -72,10 +85,35 @@ export class StoreImpl implements Store {
 
     nextSample (sample: AudioBuffer): void {
       this._timeAnalisis.next(null)
+      this._hpcp.next(null)
+      this._spectralpeaks.next(null)
+      this._fft.next(null)
       this._sample.next(sample)
-      this.extractor.analyze(this._channelData(sample)).then(a => {
-        this._timeAnalisis.next(a)
+      
+      var data = this._channelData(sample)
+
+      this.fft.of(data).then((spectrum:FFTResponse) => {
+        const fft = spectrum.full.map((x, i) => {
+          return { magnitude: x, frequency: i * ((sample.sampleRate / 2) / spectrum.full.length) }
+        })
+
+        this._fft.next(fft)
+
+        this.spectralExtractor.analyze(spectrum.subsampled).then(se => {
+          this._spectralpeaks.next(se.peaks.frequencies)
+          this._hpcp.next(se.hpcp)
+
+
+          this.extractor.analyze(data).then(a => {
+            this._timeAnalisis.next(a)
+            this._loading.next(false)
+          })
+
+          
+        });
+        
       })
+
     }
 
     playing ():Observable<PlayingEvent> {
@@ -109,7 +147,20 @@ export class StoreImpl implements Store {
     addPolyLine (n : number[]) { this._polyAdded.next(n) }
 
     getSpectralPeaks ():Observable<number[] | null> { return this._spectralpeaks }
-    addSpectralPeaks (n : number[]) { this._spectralpeaks.next(n) }
+    getHCPC(): Observable<number[] | null> { return this._hpcp }
+
+    getFFT(): Observable<SpectrumPoint[] | null> { return this._fft}
+
+    setLoading() {
+      this._loading.next(true)
+    }
+
+    loading():Observable<boolean> {
+      return this._loading
+    }
+
+
+
 }
 
 @injectable()

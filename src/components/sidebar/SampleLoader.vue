@@ -41,12 +41,14 @@ export default class SampleLoader extends Vue {
   examples = this.store.sampleExamples()
 
   selectSample (s:Example) {
+    this.store.setLoading()
     this.sampleLoader.loadFromUrl(s.url).then(ab => {
       this.store.nextSample(ab)
     })
   }
 
   load (file:File) {
+    this.store.setLoading()
     this.sampleLoader.loadFromFile(file).then(ab => {
       this.store.nextSample(ab)
     })

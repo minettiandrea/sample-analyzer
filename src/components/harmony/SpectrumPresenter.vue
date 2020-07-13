@@ -68,19 +68,17 @@ import { DrawToolkit, Panel } from '../../services/providers/draw-toolkit'
 import { FreqBox } from '../../drawables/freqBox'
 import { Spectra } from '../../drawables/spectra'
 import { Axis } from '../../drawables/axis'
-import { Quantizer, SpectrumPoint } from '../../services/providers/quantizer'
-import { FFT, FFTResponse } from '@/services/providers/fft'
+import { SpectrumPoint } from '../../services/providers/quantizer'
 import { Line } from '../../drawables/line'
 import { virtualCanvas } from '@/drawables/utils/logUtils'
 import { SpectralAnalisis } from '../../services/spectral-extractor/spectral-extractor'
+import { find } from 'rxjs/operators';
 
 @Component
 export default class SpectrumPresenter extends Vue {
-    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor
+    
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
-    @inject(REGISTRY.Quantizer) quantizer:Quantizer
-    @inject(REGISTRY.FFT) fft:FFT
     @Ref('spectrum') readonly canvasspec!: HTMLCanvasElement
     @Ref('wrapper-spectrum') readonly wrapperSpectrum!:HTMLDivElement
     @Ref('hover') readonly canvashov!:HTMLCanvasElement
@@ -89,7 +87,7 @@ export default class SpectrumPresenter extends Vue {
     private data:Float64Array
     private originalFFT:SpectrumPoint[]
     private filteredFFT:SpectrumPoint[]
-    private spectralAnalysis:SpectralAnalisis
+    private spectralPeaks:number[]
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
     public hover : boolean = true
@@ -109,33 +107,29 @@ export default class SpectrumPresenter extends Vue {
 
       this.store.sample().subscribe(ab => {
         if (ab) {
+          this.mainPanel.reset()
+          this.infoPanel.reset()
 
           this.maxFreq = ab.sampleRate / 2;
           this.freqRange = [40,this.maxFreq]
-
           this.sample = ab
-          const i = ab.numberOfChannels
-          var data = ab.getChannelData(0) // first channel in order to initialize channel variable
-          for (let j = 1; j < i; j++) {
-            var d = ab.getChannelData(j)
-            data.map((a, b) => (a + d[b]) / i)
-          }
-          this.fft.of(data).then((spectrum:FFTResponse) => {
-            this.originalFFT = spectrum.full.map((x, i) => {
-              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2) / spectrum.full.length) }
-            })
 
-            this.spectralExtractor.analyze(spectrum.subsampled).then(se => {
-              this.store.addSpectralPeaks(se.peaks.frequencies)
-              this.spectralAnalysis = se;
-              this.drawSpectrum();
-            });
-            
-            
-          }
-          )
+          this.store.getFFT().pipe(find(x => x != null )).subscribe(fft => {
+
+            if(fft) {
+              this.originalFFT = fft
+              this.store.getSpectralPeaks().pipe(find(x => x != null)).subscribe(sp => {
+                if(sp) {
+                  this.spectralPeaks = sp
+                  this.drawSpectrum();
+                }
+              })
+            }
+          })
+
         }
       })
+
     }
 
 
@@ -157,7 +151,7 @@ export default class SpectrumPresenter extends Vue {
       this.mainPanel.add(axis)
       this.mainPanel.redraw()
 
-      this.spectralAnalysis.peaks.frequencies.forEach(peak => {
+      this.spectralPeaks.forEach(peak => {
         // peak is in Hz, convert to log position
         const start =  this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0]) // select next bin
         const xbin = this.filteredFFT.findIndex(x => x.frequency > peak)
@@ -183,7 +177,7 @@ export default class SpectrumPresenter extends Vue {
     }
 
     onMouseMove (e: MouseEvent) {
-      if (this.hover && this.sampleON) {
+      if (this.freqBox && this.hover && this.sampleON) {
         this.freqBox.xpos = e.offsetX
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
@@ -200,8 +194,10 @@ export default class SpectrumPresenter extends Vue {
       }
     }
     hide () {
-      this.freqBox.visible = false
-      this.infoPanel.redraw()
+      if(this.freqBox) {
+        this.freqBox.visible = false
+        this.infoPanel.redraw()
+      }
     }
 }
 </script>
