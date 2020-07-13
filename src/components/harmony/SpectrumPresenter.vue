@@ -86,14 +86,14 @@ export default class SpectrumPresenter extends Vue {
             //   console.log(freq)
             //   return { magnitude: x, frequency: freq }
             // }).filter(x => x.frequency > 20); // ignore lower part of the spectrum, not intresting
-            //this.quantizedFFT =  this.quantizer.log(spectrum.linear,2048,this.sample.sampleRate).filter(x => x.frequency > 20);
-            this.quantizedFFT = spectrum.linear.map((x,i) => {
-              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2)/spectrum.linear.length) }
-            }); //linear works, checked with Matlab
+            // this.quantizedFFT =  this.quantizer.log(spectrum.linear,2048,this.sample.sampleRate).filter(x => x.frequency > 20);
+            this.quantizedFFT = spectrum.linear.map((x, i) => {
+              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2) / spectrum.linear.length) }
+            }) // linear works, checked with Matlab
             let spectra = new Spectra(this.quantizedFFT)
             this.mainPanel.add(spectra)
             let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
-            this.freqbounds = [this.quantizedFFT[0].frequency,this.quantizedFFT[this.quantizedFFT.length-1].frequency]
+            this.freqbounds = [this.quantizedFFT[0].frequency, this.quantizedFFT[this.quantizedFFT.length - 1].frequency]
             this.mainPanel.add(axis)
             this.mainPanel.redraw()
 
@@ -101,20 +101,18 @@ export default class SpectrumPresenter extends Vue {
             this.spectralExtractor.analyze(spectrum.linear).then(se => {
               se.peaks.frequencies.forEach(peak => {
                 // peak is in Hz, convert to log position
-                const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) //select next bin
-                const xpos  = xbin / this.quantizedFFT.length
+                const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) // select next bin
+                const xpos = xbin / this.quantizedFFT.length
                 const o = new Line('red', 2, xpos, true)
                 this.infoPanel.add(o)
                 this.sampleON = true
               })
-              this.infoPanel.redraw()              
+              this.infoPanel.redraw()
             })
           }
           )
         }
       })
-
-      
     }
 
     redraw () {
