@@ -4,6 +4,10 @@
 
             <SpectrumPresenter />
     </v-row>
+    <v-row align="center" justify="center">
+
+            <HPCPPresenter />
+    </v-row>
       <v-row>
         <OvertonesPresenter />
 
@@ -19,12 +23,14 @@ import { Component } from 'vue-property-decorator'
 import SpectrumPresenter from './SpectrumPresenter.vue'
 import OvertonesPresenter from './OvertonesPresenter.vue'
 import VoicingsPresenter from './VoicingsPresenter.vue'
+import HPCPPresenter from './HPCPPresenter.vue'
 
 @Component({
   components: {
     SpectrumPresenter,
     OvertonesPresenter,
-    VoicingsPresenter
+    VoicingsPresenter,
+    HPCPPresenter
   }
 })
 export default class HarmonicStructure extends Vue {

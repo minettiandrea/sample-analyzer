@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.4.4",
+    "@types/chart.js": "^2.9.22",
     "@types/vexflow": "^1.2.33",
     "chart.js": "^2.9.3",
     "core-js": "^3.4.3",
