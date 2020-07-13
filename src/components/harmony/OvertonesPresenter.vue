@@ -12,11 +12,21 @@
 <script lang="ts">
 import Vue from 'vue'
 import * as Vex from 'vexflow'
+import { inject } from 'inversify-props'
+import { REGISTRY } from '@/ioc/registry'
+import { Store } from '@/services/store/store'
+import { NoteFrequencyProvider } from '../../services/providers/note-frequency'
 import { Component, Ref } from 'vue-property-decorator'
+import { EssentiaSpectralExtractor } from '@/services/spectral-extractor/essentia-spectral-extractor'
 
 @Component
 export default class OvertonesPresenter extends Vue {
     @Ref('scoreh') score!:HTMLDivElement
+    @inject(REGISTRY.Store) store:Store
+    @inject(REGISTRY.NoteFrequencyProvider) notemgt:NoteFrequencyProvider
+    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor;
+
+    private notes:String[]
 
     mounted () {
       const renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
@@ -31,6 +41,18 @@ export default class OvertonesPresenter extends Vue {
       const stavebass = new Vex.Flow.Stave(10, 200, 800)
       stavebass.addClef('bass')
       stavebass.setContext(context).draw()
+
+      this.store.getSpectralPeaks().subscribe(peaks => {
+        if (peaks) {
+          peaks.map(a => this.notemgt.freqToNote(a))
+          console.log(peaks.map(a => this.notemgt.freqToNote(a)))
+        }
+      })
+      console.log()
+    }
+
+    drawTones () {
+
     }
 }
 </script>

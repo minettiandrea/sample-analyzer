@@ -75,7 +75,7 @@ import { SpectralAnalisis } from '../../services/spectral-extractor/spectral-ext
 
 @Component
 export default class SpectrumPresenter extends Vue {
-    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor;
+    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
     @inject(REGISTRY.Quantizer) quantizer:Quantizer
@@ -128,6 +128,7 @@ export default class SpectrumPresenter extends Vue {
             })
 
             this.spectralExtractor.analyze(spectrum.linear).then(se => {
+              this.store.addSpectralPeaks(se.peaks.frequencies)
               this.spectralAnalysis = se;
               this.drawSpectrum();
             });
