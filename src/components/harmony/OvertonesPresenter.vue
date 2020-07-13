@@ -27,32 +27,74 @@ export default class OvertonesPresenter extends Vue {
     @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor;
 
     private notes:String[]
+    private TREBLE:Vex.Flow.Stave
+    private ALTO:Vex.Flow.Stave
+    private BASS:Vex.Flow.Stave
 
     mounted () {
       const renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
-      renderer.resize(1400, 300)
+      renderer.resize(1400, 350)
       const context = renderer.getContext()
-      const stavetreble = new Vex.Flow.Stave(10, 40, 800)
-      stavetreble.addClef('treble')
-      stavetreble.setContext(context).draw()
-      const stavealto = new Vex.Flow.Stave(10, 120, 800)
-      stavealto.addClef('alto')
-      stavealto.setContext(context).draw()
-      const stavebass = new Vex.Flow.Stave(10, 200, 800)
-      stavebass.addClef('bass')
-      stavebass.setContext(context).draw()
+      this.TREBLE = new Vex.Flow.Stave(10, 40, 800)
+      this.TREBLE.addClef('treble')
+      this.TREBLE.setContext(context).draw()
+      this.ALTO = new Vex.Flow.Stave(10, 120, 800)
+      this.ALTO.addClef('alto')
+      this.ALTO.setContext(context).draw()
+      this.BASS = new Vex.Flow.Stave(10, 200, 800)
+      this.BASS.addClef('bass')
+      this.BASS.setContext(context).draw()
 
       this.store.getSpectralPeaks().subscribe(peaks => {
         if (peaks) {
-          peaks.map(a => this.notemgt.freqToNote(a))
-          console.log(peaks.map(a => this.notemgt.freqToNote(a)))
+          this.notes = peaks.map(a => this.notemgt.freqToNote(a))
+          this.drawTones(context)
         }
       })
-      console.log()
     }
 
-    drawTones () {
+    drawTones (ctx:Vex.IRenderContext) {
+      var notesBASS:Vex.Flow.StaveNote[] = []
+      var notesTREBLE:Vex.Flow.StaveNote[] = []
+      var notesALTO:Vex.Flow.StaveNote[] = []
 
+      this.notes.forEach(n => {
+        let oct = n.substring(n.length - 1) // octave 4-5-6
+        let val = n.substring(0, n.length - 1) // note value C-D-E
+        let myclef = this.clefS(oct) // string of the clef
+        let clefref = this.clefRef(oct)
+        var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [val + '/' + oct], duration: '1' })
+
+        switch (myclef) {
+          case ('alto') : notesALTO.push(vexn); break
+          case ('treble') : notesTREBLE.push(vexn); break
+          default: notesBASS.push(vexn)
+        }
+      })
+
+      let voiceB = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesBASS)
+      let voiceT = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesTREBLE)
+      let voiceA = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesALTO)
+      let formatter = new Vex.Flow.Formatter().format([voiceB, voiceT, voiceA], 250)
+      voiceB.draw(ctx, this.BASS)
+      voiceT.draw(ctx, this.TREBLE)
+      voiceA.draw(ctx, this.ALTO)
+    }
+
+    clefS (oct:string):string {
+      switch (oct) {
+        case '5': case '6': return 'treble'
+        case '4': case '3': return 'alto'
+        default: return 'bass'
+      }
+    }
+
+    clefRef (oct:string):Vex.Flow.Stave {
+      switch (oct) {
+        case '5': case '6': return this.TREBLE
+        case '4': case '3': return this.ALTO
+        default: return this.BASS
+      }
     }
 }
 </script>
