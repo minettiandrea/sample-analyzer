@@ -1,20 +1,23 @@
 import { Drawable } from '@/services/providers/draw-toolkit'
 import { SpectrumPoint } from '@/services/providers/quantizer'
 import { of } from 'rxjs'
+import { virtualCanvas } from './utils/logUtils'
 
 export class Axis implements Drawable {
     textFreq:string[]
     graphicFreq: number[]
     q:SpectrumPoint[]
     max:number
-    logX = true
-    min = 40
+    log:boolean = true
+    min:number = 40
 
-    constructor (t:string[], n:number[], q:SpectrumPoint[], max:number) {
+    constructor (t:string[], n:number[], q:SpectrumPoint[], max:number, min:number, log:boolean) {
       this.textFreq = t
       this.graphicFreq = n
       this.q = q
       this.max = max
+      this.min = min
+      this.log =  log
     }
 
     draw (ctx:CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
@@ -29,7 +32,7 @@ export class Axis implements Drawable {
       ctx.stroke()
       // frequency bins
       for (let j = 0; j < this.graphicFreq.length; j++) {
-        if (this.graphicFreq[j] < this.max) {
+        if (this.graphicFreq[j] < this.max && this.graphicFreq[j] >= this.min) {
           let widthpx = canvas.width // px width
 
           let minDelta = Math.min(...this.q.map(x => Math.abs(x.frequency - this.graphicFreq[j])))
@@ -37,9 +40,10 @@ export class Axis implements Drawable {
          
           let pos = 0;
 
-          if(this.logX) {
+          if(this.log) {
             const minFreqIndex = this.q.findIndex(x => x.frequency > this.min)
-            pos = canvas.width + Math.log((idx+minFreqIndex)/this.q.length) / Math.log(widthpx) * widthpx
+            const sizing = virtualCanvas(canvas.offsetWidth,minFreqIndex,this.q.length)
+            pos = sizing.width + sizing.offset + Math.log(idx/this.q.length) / Math.log(sizing.width) * sizing.width
           } else {
             pos = Math.floor(idx / this.q.length * widthpx)
           }

@@ -1,14 +1,16 @@
 import { Drawable } from '@/services/providers/draw-toolkit'
 import { SpectrumPoint } from '@/services/providers/quantizer'
+import { virtualCanvas } from './utils/logUtils'
 
 export class Spectra implements Drawable {
     spectrum:SpectrumPoint[]
-    logX = true
-    fs: number = 44100
+    log:boolean = true
     min: number = 40
 
-    constructor (spectrum:SpectrumPoint[]) {
+    constructor (spectrum:SpectrumPoint[],min:number,log:boolean) {
       this.spectrum = spectrum
+      this.min = min
+      this.log = log
     }
 
     draw (ctx: CanvasRenderingContext2D, canvas:HTMLCanvasElement) {
@@ -28,19 +30,17 @@ export class Spectra implements Drawable {
       const nblocks = this.spectrum.length
       let start = 0
       let offsetX = -1000
-      if(this.logX) {
+      if(this.log) {
         const minFreqIndex = this.spectrum.findIndex(x => x.frequency > this.min)
         start = minFreqIndex
-        while((width + offsetX - canvas.offsetWidth) < 0 && width < 10000) {
-          width += 10;
-          offsetX = Math.log10(minFreqIndex/nblocks) / Math.log10(width) * width
-        }
+        const sizing = virtualCanvas(canvas.offsetWidth,start,nblocks)
+        offsetX = sizing.offset
+        width = sizing.width
       }
       for (let i = start; i < nblocks; i++) {
         let x = 0;
-        if(this.logX) {
-          x = width + offsetX + (Math.log10((i)/(nblocks)) / Math.log(width)) * width
-          //console.log(x)
+        if(this.log) {
+          x = width + offsetX + (Math.log((i)/(nblocks)) / Math.log(width)) * width
         } else { //linear
           x = i / nblocks * width
         }

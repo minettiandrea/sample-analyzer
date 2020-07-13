@@ -11,6 +11,45 @@
           <canvas ref='spectrum' class='spectrum'>
           </canvas>
         </div>
+        <div>
+          <v-radio-group v-model="log" row @change="drawSpectrum()">
+            <v-radio label="Log" :value="true"></v-radio>
+            <v-radio label="Lin" :value="false"></v-radio>
+          </v-radio-group>
+        </div>
+        <div>
+          <v-range-slider
+            v-model="freqRange"
+            :max="maxFreq"
+            :min="minFreq"
+            hide-details
+            class="align-center"
+            @change="drawSpectrum()"
+          >
+            <template v-slot:prepend>
+              <v-text-field
+                :value="freqRange[0]"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 60px"
+                @change="$set(freqRange, 0, $event)"
+              ></v-text-field>
+            </template>
+            <template v-slot:append>
+              <v-text-field
+                :value="freqRange[1]"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 60px"
+                @change="$set(freqRange, 1, $event)"
+              ></v-text-field>
+            </template>
+          </v-range-slider>
+        </div>
     </v-card>
   </v-row>
 </v-container>
@@ -31,6 +70,8 @@ import { Axis } from '../../drawables/axis'
 import { Quantizer, SpectrumPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 import { Line } from '../../drawables/line'
+import { virtualCanvas } from '@/drawables/utils/logUtils'
+import { SpectralAnalisis } from '../../services/spectral-extractor/spectral-extractor'
 
 @Component
 export default class SpectrumPresenter extends Vue {
@@ -45,15 +86,20 @@ export default class SpectrumPresenter extends Vue {
 
     private sample:AudioBuffer
     private data:Float64Array
-    private quantizedFFT:SpectrumPoint[]
+    private originalFFT:SpectrumPoint[]
+    private filteredFFT:SpectrumPoint[]
+    private spectralAnalysis:SpectralAnalisis
     private graphicFreq: number[] = [100, 1000, 10000]
     private textFreq:string[] = ['100', '1k', '10k'] // frequency references
-    private freqbounds:number[] = [20, 20000]
     public hover : boolean = true
     private freqBox : FreqBox
     private infoPanel: Panel
     private mainPanel: Panel
     private sampleON:boolean = false // manage mousehover when sample is still loading/offline/not loaded yet
+    private minFreq:number = 20
+    private maxFreq:number = 20000
+    private freqRange:number[] = [40,10000]
+    private log:boolean = true
 
     mounted () {
       this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
@@ -61,14 +107,13 @@ export default class SpectrumPresenter extends Vue {
 
       this.store.sample().subscribe(ab => {
         if (ab) {
-          this.mainPanel.reset()
-          this.infoPanel.reset()
-          this.mainPanel.redraw()
-          this.infoPanel.redraw()
-
+          
           this.freqBox = new FreqBox('', '', 0, 0, false)
           this.infoPanel.add(this.freqBox)
           this.mouseHandler()
+
+          this.maxFreq = ab.sampleRate / 2;
+          this.freqRange = [40,this.maxFreq]
 
           this.sample = ab
           const i = ab.numberOfChannels
@@ -78,44 +123,51 @@ export default class SpectrumPresenter extends Vue {
             data.map((a, b) => (a + d[b]) / i)
           }
           this.fft.of(data).then((spectrum:{log:number[], linear:number[]}) => {
-            // this.quantizedFFT = spectrum.log.map((x, i) => {
-            //   // i must me between 0Hz and sampleRate/2 Hz logarithmically distributed, that means i=256 => frequency 22050
-            //   const max = this.sample.sampleRate / 2;
-            //   if(i == 0 ) return {magnitude: 0, frequency: 0}
-            //   const freq = Math.pow(max,i/spectrum.log.length)
-            //   console.log(freq)
-            //   return { magnitude: x, frequency: freq }
-            // }).filter(x => x.frequency > 20); // ignore lower part of the spectrum, not intresting
-            // this.quantizedFFT =  this.quantizer.log(spectrum.linear,2048,this.sample.sampleRate).filter(x => x.frequency > 20);
-            this.quantizedFFT = spectrum.linear.map((x, i) => {
+            this.originalFFT = spectrum.linear.map((x, i) => {
               return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2) / spectrum.linear.length) }
-            }) // linear works, checked with Matlab
-            let spectra = new Spectra(this.quantizedFFT)
-            this.mainPanel.add(spectra)
-            let axis = new Axis(this.textFreq, this.graphicFreq, this.quantizedFFT, this.sample.sampleRate)
-            this.freqbounds = [this.quantizedFFT[0].frequency, this.quantizedFFT[this.quantizedFFT.length - 1].frequency]
-            this.mainPanel.add(axis)
-            this.mainPanel.redraw()
-
-            // if spectrum has been computed, analyze it
-            this.spectralExtractor.analyze(spectrum.linear).then(se => {
-              se.peaks.frequencies.forEach(peak => {
-                // peak is in Hz, convert to log position
-                const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) // select next bin
-                const xpos = xbin / this.quantizedFFT.length
-                const o = new Line('red', 2, xpos, true)
-                this.infoPanel.add(o)
-                this.sampleON = true
-              })
-              this.infoPanel.redraw()
             })
+
+            this.spectralExtractor.analyze(spectrum.linear).then(se => {
+              this.spectralAnalysis = se;
+              this.drawSpectrum();
+            });
+            
+            
           }
           )
         }
       })
     }
 
-    redraw () {
+
+    drawSpectrum() {
+      this.mainPanel.reset()
+      this.infoPanel.reset()
+      this.filteredFFT = this.originalFFT.filter(x => x.frequency < this.freqRange[1]) // linear works, checked with Matlab
+      if(!this.log) {
+          this.filteredFFT = this.filteredFFT.filter(x => x.frequency > this.freqRange[0]) 
+      }
+      let spectra = new Spectra(this.filteredFFT,this.freqRange[0],this.log)
+      this.mainPanel.add(spectra)
+      let axis = new Axis(this.textFreq, this.graphicFreq, this.filteredFFT, this.freqRange[1], this.freqRange[0], this.log)
+      this.mainPanel.add(axis)
+      this.mainPanel.redraw()
+
+      this.spectralAnalysis.peaks.frequencies.forEach(peak => {
+        // peak is in Hz, convert to log position
+        const start =  this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0]) // select next bin
+        const xbin = this.filteredFFT.findIndex(x => x.frequency > peak)
+        const xpos = xbin / this.filteredFFT.length
+        if(this.log) { 
+          const o = new Line('red', 2, xpos, true,start,this.filteredFFT.length)
+          this.infoPanel.add(o)
+        } else {
+          const o = new Line('red', 2, xpos, true)
+          this.infoPanel.add(o)
+        }
+        
+        this.sampleON = true
+      })
       this.infoPanel.redraw()
     }
 
@@ -131,17 +183,21 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.xpos = e.offsetX
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
-        let idx = Math.ceil(e.offsetX / this.canvashov.offsetWidth * this.quantizedFFT.length)
-        // console.log('canvas width: ' + this.canvashov.offsetWidth + ' mouse:' + e.offsetX + ' id:' + idx)
-        let f = this.quantizedFFT[idx].frequency
+
+        const start =  this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0])
+        const sizing = virtualCanvas(this.canvashov.width,start,this.filteredFFT.length)
+
+        //Inversion of line.ts:35
+        let f = Math.exp((e.offsetX - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate /2 )
+
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
 
-        this.redraw()
+        this.infoPanel.redraw()
       }
     }
     hide () {
       this.freqBox.visible = false
-      this.redraw()
+      this.infoPanel.redraw()
     }
 }
 </script>
