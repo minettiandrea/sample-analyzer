@@ -68,7 +68,7 @@ import { FreqBox } from '../../drawables/freqBox'
 import { Spectra } from '../../drawables/spectra'
 import { Axis } from '../../drawables/axis'
 import { Quantizer, SpectrumPoint } from '../../services/providers/quantizer'
-import { FFT } from '@/services/providers/fft'
+import { FFT, FFTResponse } from '@/services/providers/fft'
 import { Line } from '../../drawables/line'
 import { virtualCanvas } from '@/drawables/utils/logUtils'
 import { SpectralAnalisis } from '../../services/spectral-extractor/spectral-extractor'
@@ -122,12 +122,12 @@ export default class SpectrumPresenter extends Vue {
             var d = ab.getChannelData(j)
             data.map((a, b) => (a + d[b]) / i)
           }
-          this.fft.of(data).then((spectrum:{log:number[], linear:number[]}) => {
-            this.originalFFT = spectrum.linear.map((x, i) => {
-              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2) / spectrum.linear.length) }
+          this.fft.of(data).then((spectrum:FFTResponse) => {
+            this.originalFFT = spectrum.full.map((x, i) => {
+              return { magnitude: x, frequency: i * ((this.sample.sampleRate / 2) / spectrum.full.length) }
             })
 
-            this.spectralExtractor.analyze(spectrum.linear).then(se => {
+            this.spectralExtractor.analyze(spectrum.subsampled).then(se => {
               this.store.addSpectralPeaks(se.peaks.frequencies)
               this.spectralAnalysis = se;
               this.drawSpectrum();

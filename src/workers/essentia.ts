@@ -44,14 +44,12 @@ function handleSpectrum (msg:EssentiaMessage) {
   const FRAME_SIZE = 4096
   const spectrumResult = essentia.vectorToArray(result.spectrum)
   let subsampled:number[] = []
-  const divider = spectrumResult.length / 2048
+  const divider = spectrumResult.length / FRAME_SIZE
   spectrumResult.forEach((el:number, i:number) => {
     subsampled[Math.floor(i / divider)] = subsampled[Math.floor(i / divider)] ? subsampled[Math.floor(i / divider)] + el : el
   })
   subsampled = subsampled.map(x => x / Math.floor(divider))
-  // subsampled = spectrumResult
-  // let logresult = essentia.LogSpectrum(essentia.arrayToVector(subsampled))
-  let replyMsg:FFTResponse = { log: [], linear: Array.from(subsampled) }
+  let replyMsg:FFTResponse = { full: Array.from(spectrumResult), subsampled: Array.from(subsampled) }
   const reply = msg.reply(replyMsg)
   ctx.postMessage(reply)
 }

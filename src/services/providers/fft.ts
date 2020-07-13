@@ -8,8 +8,8 @@ export interface FFT{
 }
 
 export interface FFTResponse{
-  log:number[];
-  linear:number[];
+  full:number[];
+  subsampled:number[];
 }
 
 @injectable()
