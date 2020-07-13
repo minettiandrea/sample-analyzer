@@ -23,6 +23,8 @@ export interface Store{
     sampleExamples():Example[]
     getPolyLine ():Observable<number[] | null>
     addPolyLine (number:number[]):void
+    getSpectralPeaks ():Observable<number[] | null>
+    addSpectralPeaks (number:number[]):void
 }
 
 export interface PlayingEvent{
@@ -45,6 +47,7 @@ export class StoreImpl implements Store {
     protected _skipped:BehaviorSubject<number | null> = new BehaviorSubject<number | null>(null);
 
     private _polyAdded = new BehaviorSubject<number[] | null>(null);
+    private _spectralpeaks = new BehaviorSubject<number[] | null>(null)
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -104,6 +107,9 @@ export class StoreImpl implements Store {
 
     getPolyLine ():Observable<number[] | null> { return this._polyAdded }
     addPolyLine (n : number[]) { this._polyAdded.next(n) }
+
+    getSpectralPeaks ():Observable<number[] | null> { return this._spectralpeaks }
+    addSpectralPeaks (n : number[]) { this._spectralpeaks.next(n) }
 }
 
 @injectable()

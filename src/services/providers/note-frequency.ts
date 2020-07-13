@@ -8,18 +8,31 @@ export interface NoteWeigth{
 
 export interface NoteFrequencyProvider {
     allNotes():Note[];
-
-    spectrumQuantize(fs: number, fft: number[]):NoteWeigth[];
+    freqToNote(f:number):String;
 }
 
 @injectable()
 export class NoteFrequencyProviderImpl implements NoteFrequencyProvider {
   private f0 = 440;
+  private NOTE = ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#']
+
   private minNote = -60 // correspond to 13.75 Hz
   private maxNote = 65 // 19 ~kHz
 
   private noteFrequency (step:number):number {
     return this.f0 * Math.pow(2, step / 12)
+  }
+
+  freqToNote (freq:number):String {
+    let deltacents = Math.floor(1200 * Math.log(freq / this.f0) / Math.log(2)) // cents formula
+    let deltanote = Math.floor(deltacents / 100) // 100 cents = 1 semitone
+    if (deltanote % 100 > 50) { deltanote++ }
+
+    let note = deltanote + 48 // count semitones starting from c0 - 16.35Hz
+    let octave = Math.ceil(note / 12)
+
+    let idx = (note + 1) % 12
+    return (this.NOTE[idx] + octave.toString())
   }
 
   allNotes () {
@@ -32,28 +45,5 @@ export class NoteFrequencyProviderImpl implements NoteFrequencyProvider {
       })
     }
     return notes
-  }
-
-  spectrumQuantize (fs:number, fft: number[]): NoteWeigth[] {
-    let notes = this.allNotes()
-    let fStep = fs / fft.length
-    let quantization = []
-
-    for (let note = 1; note < notes.length - 1; note++) {
-      let lowerBound = (notes[note - 1].frequency + notes[note].frequency) / 2
-      let upperBound = (notes[note + 1].frequency + notes[note].frequency) / 2
-      quantization[note] = {
-        note: notes[note],
-        magnitude: 0
-      }
-
-      for (let j = 0; j < fs / 2; j++) {
-        let frequency = j * fStep
-        if (frequency >= lowerBound && frequency < upperBound) {
-          quantization[note].magnitude += fft[j]
-        }
-      }
-    }
-    return quantization
   }
 }

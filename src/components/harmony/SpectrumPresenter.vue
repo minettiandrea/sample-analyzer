@@ -31,10 +31,11 @@ import { Axis } from '../../drawables/axis'
 import { Quantizer, SpectrumPoint } from '../../services/providers/quantizer'
 import { FFT } from '@/services/providers/fft'
 import { Line } from '../../drawables/line'
+import { NoteFrequencyProvider } from '../../services/providers/note-frequency'
 
 @Component
 export default class SpectrumPresenter extends Vue {
-    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor;
+    @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
     @inject(REGISTRY.Quantizer) quantizer:Quantizer
@@ -99,6 +100,7 @@ export default class SpectrumPresenter extends Vue {
 
             // if spectrum has been computed, analyze it
             this.spectralExtractor.analyze(spectrum.linear).then(se => {
+              this.store.addSpectralPeaks(se.peaks.frequencies)
               se.peaks.frequencies.forEach(peak => {
                 // peak is in Hz, convert to log position
                 const xbin = this.quantizedFFT.findIndex(x => x.frequency > peak) // select next bin
