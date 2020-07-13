@@ -3,6 +3,7 @@
     <v-row align='center' justify='center'>
 
     <v-card class="mx-auto col-10 mb-5 center">
+      <h2>Spectrum</h2>
         <div class='wrapper'
           ref='wrapper-spectrum'
           @mouseover="hover = true"
@@ -104,13 +105,10 @@ export default class SpectrumPresenter extends Vue {
     mounted () {
       this.mainPanel = this.drawtoolkit.setUp(this.canvasspec, 1)
       this.infoPanel = this.drawtoolkit.setUp(this.canvashov, 0.5)
+      this.mouseHandler()
 
       this.store.sample().subscribe(ab => {
         if (ab) {
-          
-          this.freqBox = new FreqBox('', '', 0, 0, false)
-          this.infoPanel.add(this.freqBox)
-          this.mouseHandler()
 
           this.maxFreq = ab.sampleRate / 2;
           this.freqRange = [40,this.maxFreq]
@@ -144,6 +142,11 @@ export default class SpectrumPresenter extends Vue {
     drawSpectrum() {
       this.mainPanel.reset()
       this.infoPanel.reset()
+
+      this.freqBox = new FreqBox('', '', 0, 0, false)
+      this.infoPanel.add(this.freqBox)
+
+
       this.filteredFFT = this.originalFFT.filter(x => x.frequency < this.freqRange[1]) // linear works, checked with Matlab
       if(!this.log) {
           this.filteredFFT = this.filteredFFT.filter(x => x.frequency > this.freqRange[0]) 
