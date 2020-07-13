@@ -38,7 +38,7 @@ export default class HPCPPresenter extends Vue  {
                         labels: ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'],
                         datasets: [{
                             label: 'Note',
-                            data: hcpc,
+                            data: hcpc || [],
                             backgroundColor: 'rgba(54, 162, 235, 0.2)',
                             borderColor: 'rgba(54, 162, 235, 1)',
                             borderWidth: 1
