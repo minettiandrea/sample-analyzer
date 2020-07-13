@@ -178,7 +178,7 @@ export default class SpectrumPresenter extends Vue {
 
     onMouseMove (e: MouseEvent) {
       if (this.freqBox && this.hover && this.sampleON) {
-        this.freqBox.xpos = e.offsetX
+        this.freqBox.xpos = e.offsetX * this.canvashov.width / this.canvashov.offsetWidth
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
 
@@ -186,7 +186,7 @@ export default class SpectrumPresenter extends Vue {
         const sizing = virtualCanvas(this.canvashov.width,start,this.filteredFFT.length)
 
         //Inversion of line.ts:35
-        let f = Math.exp((e.offsetX - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate /2 )
+        let f = Math.exp((this.freqBox.xpos - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate /2 )
 
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
 
