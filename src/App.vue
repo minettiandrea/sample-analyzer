@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire">
-    <loading :active.sync="isLoading" 
-        :can-cancel="false" 
+    <loading :active.sync="isLoading"
+        :can-cancel="false"
         :is-full-page="true"></loading>
 
     <v-navigation-drawer v-model="drawer" app clipped>
@@ -45,8 +45,8 @@ import SampleLoader from './components/sidebar/SampleLoader.vue'
 import HarmonicStructure from './components/harmony/HarmonicStructure.vue'
 import RhythmicStructure from './components/rhythm/RhythmicStructure.vue'
 // @ts-ignore
-import Loading from 'vue-loading-overlay';
-import 'vue-loading-overlay/dist/vue-loading.css';
+import Loading from 'vue-loading-overlay'
+import 'vue-loading-overlay/dist/vue-loading.css'
 import { inject } from 'inversify-props'
 import { REGISTRY } from './ioc/registry'
 import { Store } from './services/store/store'
@@ -60,7 +60,6 @@ import { Store } from './services/store/store'
   }
 })
 export default class App extends Vue {
-
   @inject(REGISTRY.Store) store:Store
 
   created () {}
@@ -70,14 +69,14 @@ export default class App extends Vue {
 
   @Prop(String) source: string;
 
-  mounted() {
+  mounted () {
     this.store.loading().subscribe(x => this.isLoading = x)
   }
 
   data () {
     return {
       currentTab: 'Harmony',
-      tabs: ['Harmony', 'Rhthym']
+      tabs: ['Harmony', 'Rhythm']
     }
   }
   computed () {}

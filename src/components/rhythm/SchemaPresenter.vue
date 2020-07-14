@@ -34,20 +34,20 @@ export default class SchemaPresenter extends Vue {
   notes: any[] = [];
   tuplets : any[] = []
   renderer:Vex.Flow.Renderer;
-  cvs:Vex.IRenderContext
+  ctx:Vex.IRenderContext
   polystave:Vex.Flow.Stave
 
   mounted () {
-    this.cvs = this.freshSVG()
+    this.ctx = this.freshSVG()
     this.store.timeAnalysis().subscribe(ta => {
       if (ta) {
         this.notes = [QuarterRythm] // clear notes with just initial beat
-        this.cvs.clear()
+        this.ctx.clear()
         this.renderer.getContext().clear()
         this.peaks = ta.peaks
         this.peaks.forEach(() => this.notes.push(QuarterRythm))
 
-        this.drawRhythm(this.renderer.getContext(), this.notes, 10)
+        this.drawRhythm(this.renderer.getContext(), this.notes, 10, this.r1.toString())
       }
     })
   }
@@ -61,12 +61,12 @@ export default class SchemaPresenter extends Vue {
     return this.renderer.getContext()
   }
 
-  private drawRhythm (ctx:Vex.IRenderContext, notes:any[], height:number) {
+  private drawRhythm (ctx:Vex.IRenderContext, notes:any[], height:number, signature:string) {
     const bars = this.splitBars(notes)
     const width = 400
     bars.forEach((bar, i) => {
       if (i === 0) {
-        this.drawBar(bar, 10, height, ctx, stave => stave.addClef('percussion').addTimeSignature(this.r1.toString() + '/' + this.r1.toString()))
+        this.drawBar(bar, 10, height, ctx, stave => stave.addClef('percussion').addTimeSignature(signature + '/' + 4))
       } else if (i === (bars.length - 1)) {
         this.drawBar(bar, i * width + 10, height, ctx, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
       } else {
@@ -75,20 +75,6 @@ export default class SchemaPresenter extends Vue {
     })
 
     this.drawBar([], 410, height, ctx)
-  }
-
-  private createPoly () { // create polyrhythmic tuplets
-    let lng = this.notes.length
-    let poly = this.r2
-    let i = 0
-    for (i; i < lng; i += poly) {
-      let t = new Vex.Flow.Tuplet(this.notes.slice(i, i + poly - 1))
-      this.tuplets.push(t)
-    }
-    // at the end of the cycle i is equal to the rest of the division
-    for (i; i < lng; i++) {
-      this.tuplets.push(QuarterRythm)
-    }
   }
 
   private drawPoly () {
@@ -103,7 +89,7 @@ export default class SchemaPresenter extends Vue {
       idx++
     }
     this.store.addPolyLine(array)
-    this.createPoly()
+    this.drawRhythm(this.ctx, this.notes, 120, this.r2.toString())
   }
 
   private splitBars (notes:NoteElement[]):NoteElement[][] {
