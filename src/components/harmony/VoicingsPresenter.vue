@@ -37,7 +37,8 @@ export default class VoicingsPresenter extends Vue {
   @Ref('scorevoice') scorev:HTMLDivElement
   public renderer:Vex.Flow.Renderer
   public voicings:VoicingDefinition[] = []
-  public voicingsRender:Vex.Flow.StaveNote[] = []
+  public rhRender:Vex.Flow.StaveNote[] = [] // right hand voicing
+  public lhRender:Vex.Flow.StaveNote[] = [] // left hand voicing
   public CENTRAL_NOTE = 0
   public DEFAULT_OCTAVE = 4
   private TREBLE:Vex.Flow.Stave
@@ -100,32 +101,40 @@ export default class VoicingsPresenter extends Vue {
         notestr.push(this.toNote(note))
       }) // once got the names of the note in an array of strings add the stavenote object to an array
       let c = new Vex.Flow.StaveNote({ clef: 'treble',
-        keys: [notestr[0], notestr[1], notestr[2], notestr[3]],
-        duration: 'q' })
-      this.voicingsRender.push(c)
+        keys: [notestr[1], notestr[2], notestr[3]],
+        duration: '1' })
+      this.rhRender.push(c)
+      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'alto', keys: [notestr[0]], duration: '1' }))
     })
   }
 
   private drawChords () {
     // Create a voice in free mode and add the notes from above
-    var voice = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2)
-    voice.addTickables(this.voicingsRender)
+    let voiceT = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2)
+    voiceT.addTickables(this.rhRender)
+    let voiceA = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2)
+    voiceA.addTickables(this.lhRender)
 
     // Format and justify the notes to 400 pixels.
-    var formatter = new Vex.Flow.Formatter().joinVoices([voice]).format([voice], 400)
+    var formatter = new Vex.Flow.Formatter().joinVoices([voiceT]).format([voiceT, voiceA], 400)
 
     // Render voice
-    voice.draw(this.ctx, this.TREBLE)
+    voiceA.draw(this.ctx, this.ALTO)
+    voiceT.draw(this.ctx, this.TREBLE)
   }
 
   private freshSVG () {
     this.ctx = this.renderer.getContext()
-    this.TREBLE = new Vex.Flow.Stave(10, 40, 600)
+    this.TREBLE = new Vex.Flow.Stave(25, 0, 600)
     this.TREBLE.addClef('treble')
     this.TREBLE.setContext(this.ctx).draw()
-    this.ALTO = new Vex.Flow.Stave(10, 120, 600)
+    this.ALTO = new Vex.Flow.Stave(25, 120, 600)
     this.ALTO.addClef('alto')
     this.ALTO.setContext(this.ctx).draw()
+
+    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(3).setContext(this.ctx).draw() // 3 = brace
+    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(1).setContext(this.ctx).draw()
+    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(6).setContext(this.ctx).draw()
 
     return this.renderer.getContext()
   }
@@ -133,7 +142,8 @@ export default class VoicingsPresenter extends Vue {
   private redrawStave () {
     this.renderer.getContext().clear()
     this.freshSVG()
-    this.voicingsRender = []
+    this.rhRender = []
+    this.lhRender = []
 
     this.createChords()
     this.drawChords()
