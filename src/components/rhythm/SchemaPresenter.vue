@@ -32,8 +32,10 @@ export default class SchemaPresenter extends Vue {
   r2 :number = 4;
   peaks:number[] = [];
   notes: any[] = [];
+  tuplets : any[] = []
   renderer:Vex.Flow.Renderer;
-  cvs:any
+  cvs:Vex.IRenderContext
+  polystave:Vex.Flow.Stave
 
   mounted () {
     this.cvs = this.freshSVG()
@@ -45,7 +47,7 @@ export default class SchemaPresenter extends Vue {
         this.peaks = ta.peaks
         this.peaks.forEach(() => this.notes.push(QuarterRythm))
 
-        this.drawRhythm(this.renderer.getContext())
+        this.drawRhythm(this.renderer.getContext(), this.notes, 10)
       }
     })
   }
@@ -53,33 +55,40 @@ export default class SchemaPresenter extends Vue {
   private freshSVG () {
     let renderers = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
     this.renderer = renderers
-
     // Size our svg:
     this.renderer.resize(1400, 300)
-
     // And get a drawing context:
     return this.renderer.getContext()
   }
 
-  private drawRhythm (ctx:Vex.IRenderContext) {
-    const bars = this.splitBars(this.notes)
+  private drawRhythm (ctx:Vex.IRenderContext, notes:any[], height:number) {
+    const bars = this.splitBars(notes)
     const width = 400
     bars.forEach((bar, i) => {
       if (i === 0) {
-        this.drawBar(bar, 10, ctx, stave => stave.addClef('percussion').addTimeSignature(this.r1.toString() + '/' + this.r2.toString()))
+        this.drawBar(bar, 10, height, ctx, stave => stave.addClef('percussion').addTimeSignature(this.r1.toString() + '/' + this.r1.toString()))
       } else if (i === (bars.length - 1)) {
-        this.drawBar(bar, i * width + 10, ctx, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
+        this.drawBar(bar, i * width + 10, height, ctx, stave => stave.setEndBarType(Vex.Flow.Barline.type.END))
       } else {
-        this.drawBar(bar, i * width + 10, ctx)
+        this.drawBar(bar, i * width + 10, height, ctx)
       }
     })
 
-    this.drawBar([], 410, ctx)
+    this.drawBar([], 410, height, ctx)
   }
 
-  private addPoly () {
-    let polystev = new Vex.Flow.Stave(10, 120, 800)
-    polystev.addClef('percussion')
+  private createPoly () { // create polyrhythmic tuplets
+    let lng = this.notes.length
+    let poly = this.r2
+    let i = 0
+    for (i; i < lng; i += poly) {
+      let t = new Vex.Flow.Tuplet(this.notes.slice(i, i + poly - 1))
+      this.tuplets.push(t)
+    }
+    // at the end of the cycle i is equal to the rest of the division
+    for (i; i < lng; i++) {
+      this.tuplets.push(QuarterRythm)
+    }
   }
 
   private drawPoly () {
@@ -88,12 +97,13 @@ export default class SchemaPresenter extends Vue {
     let subd = beat / this.r2
     let idx = 0
     let array = []
-    let delta4 = this.peaks[1] - this.peaks[0] // separation between beats in a 4:4 time signature
+    let delta4 = this.peaks[1] - this.peaks[0] // separation between beats in any time signature
     while (idx * subd <= delta4 * (lng)) {
       array.push(idx * subd)
       idx++
     }
     this.store.addPolyLine(array)
+    this.createPoly()
   }
 
   private splitBars (notes:NoteElement[]):NoteElement[][] {
@@ -116,14 +126,13 @@ export default class SchemaPresenter extends Vue {
     }
   }
 
-  private drawBar (notes:NoteElement[], left:number, context: Vex.IRenderContext, modifier: (stave:Vex.Flow.Stave) => void = (() => {})):void {
-    var stave = new Vex.Flow.Stave(left, 40, 400).setConfigForLines(
+  private drawBar (notes:NoteElement[], left:number, height:number, context: Vex.IRenderContext, modifier: (stave:Vex.Flow.Stave) => void = (() => {})):void {
+    var stave = new Vex.Flow.Stave(left, height, 400).setConfigForLines(
       [false, false, true, false, false].map(function (visible) {
         return { visible: visible }
       }))
 
     modifier(stave)
-
     // Connect it to the rendering context and draw!
     stave.setContext(context).draw()
 

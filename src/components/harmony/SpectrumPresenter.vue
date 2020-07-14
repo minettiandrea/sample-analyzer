@@ -72,11 +72,10 @@ import { SpectrumPoint } from '../../services/providers/quantizer'
 import { Line } from '../../drawables/line'
 import { virtualCanvas } from '@/drawables/utils/logUtils'
 import { SpectralAnalisis } from '../../services/spectral-extractor/spectral-extractor'
-import { find } from 'rxjs/operators';
+import { find } from 'rxjs/operators'
 
 @Component
 export default class SpectrumPresenter extends Vue {
-    
     @inject(REGISTRY.Store) store:Store
     @inject(REGISTRY.DrawToolkit) drawtoolkit:DrawToolkit
     @Ref('spectrum') readonly canvasspec!: HTMLCanvasElement
@@ -97,7 +96,7 @@ export default class SpectrumPresenter extends Vue {
     private sampleON:boolean = false // manage mousehover when sample is still loading/offline/not loaded yet
     private minFreq:number = 20
     private maxFreq:number = 20000
-    private freqRange:number[] = [40,10000]
+    private freqRange:number[] = [40, 10000]
     private log:boolean = true
 
     mounted () {
@@ -110,42 +109,37 @@ export default class SpectrumPresenter extends Vue {
           this.mainPanel.reset()
           this.infoPanel.reset()
 
-          this.maxFreq = ab.sampleRate / 2;
-          this.freqRange = [40,this.maxFreq]
+          this.maxFreq = ab.sampleRate / 2
+          this.freqRange = [40, this.maxFreq]
           this.sample = ab
 
-          this.store.getFFT().pipe(find(x => x != null )).subscribe(fft => {
-
-            if(fft) {
+          this.store.getFFT().pipe(find(x => x != null)).subscribe(fft => {
+            if (fft) {
               this.originalFFT = fft
               this.store.getSpectralPeaks().pipe(find(x => x != null)).subscribe(sp => {
-                if(sp) {
+                if (sp) {
                   this.spectralPeaks = sp
-                  this.drawSpectrum();
+                  this.drawSpectrum()
                 }
               })
             }
           })
-
         }
       })
-
     }
 
-
-    drawSpectrum() {
+    drawSpectrum () {
       this.mainPanel.reset()
       this.infoPanel.reset()
 
       this.freqBox = new FreqBox('', '', 0, 0, false)
       this.infoPanel.add(this.freqBox)
 
-
       this.filteredFFT = this.originalFFT.filter(x => x.frequency < this.freqRange[1]) // linear works, checked with Matlab
-      if(!this.log) {
-          this.filteredFFT = this.filteredFFT.filter(x => x.frequency > this.freqRange[0]) 
+      if (!this.log) {
+        this.filteredFFT = this.filteredFFT.filter(x => x.frequency > this.freqRange[0])
       }
-      let spectra = new Spectra(this.filteredFFT,this.freqRange[0],this.log)
+      let spectra = new Spectra(this.filteredFFT, this.freqRange[0], this.log)
       this.mainPanel.add(spectra)
       let axis = new Axis(this.textFreq, this.graphicFreq, this.filteredFFT, this.freqRange[1], this.freqRange[0], this.log)
       this.mainPanel.add(axis)
@@ -153,17 +147,17 @@ export default class SpectrumPresenter extends Vue {
 
       this.spectralPeaks.forEach(peak => {
         // peak is in Hz, convert to log position
-        const start =  this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0]) // select next bin
+        const start = this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0]) // select next bin
         const xbin = this.filteredFFT.findIndex(x => x.frequency > peak)
         const xpos = xbin / this.filteredFFT.length
-        if(this.log) { 
-          const o = new Line('red', 2, xpos, true,start,this.filteredFFT.length)
+        if (this.log) {
+          const o = new Line('red', 2, xpos, true, start, this.filteredFFT.length)
           this.infoPanel.add(o)
         } else {
           const o = new Line('red', 2, xpos, true)
           this.infoPanel.add(o)
         }
-        
+
         this.sampleON = true
       })
       this.infoPanel.redraw()
@@ -182,11 +176,11 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
 
-        const start =  this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0])
-        const sizing = virtualCanvas(this.canvashov.width,start,this.filteredFFT.length)
+        const start = this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0])
+        const sizing = virtualCanvas(this.canvashov.width, start, this.filteredFFT.length)
 
-        //Inversion of line.ts:35
-        let f = Math.exp((this.freqBox.xpos - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate /2 )
+        // Inversion of line.ts:35
+        let f = Math.exp((this.freqBox.xpos - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate / 2)
 
         this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
 
@@ -194,7 +188,7 @@ export default class SpectrumPresenter extends Vue {
       }
     }
     hide () {
-      if(this.freqBox) {
+      if (this.freqBox) {
         this.freqBox.visible = false
         this.infoPanel.redraw()
       }
