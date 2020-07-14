@@ -42,7 +42,7 @@ export default class VoicingsPresenter extends Vue {
   public CENTRAL_NOTE = 0
   public DEFAULT_OCTAVE = 4
   private TREBLE:Vex.Flow.Stave
-  private ALTO:Vex.Flow.Stave
+  private BASS:Vex.Flow.Stave
   private ctx:Vex.IRenderContext
 
   private SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -94,6 +94,7 @@ export default class VoicingsPresenter extends Vue {
 
   private createChords () { // all the notes within the chord in semitone distances
     let chords = this.voicings.map(a => a.chord)
+    console.log(chords)
     chords.forEach(chord => { // for each chord
       let notestr:string[] = []
 
@@ -104,7 +105,7 @@ export default class VoicingsPresenter extends Vue {
         keys: [notestr[1], notestr[2], notestr[3]],
         duration: '1' })
       this.rhRender.push(c)
-      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'alto', keys: [notestr[0]], duration: '1' }))
+      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [notestr[0]], duration: '1' }))
     })
   }
 
@@ -119,7 +120,7 @@ export default class VoicingsPresenter extends Vue {
     var formatter = new Vex.Flow.Formatter().joinVoices([voiceT]).format([voiceT, voiceA], 400)
 
     // Render voice
-    voiceA.draw(this.ctx, this.ALTO)
+    voiceA.draw(this.ctx, this.BASS)
     voiceT.draw(this.ctx, this.TREBLE)
   }
 
@@ -128,13 +129,13 @@ export default class VoicingsPresenter extends Vue {
     this.TREBLE = new Vex.Flow.Stave(25, 0, 600)
     this.TREBLE.addClef('treble')
     this.TREBLE.setContext(this.ctx).draw()
-    this.ALTO = new Vex.Flow.Stave(25, 120, 600)
-    this.ALTO.addClef('alto')
-    this.ALTO.setContext(this.ctx).draw()
+    this.BASS = new Vex.Flow.Stave(25, 120, 600)
+    this.BASS.addClef('bass')
+    this.BASS.setContext(this.ctx).draw()
 
-    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(3).setContext(this.ctx).draw() // 3 = brace
-    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(1).setContext(this.ctx).draw()
-    new Vex.Flow.StaveConnector(this.TREBLE, this.ALTO).setType(6).setContext(this.ctx).draw()
+    new Vex.Flow.StaveConnector(this.TREBLE, this.BASS).setType(3).setContext(this.ctx).draw() // 3 = brace
+    new Vex.Flow.StaveConnector(this.TREBLE, this.BASS).setType(1).setContext(this.ctx).draw()
+    new Vex.Flow.StaveConnector(this.TREBLE, this.BASS).setType(6).setContext(this.ctx).draw()
 
     return this.renderer.getContext()
   }
