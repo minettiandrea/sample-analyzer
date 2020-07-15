@@ -24,6 +24,8 @@ A peak detection algorithm also tries to predict the pitch of the sample and plo
 
 ### HPCP
 Harmonic Pitch Class Profile (HPCP) is mostly used to detect the harmonic evolution in time of a polyphonic signal, mainly in chord detection systems. In our case, we considered the coefficients for representing the contribution of each semitone to the total sound. We plotted it in a bar chart using chart.js
+![hpcp](/screenshots/hpcp.png)
+
 
 ### Overtones presenter
 Vexflow is a powerful library for music notation. We converted the frequency maxima found in the spectrum into musical notes and reported them onto a three stacks stave ranging into three clefs: bass, alto and treble.
