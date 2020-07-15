@@ -19,9 +19,9 @@ The project exploits Typescript language, using the Vue framework.
 
 * [RxJS](https://rxjs-dev.firebaseapp.com/)​ Reactive programming using Observables for asynchronous calls.​
 
-​* [Chart.js](https://www.chartjs.org/)​ Open source library for plotting charts.​
+* [Chart.js](https://www.chartjs.org/)​ Open source library for plotting charts.​
 
-​* [Essentia.js](https://mtg.github.io/essentia.js/) Open source library developed by MTG, with state-of-the-art algorithms written in C++.
+* [Essentia.js](https://mtg.github.io/essentia.js/) Open source library developed by MTG, with state-of-the-art algorithms written in C++.
 
 ## GUI
 
