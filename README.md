@@ -3,12 +3,14 @@
 This joint-project was developed for the Advanced Coding Tools & Methodologies and Computer Music- Representation and Models courses at the Politecnico of Milan.
 
 ## Introduction
+
 When we were thinking about an idea for this project, we first asked ourselves "what could help producers or musicians?" and we came up with this: a smart system for dealing with samples.
 We started from the idea that, even tidy people, will have loads of samples but no chance to filter them. The first approach was working with big datasets locally, but this wasn't the best option to implement on a web-based application. 
 We therefore moved to a sample analyzer, that could allow the user to upload a sample and look for some useful information.
 
 ## Tools
-The project exploits Typescript language, using the Vue framework. 
+
+The project exploits Typescript language, using the Vue framework.
 
 * ![Vexflow](https://github.com/0xfe/vexflow) API to render music notations, sheets, guitar tabs.​
 
@@ -23,7 +25,8 @@ The project exploits Typescript language, using the Vue framework.
 
 ## GUI
 
-The interface is divided into two main tabs, one for rhythmical analysis and one for harmonic analysis.
+We used canvas for all the interactive graphs, such as waveform and spectrum.
+The main interface is divided into two main tabs, one for rhythmical analysis and one for harmonic analysis.
 In the sidebar, a sample loader is provided with a few offline examples (two drum breaks and two one-shot samples).
 The user will have to decided what to do with the sample. Obviously looking for chord suggestion when a kick drum sample has been loaded will lead to some strange results.
 
