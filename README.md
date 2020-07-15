@@ -48,13 +48,13 @@ Harmonic Pitch Class Profile (HPCP) is mostly used to detect the harmonic evolut
 Vexflow is a powerful library for music notation. We converted the frequency maxima found in the spectrum into musical notes and reported them onto a three stacks stave ranging into three clefs: bass, alto and treble.
 ![spectrum](/screenshots/overtones.png)
 
-
 ### Voicing suggestion
 
-Voicings is the art of creating chords. 
+Voicings is the art of creating chords.
 Why should a keyboard player choose a chord over another? There are many reasons. The melodic direction of the piece, the personal taste, the music ensemble he's playing with (leave the space for the bass and avoid bass notes for example).
 We created a simple engine based not on this factors but only on the harmonic content of the sample. This process is done for major, minor and dominant chords.
 The resulting chords are then plotted again on a stave using VexFlow.
+![voicing](/screenshots/voicing.png)
 
 ## Rhythmic analysis
 
