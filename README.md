@@ -27,10 +27,20 @@ Harmonic Pitch Class Profile (HPCP) is mostly used to detect the harmonic evolut
 
 ### Overtones presenter
 Vexflow is a powerful library for music notation. We converted the frequency maxima found in the spectrum into musical notes and reported them onto a three stacks stave ranging into three clefs: bass, alto and treble.
-![overtones](/screenshots/overtones.png)
 
-## Voicing suggestion
+### Voicing suggestion
 Voicings is the art of creating chords. 
 Why a keyboard player should choose a chord over another? There are many reasons. The melodic direction of the piece, the personal taste, the music ensemble he's playing with (leave the space for the bass and avoid bass notes for example).
 We created a simple engine based not on this factors but only on the harmonic content of the sample. This process is done for major, minor and dominant chords.
 The resulting chords are then plotted again on a stave using VexFlow.
+
+## Rhythmic analysis
+
+### Audio player
+Whenever we deal with a sample, we might want to listen to it. We provide an audio player with the possibility to move all around the sample.
+
+## Beat detection && polyrhythms
+The green lines that you can see above are the result of a beat tracking algorithm. A visual help to detect nested rhythms is provided as well. 
+Through a simple form, the user can select a subdivisions (4 against 3 - where 4 is the main pattern and 3 is the nested rhythm).
+Yellow lines will subdivided the beat to help the user visually detect if a polyrhythm is present or not.
+![overtones](/screenshots/poly.png)
