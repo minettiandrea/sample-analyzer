@@ -176,13 +176,19 @@ export default class SpectrumPresenter extends Vue {
         this.freqBox.ypos = e.offsetY
         this.freqBox.visible = true
 
-        const start = this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0])
-        const sizing = virtualCanvas(this.canvashov.width, start, this.filteredFFT.length)
+        if(this.log) {
+          const start = this.filteredFFT.findIndex(x => x.frequency > this.freqRange[0])
+          const sizing = virtualCanvas(this.canvashov.width, start, this.filteredFFT.length)
 
-        // Inversion of line.ts:35
-        let f = Math.exp((this.freqBox.xpos - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * (this.sample.sampleRate / 2)
+          // Inversion of line.ts:35
+          let f = Math.exp((this.freqBox.xpos - sizing.width - sizing.offset) * Math.log(sizing.width) / sizing.width) * this.freqRange[1]
 
-        this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
+          this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
+        } else {
+
+          let f = e.offsetX / this.canvashov.offsetWidth * (this.freqRange[1] - this.freqRange[0]) + this.freqRange[0]
+          this.freqBox.freq = f.toFixed(2).toString() + ' Hz'
+        }
 
         this.infoPanel.redraw()
       }
