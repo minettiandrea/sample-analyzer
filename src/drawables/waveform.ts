@@ -11,7 +11,7 @@ export class Waveform implements Drawable {
       ctx.translate(0, canvas.height / 2) // Set Y = 0 to be in the middle of the canvas
 
       const width = canvas.width / this.data.length
-      console.log(width)
+
       const height = canvas.height
       const padding = 10
       for (let i = 0; i < this.data.length; i++) {

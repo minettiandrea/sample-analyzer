@@ -26,7 +26,6 @@ function handleHarmony (msg:EssentiaMessage) {
   let pitch = essentia.PitchYinFFT(signal, signal.length, true) // estimate fundamental in fft domain
   let hpeaks = essentia.HarmonicPeaks(peaks.frequencies, peaks.magnitudes, pitch.pitch, 12, 0.3) // compute harmonic peaks
   let hpcp = essentia.HPCP(hpeaks.harmonicFrequencies, hpeaks.harmonicMagnitudes)
-  console.log(Array.from(essentia.vectorToArray(hpcp.hpcp)))
   const msgResponse:SpectralAnalisis = {
     peaks: {
       frequencies: Array.from(essentia.vectorToArray(hpeaks.harmonicFrequencies)),
