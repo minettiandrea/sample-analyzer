@@ -1,5 +1,5 @@
 <template>
-  <v-card class='mx-auto col-11 mt-5 space-around'>
+  <v-card class='mx-auto col-12 mt-5 space-around'>
     <v-card-title>
       <v-icon large left></v-icon>
       <span class="title font-weight-light">Suggested voicing</span>
@@ -92,6 +92,11 @@ export default class VoicingsPresenter extends Vue {
     }
   }
 
+  private hasModifier (note:number):boolean { // return a string representation of the note
+    let idx = note + this.CENTRAL_NOTE
+    return this.SCALE[mod(idx, 12)].length > 1
+  }
+
   private createChords () { // all the notes within the chord in semitone distances
     let chords = this.voicings.map(a => a.chord)
     console.log(chords)
@@ -101,9 +106,19 @@ export default class VoicingsPresenter extends Vue {
       chord.forEach(note => { // for each note within the chord
         notestr.push(this.toNote(note))
       }) // once got the names of the note in an array of strings add the stavenote object to an array
+
+      const modifiers = chord.map(this.hasModifier)
+
       let c = new Vex.Flow.StaveNote({ clef: 'treble',
-        keys: [notestr[1], notestr[2], notestr[3]],
+        keys: [...notestr.slice(1)],
         duration: '1' })
+
+      const staveNote = modifiers.slice(1).forEach((hasModifier,i) => {
+        if(hasModifier) {
+          return c.addAccidental(i,new Vex.Flow.Accidental('#'))
+        }
+      })
+      
       this.rhRender.push(c)
       this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [notestr[0]], duration: '1' }))
     })
