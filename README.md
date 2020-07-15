@@ -53,8 +53,11 @@ Yellow lines will subdivided the beat to help the user visually detect if a poly
 
 ### Alternate view of polyrhythms & BPM
 Polyrhythms can be easily represented using a rule that fits perfectly visual representation.
-To be considered such, polyrhythms shouldn't be derived one from the other. Also, don't try to use too complicated numbers... (unless you're some crazy jazz man)
+To be considered such, polyrhythms shouldn't be derived one from the other. Also, don't try to use too complicated numbers... 
+(unless you're some crazy jazz man)
+In the picture below, you can see a representation of a 5 against 4.
 ![poly2](/screenshots/poly2.png)
 
 
 ## Conclusions
+If you want to try it, we are running a github page. Click here!
