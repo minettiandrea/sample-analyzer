@@ -10,6 +10,7 @@
       <v-chip
       v-for="i in (this.r1*this.r2)"
       :key=' i'
+      color='green'
       >x</v-chip>
     </div>
 
@@ -17,7 +18,7 @@
       <v-chip
       v-for="i in (this.r1*this.r2)"
       :key='i'
-      color= ''
+      color= 'yellow'
        > x</v-chip>
     </div>
 

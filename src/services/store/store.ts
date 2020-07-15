@@ -134,7 +134,7 @@ export class StoreImpl implements Store {
         { name: 'cello', url: require('@/assets/cello.wav') },
         { name: 'drums', url: require('@/assets/drums.wav') },
         { name: 'rhodes', url: require('@/assets/rhodes.wav') },
-        { name: 'amen-break', url: require('@/assets/amen-break.wav') }
+        { name: 'amen-break', url: require('@/assets/amen.wav') }
 
       ]
     }
@@ -165,7 +165,7 @@ export class PreLoadedStore extends StoreImpl {
       const cello = require('@/assets/cello.wav')
       const drums = require('@/assets/drums.wav')
       const rhodes = require('@/assets/rhodes.wav')
-      const amen = require('@/assets/amen-break.wav')
+      const amen = require('@/assets/amen.wav')
 
       this.sampleLoader.loadFromUrl(cello).then(sample => {
         this.nextSample(sample)

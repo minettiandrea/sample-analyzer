@@ -20,59 +20,52 @@ import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { Chart } from 'chart.js'
 
-
-
 @Component
-export default class HPCPPresenter extends Vue  {
-
+export default class HPCPPresenter extends Vue {
     private chart:Chart
 
     @Ref('chart') readonly canvasChart!: HTMLCanvasElement
 
     @inject(REGISTRY.Store) store:Store
 
-    mounted() {
-
-        var ctx = this.canvasChart.getContext('2d');
-        if(ctx) {
-            this.chart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'],
-                    datasets: [{
-                        label: 'Note',
-                        data: [],
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        yAxes: [{
-                            ticks: {
-                                beginAtZero: true
-                            }
-                        }]
-                    }
+    mounted () {
+      var ctx = this.canvasChart.getContext('2d')
+      if (ctx) {
+        this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'],
+            datasets: [{
+              label: 'Note',
+              data: [],
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: {
+            scales: {
+              yAxes: [{
+                ticks: {
+                  beginAtZero: true
                 }
-            });
-        }
-
-        this.store.getHCPC().subscribe(hcpc => {
-            if(this.chart) {
-                if(this.chart.data.datasets) {
-                    this.chart.data.datasets.forEach((dataset:any) => {
-                        dataset.data = hcpc || [];
-                    });
-                    this.chart.update();
-                }
+              }]
             }
-
-
+          }
         })
-    }
+      }
 
+      this.store.getHCPC().subscribe(hcpc => {
+        if (this.chart) {
+          if (this.chart.data.datasets) {
+            this.chart.data.datasets.forEach((dataset:any) => {
+              dataset.data = hcpc || []
+            })
+            this.chart.update()
+          }
+        }
+      })
+    }
 }
 </script>
 
