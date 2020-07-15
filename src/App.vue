@@ -10,7 +10,7 @@
 
     <v-app-bar app clipped-left>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title >Sample analyzer</v-toolbar-title>
+      <v-toolbar-title >Sample analyzer <span v-if="sample">- {{sample.name}}</span></v-toolbar-title>
     </v-app-bar>
 
     <v-content>
@@ -49,7 +49,7 @@ import Loading from 'vue-loading-overlay'
 import 'vue-loading-overlay/dist/vue-loading.css'
 import { inject } from 'inversify-props'
 import { REGISTRY } from './ioc/registry'
-import { Store } from './services/store/store'
+import { Store, Sample } from './services/store/store'
 
 @Component({
   components: {
@@ -67,10 +67,13 @@ export default class App extends Vue {
   drawer = false;
   isLoading = true;
 
+  sample:Sample | null = null;
+
   @Prop(String) source: string;
 
   mounted () {
     this.store.loading().subscribe(x => this.isLoading = x)
+    this.store.sample().subscribe(s => this.sample = s)
   }
 
   data () {

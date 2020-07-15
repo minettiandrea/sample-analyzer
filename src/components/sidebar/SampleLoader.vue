@@ -7,12 +7,12 @@
     <v-card-text>
       <v-file-input @change="load" label="File input"></v-file-input>
 
-      <v-list>
+      <v-list :flat="true">
       <v-subheader>EXAMPLES</v-subheader>
-      <v-list-item-group color="primary">
+      <v-list-item-group color="primary" v-model="sample.name">
         <v-list-item
-          v-for="(item, i) in examples"
-          :key="i"
+          v-for="item in examples"
+          :key="item.name"
         >
           <v-list-item-content>
             <v-list-item-title v-text="item.name" v-on:click="selectSample(item)"></v-list-item-title>
@@ -31,7 +31,7 @@ import { Component } from 'vue-property-decorator'
 import { REGISTRY } from '../../ioc/registry'
 import { inject } from 'inversify-props'
 import { SampleLoaderService } from '../../services/sample-loader/sample-loader'
-import { Store, Example } from '@/services/store/store'
+import { Store, Example, Sample } from '@/services/store/store'
 
 @Component
 export default class SampleLoader extends Vue {
@@ -40,17 +40,27 @@ export default class SampleLoader extends Vue {
 
   examples = this.store.sampleExamples()
 
+  sample:Sample = {buffer: this.sampleLoader.emptyBuffer(), name: ''}
+
+  mounted() {
+    this.store.sample().subscribe(s => {
+      if(s) {
+        this.sample = s
+      }
+    })
+  }
+
   selectSample (s:Example) {
     this.store.setLoading()
     this.sampleLoader.loadFromUrl(s.url).then(ab => {
-      this.store.nextSample(ab)
+      this.store.nextSample({buffer: ab, name: s.name})
     })
   }
 
   load (file:File) {
     this.store.setLoading()
     this.sampleLoader.loadFromFile(file).then(ab => {
-      this.store.nextSample(ab)
+      this.store.nextSample({buffer: ab, name: file.name})
     })
   }
 }

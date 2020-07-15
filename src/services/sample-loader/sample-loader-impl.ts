@@ -7,6 +7,11 @@ import { AudioContextProvider } from '../providers/context-provider'
 export class SampleLoaderImpl implements SampleLoaderService {
   @inject(REGISTRY.AudioContextProvider) context: AudioContextProvider;
 
+  emptyBuffer():AudioBuffer {
+    return this.context.context().createBuffer(2, 1, 44100)
+  }
+
+
   loadFromUrl (url: string):Promise<AudioBuffer> {
     return new Promise<AudioBuffer>(resolve => {
       fetch(url).then(response => {
@@ -25,7 +30,7 @@ export class SampleLoaderImpl implements SampleLoaderService {
         if (fr.result) {
           this.context.context().decodeAudioData(fr.result as ArrayBuffer, audioBuffer => resolve(audioBuffer))
         } else {
-          resolve(this.context.context().createBuffer(2, 0, 44100))
+          resolve(this.emptyBuffer())
         }
       }
     })

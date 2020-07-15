@@ -53,7 +53,7 @@ import Vue from 'vue'
 import { Component } from 'vue-property-decorator'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
-import { Store } from '@/services/store/store'
+import { Store, Sample } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
 import Legend from './Legend.vue'
 
@@ -97,16 +97,16 @@ export default class AudioPlayer extends Vue {
         }
       })
     }
-    private newSample (ab:AudioBuffer | null) {
+    private newSample (ab:Sample | null) {
       if (ab) {
         if (this.playing) {
           this.pause()
         }
         this.sampletime = 0
         this.pausedAt = 0
-        this.sample = ab
+        this.sample = ab.buffer
         this.restore()
-        this.samplelng = ab.length / this.rate
+        this.samplelng = ab.buffer.length / this.rate
       }
     }
 

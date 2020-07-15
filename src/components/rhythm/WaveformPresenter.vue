@@ -83,8 +83,8 @@ export default class WaveformPresenter extends Vue {
         this.mainPanel.add(waveform)
         this.mainPanel.redraw()
 
-        this.samplerate = s.sampleRate
-        this.inverseRatio = 1 / s.duration
+        this.samplerate = s.buffer.sampleRate
+        this.inverseRatio = 1 / s.buffer.duration
         this.store.timeAnalysis().subscribe(te => {
           this.setUpInfoPanel()
           if (te) { // pass 32float array

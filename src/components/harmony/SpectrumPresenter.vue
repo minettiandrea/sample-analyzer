@@ -109,9 +109,9 @@ export default class SpectrumPresenter extends Vue {
           this.mainPanel.reset()
           this.infoPanel.reset()
 
-          this.maxFreq = ab.sampleRate / 2
+          this.maxFreq = ab.buffer.sampleRate / 2
           this.freqRange = [40, this.maxFreq]
-          this.sample = ab
+          this.sample = ab.buffer
 
           this.store.getFFT().pipe(find(x => x != null)).subscribe(fft => {
             if (fft) {

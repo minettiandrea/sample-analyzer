@@ -13,9 +13,14 @@ export interface Example{
   url: string
 }
 
+export interface Sample{
+  buffer: AudioBuffer
+  name: string
+}
+
 export interface Store{
-    sample():Observable<AudioBuffer | null>
-    nextSample(sample:AudioBuffer):void
+    sample():Observable<Sample | null>
+    nextSample(sample:Sample):void
     timeAnalysis():Observable<TimeAnalisis | null>
     channelData ():Float32Array
     playing ():Observable<PlayingEvent>
@@ -45,7 +50,7 @@ export class StoreImpl implements Store {
     @inject(REGISTRY.TimeExtractor) extractor:TimeExtractor
     @inject(REGISTRY.FFT) fft:FFT
 
-    protected _sample:BehaviorSubject<AudioBuffer | null> = new BehaviorSubject<AudioBuffer | null>(null);
+    protected _sample:BehaviorSubject<Sample | null> = new BehaviorSubject<Sample | null>(null);
     protected _timeAnalisis:BehaviorSubject<TimeAnalisis | null> = new BehaviorSubject<TimeAnalisis | null>(null);
 
     emptySampleEvent:PlayingEvent = { status: false, length: 0, elapsed: 0 }
@@ -60,7 +65,7 @@ export class StoreImpl implements Store {
     private _fft = new BehaviorSubject<SpectrumPoint[] | null>(null)
     private _loading = new BehaviorSubject<boolean>(true)
 
-    sample (): Observable<AudioBuffer | null> {
+    sample (): Observable<Sample | null> {
       return this._sample
     }
 
@@ -74,25 +79,25 @@ export class StoreImpl implements Store {
     }
 
     channelData ():Float32Array {
-      return this._sample.value ? this._channelData(this._sample.value) : Float32Array.from([0])
+      return this._sample.value ? this._channelData(this._sample.value.buffer) : Float32Array.from([0])
     }
 
     timeAnalysis (): Observable<TimeAnalisis | null> {
       return this._timeAnalisis
     }
 
-    nextSample (sample: AudioBuffer): void {
+    nextSample (sample: Sample): void {
       this._timeAnalisis.next(null)
       this._hpcp.next(null)
       this._spectralpeaks.next(null)
       this._fft.next(null)
       this._sample.next(sample)
 
-      var data = this._channelData(sample)
+      var data = this._channelData(sample.buffer)
 
       this.fft.of(data).then((spectrum:FFTResponse) => {
         const fft = spectrum.full.map((x, i) => {
-          return { magnitude: x, frequency: i * ((sample.sampleRate / 2) / spectrum.full.length) }
+          return { magnitude: x, frequency: i * ((sample.buffer.sampleRate / 2) / spectrum.full.length) }
         })
 
         this._fft.next(fft)
@@ -162,13 +167,10 @@ export class PreLoadedStore extends StoreImpl {
 
     constructor () {
       super()
-      const cello = require('@/assets/cello.wav')
-      const drums = require('@/assets/drums.wav')
-      const rhodes = require('@/assets/rhodes.wav')
-      const amen = require('@/assets/amen.wav')
+      const first:Example = this.sampleExamples()[0]
 
-      this.sampleLoader.loadFromUrl(cello).then(sample => {
-        this.nextSample(sample)
+      this.sampleLoader.loadFromUrl(first.url).then(sample => {
+        this.nextSample({buffer: sample, name: first.name })
       })
     }
 }
