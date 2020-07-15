@@ -27,6 +27,8 @@ Harmonic Pitch Class Profile (HPCP) is mostly used to detect the harmonic evolut
 
 ### Overtones presenter
 Vexflow is a powerful library for music notation. We converted the frequency maxima found in the spectrum into musical notes and reported them onto a three stacks stave ranging into three clefs: bass, alto and treble.
+![spectrum](/screenshots/overtones.png)
+
 
 ### Voicing suggestion
 Voicings is the art of creating chords. 
