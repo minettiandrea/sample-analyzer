@@ -10,7 +10,7 @@
       <v-chip
       v-for="i in (this.r1*this.r2)"
       :key=' i'
-      :color="colorMask(color1,mask1[i])"
+      :color="colorMask(color1,mask1[i-1])"
       >x</v-chip>
     </div>
 
@@ -18,7 +18,7 @@
       <v-chip
       v-for="i in (this.r1*this.r2)"
       :key='i+10'
-      :color="colorMask(color2,mask2[i])"
+      :color="colorMask(color2,mask2[i-1])"
        > x</v-chip>
     </div>
 
@@ -47,7 +47,7 @@ export default class SchemaPresenter extends Vue {
   @Ref('score') score!:HTMLDivElement
 
   r1 :number = 4;
-  r2 :number = 4;
+  r2 :number = 3;
   peaks:number[] = [];
   notes: any[] = [];
   tuplets : any[] = []
@@ -102,6 +102,8 @@ export default class SchemaPresenter extends Vue {
   }
 
   private drawPoly () {
+    if (this.r1 % this.r2 === 0 || this.r2 % this.r1 === 0) return alert('This is not possible...')
+    if (this.r1 * this.r2 > 100) return alert('Tigran... is that you?')
     this.POLYACTIVE = true
     this.mask1 = []
     this.mask2 = []
@@ -170,16 +172,18 @@ export default class SchemaPresenter extends Vue {
     let mcm = this.r1 * this.r2
 
     for (let i = 0; i < mcm; i++) {
-      if (i % this.r2 === 0) {
+      if (i % this.r2 === 0 || i === 0) {
         this.mask1.push(true)
       } else { this.mask1.push(false) }
     }
 
     for (let i = 0; i < mcm; i++) {
-      if (i % this.r1 === 0) {
+      if (i % this.r1 === 0 || i === 0) {
         this.mask2.push(true)
       } else { this.mask2.push(false) }
     }
+    console.log(this.mask1)
+    console.log(this.mask2)
   }
 
   colorMask (color:string, mask:boolean) {

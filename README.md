@@ -50,6 +50,6 @@ Yellow lines will subdivided the beat to help the user visually detect if a poly
 ![overtones](/screenshots/poly.png)
 
 ### Alternate view of polyrhythms & BPM
-Polyrhythms can be easily represented using a rule that fits perfectly visual representation
-
+Polyrhythms can be easily represented using a rule that fits perfectly visual representation.
+To be considered such, polyrhythms shouldn't be derived one from the other. 
 ## Conclusions
