@@ -81,4 +81,4 @@ In the picture below, you can see a representation of a 5 against 4.
 
 ## Conclusions
 
-If you want to try it, we are running a github page. Click here!
+If you want to try it, we are running a github page. [click here](https://minettiandrea.github.io/sample-analyzer/)
