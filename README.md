@@ -40,6 +40,7 @@ The resulting chords are then plotted again on a stave using VexFlow.
 
 ### Audio player
 Whenever we deal with a sample, we might want to listen to it. We provide a custom audio player with all the basic features.
+![overtones](/screenshots/audioplayer.png)
 
 ### Beat detection & polyrhythms
 The green lines that you can see above are the result of a beat tracking algorithm.
