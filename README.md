@@ -40,16 +40,19 @@ The resulting chords are then plotted again on a stave using VexFlow.
 
 ### Audio player
 Whenever we deal with a sample, we might want to listen to it. We provide a custom audio player with all the basic features.
-![overtones](/screenshots/audioplayer.png)
+![audioplayer](/screenshots/audioplayer.png)
 
 ### Beat detection & polyrhythms
 The green lines that you can see above are the result of a beat tracking algorithm.
 A visual help to detect nested rhythms is provided as well. 
 Through a simple form, the user can select a subdivisions (ex. 4 against 3 - where 4 is the main pattern and 3 is the nested rhythm).
 Yellow lines will subdivided the beat to help the user visually detect if a polyrhythm is present or not.
-![overtones](/screenshots/poly.png)
+![poly1](/screenshots/poly.png)
 
 ### Alternate view of polyrhythms & BPM
 Polyrhythms can be easily represented using a rule that fits perfectly visual representation.
-To be considered such, polyrhythms shouldn't be derived one from the other. 
+To be considered such, polyrhythms shouldn't be derived one from the other. Also, don't try to use too complicated numbers... (unless you're some crazy jazz man)
+![poly2](/screenshots/poly2.png)
+
+
 ## Conclusions
