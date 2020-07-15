@@ -22,7 +22,7 @@
         v-for="i in (this.r1*this.r2)"
         :key='i+10'
         :color="colorMask(color2,mask2[i-1])"
-        
+        style="color: rgba(0,0,0,0)"
         > x</v-chip>
       </div>
 
