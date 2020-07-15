@@ -1,12 +1,19 @@
 <template>
-<v-card class='mx-auto col-12'>
-    <v-card-title>
-      <v-icon large left color='orange darken-2'>fab fa-itunes-note</v-icon>
-      <span class="title font-weight-light">Overtones presenter</span>
-    </v-card-title>
-    <v-card-text>This is going to draw a pentagram with the overtones of the sound loaded.</v-card-text>
-    <div style="background-color:white" ref="scoreh"></div>
-  </v-card>
+<v-container class='col-12'>
+    <v-row align='center' justify='center'>
+
+      <v-card class="mx-auto col-10 mb-5 center">
+        <v-card-title>
+          <v-icon large left color='orange darken-2'>fab fa-itunes-note</v-icon>
+          <span class="title font-weight-light">Overtones presenter</span>
+        </v-card-title>
+        <v-card-text>This is going to draw a pentagram with the overtones of the sound loaded.</v-card-text>
+        <v-row align='center' justify='center'>
+          <div style="background-color:white;" ref="scoreh"></div>
+        </v-row>
+      </v-card>
+    </v-row>
+</v-container>
 </template>
 
 <script lang="ts">
@@ -35,7 +42,7 @@ export default class OvertonesPresenter extends Vue {
 
     mounted () {
       this.renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
-      this.renderer.resize(1400, 350)
+      this.renderer.resize(662, 350)
       this.freshSVG()
 
       this.store.getSpectralPeaks().subscribe(peaks => {
@@ -60,7 +67,7 @@ export default class OvertonesPresenter extends Vue {
         let val = n.substring(0, n.length - 1) // note value C-D-E
         let myclef = this.clefS(oct) // string of the clef
         let clefref = this.clefRef(oct)
-        var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [val + '/' + oct], duration: '1' })
+        var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [val + '/' + oct], duration: 'q' })
 
         switch (myclef) {
           case ('alto') : notesALTO.push(vexn); break
@@ -72,7 +79,7 @@ export default class OvertonesPresenter extends Vue {
       let voiceB = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesBASS)
       let voiceT = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesTREBLE)
       let voiceA = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesALTO)
-      let formatter = new Vex.Flow.Formatter().format([voiceB, voiceT, voiceA], 250)
+      let formatter = new Vex.Flow.Formatter().format([voiceB, voiceT, voiceA], 200)
       voiceB.draw(ctx, this.BASS)
       voiceT.draw(ctx, this.TREBLE)
       voiceA.draw(ctx, this.ALTO)
@@ -97,13 +104,13 @@ export default class OvertonesPresenter extends Vue {
     freshSVG () {
       this.ctx = this.renderer.getContext()
 
-      this.TREBLE = new Vex.Flow.Stave(10, 40, 800)
+      this.TREBLE = new Vex.Flow.Stave(10, 40, 650)
       this.TREBLE.addClef('treble')
       this.TREBLE.setContext(this.ctx).draw()
-      this.ALTO = new Vex.Flow.Stave(10, 120, 800)
+      this.ALTO = new Vex.Flow.Stave(10, 120, 650)
       this.ALTO.addClef('alto')
       this.ALTO.setContext(this.ctx).draw()
-      this.BASS = new Vex.Flow.Stave(10, 200, 800)
+      this.BASS = new Vex.Flow.Stave(10, 200, 650)
       this.BASS.addClef('bass')
       this.BASS.setContext(this.ctx).draw()
 

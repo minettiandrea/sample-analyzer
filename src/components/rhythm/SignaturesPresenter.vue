@@ -1,22 +1,26 @@
 <template>
-  <v-card class='mx-auto col-12 mt-5 space-around'>
-    <v-simple-table>
-      <template v-slot:default>
-        <thead>
-          <tr>
-            <th class="text-left">BPM</th>
-            <th class="text-left">Swing</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(signature,i) in signatures" :key="i">
-            <td>{{signature.bpm}}</td>
-            <td>{{signature.swing}}</td>
-          </tr>
-        </tbody>
-      </template>
-    </v-simple-table>
+<v-container class='col-12' >
+  <v-row align='center' justify='center'>
+    <v-card class='mx-auto col-10 mt-5 space-around'>
+      <v-simple-table>
+        <template v-slot:default>
+          <thead>
+            <tr>
+              <th class="text-left">BPM</th>
+              <th class="text-left">Swing</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(signature,i) in signatures" :key="i">
+              <td>{{signature.bpm}}</td>
+              <td>{{signature.swing.toFixed(2)}}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
   </v-card>
+  </v-row>
+</v-container>
 </template>
 
 <script lang="ts">

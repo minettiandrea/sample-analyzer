@@ -1,34 +1,40 @@
 <template>
-  <v-card class='mx-auto col-12 mt-5 space-around'>
-    <v-card-title>
-      <v-icon large left></v-icon>
-      <span class="title font-weight-light">Rythmic schema</span>
-    </v-card-title>
-    <div style="background-color:white" ref="score"></div>
+<v-container class='col-12' >
+  <v-row align='center' justify='center'>
+    <v-card class='mx-auto col-10 mt-5 space-around'>
+      <v-card-title>
+        <v-icon large left></v-icon>
+        <span class="title font-weight-light">Rythmic schema</span>
+      </v-card-title>
+      <div style="background-color:white; display:none" ref="score"></div>
 
-    <div class='mb-6 col-12 d-flex justify-space-around'>
-      <v-chip
-      v-for="i in (this.r1*this.r2)"
-      :key=' i'
-      :color="colorMask(color1,mask1[i-1])"
-      >x</v-chip>
-    </div>
+      <div class='mb-6 col-12 d-flex justify-space-around'>
+        <v-chip
+        v-for="i in (this.r1*this.r2)"
+        :key='i'
+        :color="colorMask(color1,mask1[i-1])"
+        style="color: rgba(0,0,0,0)"
+        >X</v-chip>
+      </div>
 
-    <div class='mb-6 col-12 d-flex justify-space-around'>
-      <v-chip
-      v-for="i in (this.r1*this.r2)"
-      :key='i+10'
-      :color="colorMask(color2,mask2[i-1])"
-       > x</v-chip>
-    </div>
+      <div class='mb-6 col-12 d-flex justify-space-around'>
+        <v-chip
+        v-for="i in (this.r1*this.r2)"
+        :key='i+10'
+        :color="colorMask(color2,mask2[i-1])"
+        
+        > x</v-chip>
+      </div>
 
-    <v-card-text>
-      <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
-    <v-btn @click="drawPoly" @change='clearPoly'> Visualize possible polyrhythm </v-btn>
-    <v-btn @click="clearPoly" @change='clearPoly'> Clear all </v-btn>
-    </v-card-text>
+      <v-card-text>
+        <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
+      <v-btn @click="drawPoly" @change='clearPoly'> Visualize possible polyrhythm </v-btn>
+      <v-btn @click="clearPoly" @change='clearPoly'> Clear all </v-btn>
+      </v-card-text>
 
-  </v-card>
+    </v-card>
+  </v-row>
+</v-container>
 </template>
 
 <script lang="ts">
@@ -192,6 +198,8 @@ export default class SchemaPresenter extends Vue {
       else return 'grey'
     } else return 'grey'
   }
+
+  
 
   deactivatePoly () {
     this.POLYACTIVE = false

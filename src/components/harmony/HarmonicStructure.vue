@@ -1,18 +1,17 @@
 <template>
 <v-container fluid>
-     <v-row align="center" justify="center">
-
-            <SpectrumPresenter />
+    <v-row align="center" justify="center">
+      <SpectrumPresenter />
     </v-row>
     <v-row align="center" justify="center">
-
-            <HPCPPresenter />
+      <HPCPPresenter />
     </v-row>
-      <v-row>
-        <OvertonesPresenter />
-
-        <VoicingsPresenter />
-      </v-row>
+    <v-row align="center" justify="center">
+      <OvertonesPresenter />
+    </v-row>
+    <v-row align="center" justify="center">
+      <VoicingsPresenter />
+    </v-row>
 </v-container>
 
 </template>

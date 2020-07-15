@@ -1,5 +1,8 @@
 <template>
-  <v-card class='mx-auto col-12 mt-5 space-around'>
+<v-container class='col-12'>
+    <v-row align='center' justify='center'>
+
+      <v-card class="mx-auto col-10 mb-5 center">
     <v-card-title>
       <v-icon large left></v-icon>
       <span class="title font-weight-light">Suggested voicing</span>
@@ -11,10 +14,14 @@
       </ul>
 
     </v-card-text>
-
-        <div style="background-color:white" ref="scorevoice"></div>
+    <v-row align='center' justify='center'>
+      <div style="background-color:white" ref="scorevoice"></div>
+    </v-row>
+        
 
   </v-card>
+    </v-row>
+</v-container>
 </template>
 
 <script lang="ts">
@@ -64,7 +71,7 @@ export default class VoicingsPresenter extends Vue {
 
   mounted () { // draw the lines
     this.renderer = new Vex.Flow.Renderer(this.scorev, Vex.Flow.Renderer.Backends.SVG)
-    this.renderer.resize(1400, 350)
+    this.renderer.resize(630, 350)
     this.freshSVG()
 
     this.store.getHCPC().subscribe(hcpc => {

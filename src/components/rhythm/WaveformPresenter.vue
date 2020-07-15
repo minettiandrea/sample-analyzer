@@ -18,7 +18,6 @@
   </v-row>
   <v-row align='center' justify='center'>
       <AudioPlayer />
-      <Legend />
   </v-row>
 </v-container>
 </template>
@@ -26,7 +25,6 @@
 <script lang="ts">
 import Vue from 'vue'
 import AudioPlayer from './AudioPlayer.vue'
-import Legend from './Legend.vue'
 
 import { Component, Ref } from 'vue-property-decorator'
 import { inject } from 'inversify-props'
@@ -44,7 +42,6 @@ import { TimeExtractor } from '../../services/time-extractor/time-extractor'
 
 @Component({
   components: { AudioPlayer,
-    Legend
   }
 })
 export default class WaveformPresenter extends Vue {

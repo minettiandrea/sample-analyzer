@@ -1,6 +1,16 @@
 <template>
-<v-container>
-            <v-row class='col-12 py-0'
+<v-container class='col-10'>
+      <v-row justify='center' class='col-12 py-0'>
+              <v-slider
+                v-model='sampletime'
+                color="#1976D2"
+                @click='skip'
+                :label=" (sampletime * samplelng / 100).toFixed(3)  + ' : ' +  samplelng.toFixed(3)"
+              >
+            </v-slider>
+            
+          </v-row>
+        <v-row class='col-12 py-0'
           align-content='center'
           justify='center'
           dense
@@ -18,7 +28,7 @@
                 </v-btn>
             </v-col>
 
-            <v-col cols="4">
+            <v-col cols="2">
               <v-slider @change='changeVolume'
               dark dense
               v-model='volume'
@@ -28,17 +38,12 @@
               step='.1'
               ></v-slider>
             </v-col>
+            <v-col>
+              <Legend class="float-right" />
+            </v-col>
 
           </v-row>
-          <v-row justify='center' class='pt-0'>
-              <v-slider
-                v-model='sampletime'
-                color="#1976D2"
-                @click='skip'
-                :label=" (sampletime * samplelng / 100).toFixed(3)  + ' : ' +  samplelng.toFixed(3)"
-              >
-            </v-slider>
-          </v-row>
+          
 
 </v-container>
 </template>
@@ -50,8 +55,11 @@ import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
 import { AudioContextProvider } from '../../services/providers/context-provider'
+import Legend from './Legend.vue'
 
-@Component
+@Component({
+  components: {Legend}
+})
 export default class AudioPlayer extends Vue {
     private playing: boolean = false
     private paused: boolean = true
