@@ -24,8 +24,8 @@
 
     <v-card-text>
       <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
-    <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
-    <v-btn @click="clearPoly"> Clear all </v-btn>
+    <v-btn @click="drawPoly" @change='clearPoly'> Visualize possible polyrhythm </v-btn>
+    <v-btn @click="clearPoly" @change='clearPoly'> Clear all </v-btn>
     </v-card-text>
 
   </v-card>
@@ -58,6 +58,7 @@ export default class SchemaPresenter extends Vue {
   mask2:boolean[] = []
   color1:string = 'green'
   color2:string = 'yellow'
+  POLYACTIVE:boolean = false
 
   mounted () {
     this.createMask()
@@ -101,6 +102,7 @@ export default class SchemaPresenter extends Vue {
   }
 
   private drawPoly () {
+    this.POLYACTIVE = true
     this.mask1 = []
     this.mask2 = []
     this.createMask()
@@ -181,9 +183,14 @@ export default class SchemaPresenter extends Vue {
   }
 
   colorMask (color:string, mask:boolean) {
-    let result = {}
-    result[color] = mask
-    return color
+    if (this.POLYACTIVE) {
+      if (mask) return color
+      else return 'grey'
+    } else return 'grey'
+  }
+
+  deactivatePoly () {
+    this.POLYACTIVE = false
   }
 }
 </script>
