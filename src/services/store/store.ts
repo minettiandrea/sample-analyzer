@@ -41,7 +41,6 @@ export interface PlayingEvent{
 
 @injectable()
 export class StoreImpl implements Store {
-    
     @inject(REGISTRY.SpectralExtractor) spectralExtractor: EssentiaSpectralExtractor
     @inject(REGISTRY.TimeExtractor) extractor:TimeExtractor
     @inject(REGISTRY.FFT) fft:FFT
@@ -60,7 +59,6 @@ export class StoreImpl implements Store {
     private _hpcp = new BehaviorSubject<number[] | null>(null)
     private _fft = new BehaviorSubject<SpectrumPoint[] | null>(null)
     private _loading = new BehaviorSubject<boolean>(true)
-
 
     sample (): Observable<AudioBuffer | null> {
       return this._sample
@@ -89,7 +87,7 @@ export class StoreImpl implements Store {
       this._spectralpeaks.next(null)
       this._fft.next(null)
       this._sample.next(sample)
-      
+
       var data = this._channelData(sample)
 
       this.fft.of(data).then((spectrum:FFTResponse) => {
@@ -103,17 +101,12 @@ export class StoreImpl implements Store {
           this._spectralpeaks.next(se.peaks.frequencies)
           this._hpcp.next(se.hpcp)
 
-
           this.extractor.analyze(data).then(a => {
             this._timeAnalisis.next(a)
             this._loading.next(false)
           })
-
-          
-        });
-        
+        })
       })
-
     }
 
     playing ():Observable<PlayingEvent> {
@@ -139,7 +132,9 @@ export class StoreImpl implements Store {
     sampleExamples (): Example[] {
       return [
         { name: 'cello', url: require('@/assets/cello.wav') },
-        { name: 'drums', url: require('@/assets/drums.wav') }
+        { name: 'drums', url: require('@/assets/drums.wav') },
+        { name: 'rhodes', url: require('@/assets/rhodes.wav') }
+
       ]
     }
 
@@ -147,20 +142,17 @@ export class StoreImpl implements Store {
     addPolyLine (n : number[]) { this._polyAdded.next(n) }
 
     getSpectralPeaks ():Observable<number[] | null> { return this._spectralpeaks }
-    getHCPC(): Observable<number[] | null> { return this._hpcp }
+    getHCPC (): Observable<number[] | null> { return this._hpcp }
 
-    getFFT(): Observable<SpectrumPoint[] | null> { return this._fft}
+    getFFT (): Observable<SpectrumPoint[] | null> { return this._fft }
 
-    setLoading() {
+    setLoading () {
       this._loading.next(true)
     }
 
-    loading():Observable<boolean> {
+    loading ():Observable<boolean> {
       return this._loading
     }
-
-
-
 }
 
 @injectable()
@@ -171,6 +163,7 @@ export class PreLoadedStore extends StoreImpl {
       super()
       const cello = require('@/assets/cello.wav')
       const drums = require('@/assets/drums.wav')
+      const rhodes = require('@/assets/rhodes.wav')
       this.sampleLoader.loadFromUrl(cello).then(sample => {
         this.nextSample(sample)
       })

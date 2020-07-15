@@ -145,7 +145,7 @@ export default class WaveformPresenter extends Vue {
   private setUpInfoPanel () {
     this.infoPanel.reset()
     this.playingCursor = new Line('red', 3, 0, false)
-    this.mouseCursor = new Line('red', 3, 0, false)
+    this.mouseCursor = new Line('orange', 3, 0, false)
     this.infoPanel.add(this.playingCursor)
     this.infoPanel.add(this.mouseCursor)
   }
