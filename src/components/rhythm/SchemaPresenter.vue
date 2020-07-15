@@ -5,6 +5,22 @@
       <span class="title font-weight-light">Rythmic schema</span>
     </v-card-title>
     <div style="background-color:white" ref="score"></div>
+
+    <div class='mb-6 col-12 d-flex justify-space-around'>
+      <v-chip
+      v-for="i in (this.r1*this.r2)"
+      :key=' i'
+      >x</v-chip>
+    </div>
+
+    <div class='mb-6 col-12 d-flex justify-space-around'>
+      <v-chip
+      v-for="i in (this.r1*this.r2)"
+      :key='i'
+      color= ''
+       > x</v-chip>
+    </div>
+
     <v-card-text>
       <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
     <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
@@ -36,6 +52,8 @@ export default class SchemaPresenter extends Vue {
   renderer:Vex.Flow.Renderer;
   ctx:Vex.IRenderContext
   polystave:Vex.Flow.Stave
+  mask1:boolean[]
+  mask2:boolean[]
 
   mounted () {
     this.ctx = this.freshSVG()
@@ -78,6 +96,9 @@ export default class SchemaPresenter extends Vue {
   }
 
   private drawPoly () {
+    this.mask1 = []
+    this.mask2 = []
+    this.createMask()
     let lng = this.peaks.length
     let beat = this.peaks[this.r1 - 1] // 4th peak in 4against... , 3rd peak in 3 against
     let subd = beat / this.r2
@@ -133,6 +154,22 @@ export default class SchemaPresenter extends Vue {
 
   private clearPoly ():void{
     this.$root.$emit('clearpoly')
+  }
+
+  createMask () {
+    let mcm = this.r1 * this.r2
+
+    for (let i = 0; i < mcm; i++) {
+      if (i % this.r2 === 0) {
+        this.mask1.push(true)
+      } else { this.mask1.push(false) }
+    }
+
+    for (let i = 0; i < mcm; i++) {
+      if (i % this.r1 === 0) {
+        this.mask2.push(true)
+      } else { this.mask2.push(false) }
+    }
   }
 }
 </script>
