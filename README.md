@@ -12,16 +12,16 @@ We therefore moved to a sample analyzer, that could allow the user to upload a s
 
 The project exploits Typescript language, using the Vue framework.
 
-* ![Vexflow](https://github.com/0xfe/vexflow) API to render music notations, sheets, guitar tabs.​
+* [Vexflow](https://github.com/0xfe/vexflow) API to render music notations, sheets, guitar tabs.​
 
-* ![Inversify](https://github.com/inversify/InversifyJS) IOC -> Inversion of control. Classes helpful to have SOLID code properties, especially dependency inversion principle.​ In other words: it helps to have classes that are easily testable and isolated.​
-* ![Vuetify](https://vuetifyjs.com/en/)​ Material design for Vue framework​.
+* [Inversify](https://github.com/inversify/InversifyJS) IOC -> Inversion of control. Classes helpful to have SOLID code properties, especially dependency inversion principle.​ In other words: it helps to have classes that are easily testable and isolated.​
+* [Vuetify](https://vuetifyjs.com/en/)​ Material design for Vue framework​.
 
-* ![RxJS](https://rxjs-dev.firebaseapp.com/)​ Reactive programming using Observables for asynchronous calls.​
+* [RxJS](https://rxjs-dev.firebaseapp.com/)​ Reactive programming using Observables for asynchronous calls.​
 
-​* ![Chart.js](https://www.chartjs.org/)​ Open source library for plotting charts.​
+​* [Chart.js](https://www.chartjs.org/)​ Open source library for plotting charts.​
 
-​* ![Essentia.js](https://mtg.github.io/essentia.js/) Open source library developed by MTG, with state-of-the-art algorithms written in C++.
+​* [Essentia.js](https://mtg.github.io/essentia.js/) Open source library developed by MTG, with state-of-the-art algorithms written in C++.
 
 ## GUI
 
