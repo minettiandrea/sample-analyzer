@@ -69,6 +69,14 @@ export default class VoicingsPresenter extends Vue {
 
     this.store.getHCPC().subscribe(hcpc => {
       if (hcpc) {
+        this.ctx.clear()
+        this.freshSVG()
+
+        // empty all the global variables on new sample loaded
+        this.voicings = []
+        this.rhRender = []
+        this.lhRender = []
+
         const foundamental = hcpc.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0) // find the max index
         const voicings = this.definitions.map(x => {
           return { chord: x, score: x.chord.map(y => hcpc[(y + 12 + foundamental) % 12]).reduce((x, y) => x + y) }
@@ -99,7 +107,6 @@ export default class VoicingsPresenter extends Vue {
 
   private createChords () { // all the notes within the chord in semitone distances
     let chords = this.voicings.map(a => a.chord)
-    console.log(chords)
     chords.forEach(chord => { // for each chord
       let notestr:string[] = []
 
@@ -113,12 +120,12 @@ export default class VoicingsPresenter extends Vue {
         keys: [...notestr.slice(1)],
         duration: '1' })
 
-      const staveNote = modifiers.slice(1).forEach((hasModifier,i) => {
-        if(hasModifier) {
-          return c.addAccidental(i,new Vex.Flow.Accidental('#'))
+      const staveNote = modifiers.slice(1).forEach((hasModifier, i) => {
+        if (hasModifier) {
+          return c.addAccidental(i, new Vex.Flow.Accidental('#'))
         }
       })
-      
+
       this.rhRender.push(c)
       this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [notestr[0]], duration: '1' }))
     })

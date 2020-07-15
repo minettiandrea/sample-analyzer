@@ -30,25 +30,22 @@ export default class OvertonesPresenter extends Vue {
     private TREBLE:Vex.Flow.Stave
     private ALTO:Vex.Flow.Stave
     private BASS:Vex.Flow.Stave
+    private ctx:Vex.IRenderContext
+    private renderer:Vex.Flow.Renderer
 
     mounted () {
-      const renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
-      renderer.resize(1400, 350)
-      const context = renderer.getContext()
-      this.TREBLE = new Vex.Flow.Stave(10, 40, 800)
-      this.TREBLE.addClef('treble')
-      this.TREBLE.setContext(context).draw()
-      this.ALTO = new Vex.Flow.Stave(10, 120, 800)
-      this.ALTO.addClef('alto')
-      this.ALTO.setContext(context).draw()
-      this.BASS = new Vex.Flow.Stave(10, 200, 800)
-      this.BASS.addClef('bass')
-      this.BASS.setContext(context).draw()
+      this.renderer = new Vex.Flow.Renderer(this.score, Vex.Flow.Renderer.Backends.SVG)
+      this.renderer.resize(1400, 350)
+      this.freshSVG()
 
       this.store.getSpectralPeaks().subscribe(peaks => {
         if (peaks) {
+          this.ctx.clear()
+          this.freshSVG()
+          this.notes = [] // empty the global variable
+
           this.notes = peaks.map(a => this.notemgt.freqToNote(a))
-          this.drawTones(context)
+          this.drawTones(this.ctx)
         }
       })
     }
@@ -95,6 +92,22 @@ export default class OvertonesPresenter extends Vue {
         case '4': case '3': return this.ALTO
         default: return this.BASS
       }
+    }
+
+    freshSVG () {
+      this.ctx = this.renderer.getContext()
+
+      this.TREBLE = new Vex.Flow.Stave(10, 40, 800)
+      this.TREBLE.addClef('treble')
+      this.TREBLE.setContext(this.ctx).draw()
+      this.ALTO = new Vex.Flow.Stave(10, 120, 800)
+      this.ALTO.addClef('alto')
+      this.ALTO.setContext(this.ctx).draw()
+      this.BASS = new Vex.Flow.Stave(10, 200, 800)
+      this.BASS.addClef('bass')
+      this.BASS.setContext(this.ctx).draw()
+
+      return this.renderer.getContext()
     }
 }
 </script>

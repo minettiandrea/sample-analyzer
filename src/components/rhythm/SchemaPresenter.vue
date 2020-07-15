@@ -10,15 +10,15 @@
       <v-chip
       v-for="i in (this.r1*this.r2)"
       :key=' i'
-      color='green'
+      :color="colorMask(color1,mask1[i])"
       >x</v-chip>
     </div>
 
     <div class='mb-6 col-12 d-flex justify-space-around'>
       <v-chip
       v-for="i in (this.r1*this.r2)"
-      :key='i'
-      color= 'yellow'
+      :key='i+10'
+      :color="colorMask(color2,mask2[i])"
        > x</v-chip>
     </div>
 
@@ -39,6 +39,7 @@ import { NoteElement, QuarterRythm, Note, Quarter } from '@/model/note'
 import { inject } from 'inversify-props'
 import { REGISTRY } from '@/ioc/registry'
 import { Store } from '@/services/store/store'
+import { Color } from 'vuetify/lib/util/colors'
 
 @Component
 export default class SchemaPresenter extends Vue {
@@ -53,10 +54,13 @@ export default class SchemaPresenter extends Vue {
   renderer:Vex.Flow.Renderer;
   ctx:Vex.IRenderContext
   polystave:Vex.Flow.Stave
-  mask1:boolean[]
-  mask2:boolean[]
+  mask1:boolean[] = []
+  mask2:boolean[] = []
+  color1:string = 'green'
+  color2:string = 'yellow'
 
   mounted () {
+    this.createMask()
     this.ctx = this.freshSVG()
     this.store.timeAnalysis().subscribe(ta => {
       if (ta) {
@@ -157,7 +161,10 @@ export default class SchemaPresenter extends Vue {
     this.$root.$emit('clearpoly')
   }
 
-  createMask () {
+  private createMask () {
+    this.mask1 = []
+    this.mask2 = []
+
     let mcm = this.r1 * this.r2
 
     for (let i = 0; i < mcm; i++) {
@@ -171,6 +178,12 @@ export default class SchemaPresenter extends Vue {
         this.mask2.push(true)
       } else { this.mask2.push(false) }
     }
+  }
+
+  colorMask (color:string, mask:boolean) {
+    let result = {}
+    result[color] = mask
+    return color
   }
 }
 </script>
