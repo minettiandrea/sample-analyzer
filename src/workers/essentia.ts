@@ -39,7 +39,6 @@ function handleHarmony (msg:EssentiaMessage) {
 
 function handleSpectrum (msg:EssentiaMessage) {
   const result = essentia.Spectrum(essentia.arrayToVector(msg.payload), msg.payload.length)
-
   const FRAME_SIZE = 4096
   const spectrumResult = essentia.vectorToArray(result.spectrum)
   let subsampled:number[] = []

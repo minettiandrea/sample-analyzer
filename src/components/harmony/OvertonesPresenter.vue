@@ -69,7 +69,6 @@ export default class OvertonesPresenter extends Vue {
         let clefref = this.clefRef(oct)
 
           const vexNote = val + '/' + oct
-          console.log(vexNote)
           var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [vexNote], duration: 'q' })
 
           if(n.includes('#')) {

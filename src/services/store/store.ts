@@ -139,8 +139,6 @@ export class StoreImpl implements Store {
         { name: 'cello', url: require('@/assets/cello.wav') },
         { name: 'drums', url: require('@/assets/drums.wav') },
         { name: 'rhodes', url: require('@/assets/rhodes.wav') },
-        { name: 'amen-break', url: require('@/assets/amen.wav') }
-
       ]
     }
 
