@@ -64,25 +64,38 @@ export default class OvertonesPresenter extends Vue {
 
       this.notes.forEach(n => {
         let oct = n.substring(n.length - 1) // octave 4-5-6
-        let val = n.substring(0, n.length - 1) // note value C-D-E
+        let val = n.substring(0,1) // note value C-D-E
         let myclef = this.clefS(oct) // string of the clef
         let clefref = this.clefRef(oct)
-        var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [val + '/' + oct], duration: 'q' })
 
-        switch (myclef) {
-          case ('alto') : notesALTO.push(vexn); break
-          case ('treble') : notesTREBLE.push(vexn); break
-          default: notesBASS.push(vexn)
-        }
+          const vexNote = val + '/' + oct
+          console.log(vexNote)
+          var vexn = new Vex.Flow.StaveNote({ clef: myclef, keys: [vexNote], duration: 'q' })
+
+          if(n.includes('#')) {
+            vexn.addAccidental(0,new Vex.Flow.Accidental('#'))
+          }
+
+          switch (myclef) {
+            case ('alto') : notesALTO.push(vexn); break
+            case ('treble') : notesTREBLE.push(vexn); break
+            default: notesBASS.push(vexn)
+          }
       })
 
-      let voiceB = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesBASS)
-      let voiceT = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesTREBLE)
-      let voiceA = new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(notesALTO)
-      let formatter = new Vex.Flow.Formatter().format([voiceB, voiceT, voiceA], 200)
-      voiceB.draw(ctx, this.BASS)
-      voiceT.draw(ctx, this.TREBLE)
-      voiceA.draw(ctx, this.ALTO)
+      const vexNotes = [notesTREBLE,notesALTO,notesBASS]
+      const vexContexts = [this.TREBLE,this.ALTO,this.BASS]
+      
+      const vexVoice = vexNotes.filter(x => x.length > 0).map(x => {
+        return new Vex.Flow.Voice({ num_beats: 4, beat_value: 4 }).setMode(2).addTickables(x)
+      })
+      let formatter = new Vex.Flow.Formatter().format(vexVoice, 400)
+
+      vexNotes.forEach((x,i) => {
+        if(x.length > 0)
+          vexVoice[i].draw(ctx,vexContexts[i])
+      })
+
     }
 
     clefS (oct:string):string {
