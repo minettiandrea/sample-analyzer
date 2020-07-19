@@ -7,17 +7,29 @@
       <v-icon large left></v-icon>
       <span class="title font-weight-light">Suggested voicing</span>
     </v-card-title>
+
     <v-card-text>
       Suggested voicing for specific sound loaded
+      <v-col class='d-flex' cols='6'>
+      <v-select
+        col-2
+        label="Select chord tones"
+        :items='chordTypes'
+        :item-value='ACTUAL_CHORD'
+        @change="chordSelected"
+        >
+      </v-select>
+      </v-col>
+        {{ACTUAL_CHORD}}
+
       <ul>
-        <li v-for="(voicing,i) in voicings" :key="i">{{voicing.group}} - {{voicing.name}} - {{voicing.chord}}</li>
+        <li v-for="(voicing,i) in voicings" :key="i">{{voicing.name}} - {{voicing.chord}}</li>
       </ul>
 
     </v-card-text>
     <v-row align='center' justify='center'>
       <div style="background-color:white" ref="scorevoice"></div>
     </v-row>
-        
 
   </v-card>
     </v-row>
@@ -33,9 +45,13 @@ import { Store } from '@/services/store/store'
 import * as Vex from 'vexflow'
 
 export interface VoicingDefinition{
-  group:string
+  name:string
   chord: number[]
-  name: string
+}
+
+export interface ChordTones{
+  type:string
+  chord:number[]
 }
 
 @Component
@@ -51,14 +67,26 @@ export default class VoicingsPresenter extends Vue {
   private TREBLE:Vex.Flow.Stave
   private BASS:Vex.Flow.Stave
   private ctx:Vex.IRenderContext
+  private ACTUAL_CHORD:string = ''
+  private HPCP:number[]
+
+  public chordTypes:string[] = ['maj6', 'maj7', 'dom7', 'sus4', 'm7', 'dim7']
+  public CHORD_TONES = [
+    { type: 'maj6', chord: [4, 9] },
+    { type: 'maj7', chord: [4, 11] },
+    { type: 'dom7', chord: [4, 10] },
+    { type: 'sus4', chord: [6] },
+    { type: 'm7', chord: [3, 10] },
+    { type: 'dim7', chord: [3, 6, 9] }
+  ]
 
   private SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-  private definitions = [
+  /*  private definitions = [
     { group: 'min7', chord: [0, 3, 10], name: '1 - b3 - b7 (no fifth)' },
     { group: 'min7', chord: [-9, -2, 0], name: '1st inversion (b3 as bass)' },
     { group: 'min7', chord: [-5, 0, 3, 10], name: '2nd inversion (5th as bass)' },
-    { group: 'min7', chord: [-2, 0, 3], name: '3rd inversion (7th as bass)' },
+    { group: 'min7', chord: [-2, 0, 3], name: 'drop 4' },
     { group: 'maj7', chord: [0, 4, 10], name: '1 - 3 - 7 (no fifth)' },
     { group: 'maj7', chord: [-8, -1, 0], name: '1st inversion (3 as bass)' },
     { group: 'maj7', chord: [-5, 0, 4, 11], name: ' 2nd inversion (5th as bass)' },
@@ -67,32 +95,62 @@ export default class VoicingsPresenter extends Vue {
     { group: 'dom7', chord: [-8, -2, 0], name: '1st inversion (3 as bass)' },
     { group: 'dom7', chord: [-5, 0, 4, 10], name: '2nd inversion (5th as bass)' },
     { group: 'dom7', chord: [-2, 0, 4], name: '3rd inversion (7th as bass)' }
+  ] */
+
+  private methods = [ // methods for chord inversion
+    { type: '1st inversion', order: [2, 3, 4, 1] },
+    { type: '2nd inversion', order: [3, 1, 2, 4] },
+    { type: '3rd inversion', order: [4, 1, 2, 3] },
+    { type: 'drop 2', order: [-3, 1, 2, 4] },
+    { type: 'drop 2&4', order: [-1, -3, 2, 4] }
   ]
 
   mounted () { // draw the lines
     this.renderer = new Vex.Flow.Renderer(this.scorev, Vex.Flow.Renderer.Backends.SVG)
-    this.renderer.resize(630, 350)
+    this.renderer.resize(630, 400)
     this.freshSVG()
 
     this.store.getHCPC().subscribe(hcpc => {
       if (hcpc) {
-        this.ctx.clear()
-        this.freshSVG()
-
-        // empty all the global variables on new sample loaded
-        this.voicings = []
-        this.rhRender = []
-        this.lhRender = []
-
-        const foundamental = hcpc.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0) // find the max index
-        const voicings = this.definitions.map(x => {
-          return { chord: x, score: x.chord.map(y => hcpc[(y + 12 + foundamental) % 12]).reduce((x, y) => x + y) }
-        }).sort((x, y) => y.score - x.score).slice(0, 3)
-        this.voicings = voicings.map(x => x.chord)
-        this.createChords()
-        this.drawChords()
+        this.HPCP = hcpc
       }
     })
+  }
+
+  private chordSelected (chord:string) {
+    let filtered = this.CHORD_TONES.filter(x => x.type === (chord))[0] // select type of chord with its guide tones
+    this.ctx.clear()
+    this.freshSVG()
+
+    // empty all the global variables on new sample loaded
+    this.rhRender = []
+    this.lhRender = []
+
+    const notes = [...filtered.chord, 0, 7].sort((a, b) => a - b) // add root and 5th, sort them in increasing order
+
+    const fundamental = this.HPCP.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0) // find the max index
+    const voicings = this.methods.map(x => { // iterate on all possible moves
+      let moves = x.order // how to move the note according to voicing rule
+      let name = x.type
+      let voicing = [] // preallocate rearrenged chord
+      for (let i = 0; i < moves.length; i++) {
+        let m = moves[i]
+        if (m > 0) {
+          voicing.push(notes[m - 1])
+        }
+        if (m < 0) {
+          voicing.push(notes[-m - 1] - 12) // one octave below
+        }
+      }
+      // voicing.map((a, b) => { if (b - a < 0) b = b + 12 })
+
+      return { name: name, chord: voicing, score: voicing.map(y => this.HPCP[(y + 12 + fundamental) % 12]).reduce((x, y) => x + y) }
+    }).sort((x, y) => y.score - x.score)
+
+    let winners = voicings.slice(0, 3) // best three voicings
+    this.voicings = winners.map(x => { return { name: x.name, chord: x.chord } })
+    this.createChords()
+    this.drawChords()
   }
 
   private toNote (note:number):string { // return a string representation of the note
