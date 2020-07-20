@@ -75,7 +75,7 @@ export default class VoicingsPresenter extends Vue {
     { type: 'maj6', chord: [4, 9] },
     { type: 'maj7', chord: [4, 11] },
     { type: 'dom7', chord: [4, 10] },
-    { type: 'sus4add9', chord: [6, 14] },
+    { type: 'sus4add9', chord: [5, 14] },
     { type: 'm7', chord: [3, 10] },
     { type: 'dim7', chord: [3, 6, 9] }
   ]
@@ -98,7 +98,7 @@ export default class VoicingsPresenter extends Vue {
   ] */
 
   private methods = [ // methods for chord inversion (growing order accomplished adding +10)
-    { type: '1st inversion', order: [2, 3, 4, 11] },
+    { type: '1st inversion', order: [2, 13, 14, 11] },
     { type: '2nd inversion', order: [3, 11, 12, 14] },
     { type: '3rd inversion', order: [4, 11, 12, 13] },
     { type: 'drop 2', order: [-3, 1, 2, 4] },
@@ -175,27 +175,31 @@ export default class VoicingsPresenter extends Vue {
 
   private createChords () { // all the notes within the chord in semitone distances
     let chords = this.voicings.map(a => a.chord)
+
     chords.forEach(chord => { // for each chord
-      let notestr:string[] = []
-
+      let noteLefthand:string[] = []
+      let noteRighthand:string[] = []
       chord.forEach(note => { // for each note within the chord
-        notestr.push(this.toNote(note))
-      }) // once got the names of the note in an array of strings add the stavenote object to an array
+        let nota = this.toNote(note)
+        let oct = nota.slice(-1)
+        console.log(oct)
+        if (parseInt(oct) > 3) { noteRighthand.push(nota) } else { noteLefthand.push(nota) }
+      }) // once got the names of the note in an array of strings add the stavenote object to an array (octave splitting bw octaves)
 
+      console.log(noteLefthand)
       const modifiers = chord.map(this.hasModifier)
-      console.log(notestr)
-      let c = new Vex.Flow.StaveNote({ clef: 'treble',
-        keys: [...notestr.slice(1)],
+      let staveright = new Vex.Flow.StaveNote({ clef: 'treble',
+        keys: [...noteRighthand],
         duration: '1' })
 
       const staveNote = modifiers.slice(1).forEach((hasModifier, i) => {
         if (hasModifier) {
-          return c.addAccidental(i, new Vex.Flow.Accidental('#'))
+          return staveright.addAccidental(i, new Vex.Flow.Accidental('#'))
         }
       })
 
-      this.rhRender.push(c)
-      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [notestr[0]], duration: '1' }))
+      this.rhRender.push(staveright)
+      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [...noteLefthand], duration: '1' }))
     })
   }
 
