@@ -23,7 +23,7 @@
         {{ACTUAL_CHORD}}
 
       <ul>
-        <li v-for="(voicing,i) in voicings" :key="i">{{voicing.name}} - {{voicing.chord}}</li>
+        <li v-for="(voicing,i) in voicings" :key="i">{{voicing.name}}</li>
       </ul>
 
     </v-card-text>
@@ -70,12 +70,12 @@ export default class VoicingsPresenter extends Vue {
   private ACTUAL_CHORD:string = ''
   private HPCP:number[]
 
-  public chordTypes:string[] = ['maj6', 'maj7', 'dom7', 'sus4', 'm7', 'dim7']
+  public chordTypes:string[] = ['maj6', 'maj7', 'dom7', 'sus4add9', 'm7', 'dim7']
   public CHORD_TONES = [
     { type: 'maj6', chord: [4, 9] },
     { type: 'maj7', chord: [4, 11] },
     { type: 'dom7', chord: [4, 10] },
-    { type: 'sus4', chord: [6] },
+    { type: 'sus4add9', chord: [6, 14] },
     { type: 'm7', chord: [3, 10] },
     { type: 'dim7', chord: [3, 6, 9] }
   ]
@@ -97,10 +97,10 @@ export default class VoicingsPresenter extends Vue {
     { group: 'dom7', chord: [-2, 0, 4], name: '3rd inversion (7th as bass)' }
   ] */
 
-  private methods = [ // methods for chord inversion
-    { type: '1st inversion', order: [2, 3, 4, 1] },
-    { type: '2nd inversion', order: [3, 1, 2, 4] },
-    { type: '3rd inversion', order: [4, 1, 2, 3] },
+  private methods = [ // methods for chord inversion (growing order accomplished adding +10)
+    { type: '1st inversion', order: [2, 3, 4, 11] },
+    { type: '2nd inversion', order: [3, 11, 12, 14] },
+    { type: '3rd inversion', order: [4, 11, 12, 13] },
     { type: 'drop 2', order: [-3, 1, 2, 4] },
     { type: 'drop 2&4', order: [-1, -3, 2, 4] }
   ]
@@ -135,20 +135,23 @@ export default class VoicingsPresenter extends Vue {
       let voicing = [] // preallocate rearrenged chord
       for (let i = 0; i < moves.length; i++) {
         let m = moves[i]
-        if (m > 0) {
+        if (m > 0 && m < 10) { // no octave spacing m <10
           voicing.push(notes[m - 1])
+        }
+        if (m > 0 && m > 10) { // octave spacing m>10
+          voicing.push(notes[m - 10 - 1] + 12) // one octave above
         }
         if (m < 0) {
           voicing.push(notes[-m - 1] - 12) // one octave below
         }
       }
-      // voicing.map((a, b) => { if (b - a < 0) b = b + 12 })
 
-      return { name: name, chord: voicing, score: voicing.map(y => this.HPCP[(y + 12 + fundamental) % 12]).reduce((x, y) => x + y) }
-    }).sort((x, y) => y.score - x.score)
-
-    let winners = voicings.slice(0, 3) // best three voicings
-    this.voicings = winners.map(x => { return { name: x.name, chord: x.chord } })
+      return { name: name,
+        chord: voicing,
+        score: voicing.map(y => this.HPCP[(y + 12 + fundamental) % 12])
+          .reduce((x, y) => x + y) }
+    }).sort((x, y) => y.score - x.score).slice(0, 3)
+    this.voicings = voicings.map(x => { return { name: x.name, chord: x.chord } })
     this.createChords()
     this.drawChords()
   }
@@ -157,11 +160,11 @@ export default class VoicingsPresenter extends Vue {
     let idx = note + this.CENTRAL_NOTE
 
     if (idx < 0) {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 1).toString()// below octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 2).toString()// below octave
     } if (idx >= 12) {
       return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 1).toString() // octave above
     } else {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE).toString() // same octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 1).toString() // same octave
     }
   }
 
@@ -180,7 +183,7 @@ export default class VoicingsPresenter extends Vue {
       }) // once got the names of the note in an array of strings add the stavenote object to an array
 
       const modifiers = chord.map(this.hasModifier)
-
+      console.log(notestr)
       let c = new Vex.Flow.StaveNote({ clef: 'treble',
         keys: [...notestr.slice(1)],
         duration: '1' })
