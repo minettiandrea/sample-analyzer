@@ -61,7 +61,7 @@ export default class VoicingsPresenter extends Vue {
   public rhRender:Vex.Flow.StaveNote[] = [] // right hand voicing
   public lhRender:Vex.Flow.StaveNote[] = [] // left hand voicing
   public CENTRAL_NOTE = 0
-  public DEFAULT_OCTAVE = 3
+  public DEFAULT_OCTAVE = 4
   private TREBLE:Vex.Flow.Stave
   private BASS:Vex.Flow.Stave
   private ctx:Vex.IRenderContext
@@ -80,9 +80,9 @@ export default class VoicingsPresenter extends Vue {
   private SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
   private methods = [ // methods for chord inversion (growing order accomplished adding +10)
-    { type: '1st inversion', order: [-2, 1, 14, 11] },
+    { type: '1st inversion', order: [-2, 11, 13, 14] },
     { type: '2nd inversion', order: [-3, 4, 11, 12] },
-    { type: '3rd inversion', order: [-4, 1, 12, 13] }
+    { type: '3rd inversion', order: [-4, 11, 12, 13] }
     //   { type: 'drop 2', order: [-3, 1, 2, 4] },
   //  { type: 'drop 2&4', order: [-1, -3, 2, 4] }
   ]
@@ -146,11 +146,11 @@ export default class VoicingsPresenter extends Vue {
     let idx = note + this.CENTRAL_NOTE
 
     if (idx < 0) {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 1).toString()// below octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 2).toString()// below octave
     } if (idx >= 12) {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 2).toString() // octave above
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 1).toString() // octave above
     } else {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 1).toString() // same octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE).toString() // same octave
     }
   }
 
@@ -172,7 +172,6 @@ export default class VoicingsPresenter extends Vue {
       }) // once got the names of the note in an array of strings add the stavenote object to an array (octave splitting bw octaves)
 
       const modifiers = chord.map(this.hasModifier)
-      console.log(modifiers)
       let staveright = new Vex.Flow.StaveNote({ clef: 'treble',
         keys: [...noteRighthand],
         duration: '1' })
