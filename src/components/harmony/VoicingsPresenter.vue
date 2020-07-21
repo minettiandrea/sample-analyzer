@@ -70,12 +70,11 @@ export default class VoicingsPresenter extends Vue {
   private ACTUAL_CHORD:string = ''
   private HPCP:number[]
 
-  public chordTypes:string[] = ['maj6', 'maj7', 'dom7', 'sus4add9', 'm7', 'dim7']
+  public chordTypes:string[] = ['maj6', 'maj7', 'dom7', 'm7', 'dim7']
   public CHORD_TONES = [
     { type: 'maj6', chord: [4, 9] },
     { type: 'maj7', chord: [4, 11] },
     { type: 'dom7', chord: [4, 10] },
-    { type: 'sus4add9', chord: [5, 14] },
     { type: 'm7', chord: [3, 10] },
     { type: 'dim7', chord: [3, 6, 9] }
   ]
