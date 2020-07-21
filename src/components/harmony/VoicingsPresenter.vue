@@ -15,12 +15,10 @@
         col-2
         label="Select chord tones"
         :items='chordTypes'
-        :item-value='ACTUAL_CHORD'
         @change="chordSelected"
         >
       </v-select>
       </v-col>
-        {{ACTUAL_CHORD}}
 
       <ul>
         <li v-for="(voicing,i) in voicings" :key="i">{{voicing.name}}</li>
@@ -63,7 +61,7 @@ export default class VoicingsPresenter extends Vue {
   public rhRender:Vex.Flow.StaveNote[] = [] // right hand voicing
   public lhRender:Vex.Flow.StaveNote[] = [] // left hand voicing
   public CENTRAL_NOTE = 0
-  public DEFAULT_OCTAVE = 4
+  public DEFAULT_OCTAVE = 3
   private TREBLE:Vex.Flow.Stave
   private BASS:Vex.Flow.Stave
   private ctx:Vex.IRenderContext
@@ -81,27 +79,10 @@ export default class VoicingsPresenter extends Vue {
 
   private SCALE = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 
-  /*  private definitions = [
-    { group: 'min7', chord: [0, 3, 10], name: '1 - b3 - b7 (no fifth)' },
-    { group: 'min7', chord: [-9, -2, 0], name: '1st inversion (b3 as bass)' },
-    { group: 'min7', chord: [-5, 0, 3, 10], name: '2nd inversion (5th as bass)' },
-    { group: 'min7', chord: [-2, 0, 3], name: 'drop 4' },
-    { group: 'maj7', chord: [0, 4, 10], name: '1 - 3 - 7 (no fifth)' },
-    { group: 'maj7', chord: [-8, -1, 0], name: '1st inversion (3 as bass)' },
-    { group: 'maj7', chord: [-5, 0, 4, 11], name: ' 2nd inversion (5th as bass)' },
-    { group: 'maj7', chord: [-1, 0, 4], name: '3rd inversion (7th as bass)' },
-    { group: 'dom7', chord: [0, 4, 10], name: '1 - 3 - b7 (no fifth)' },
-    { group: 'dom7', chord: [-8, -2, 0], name: '1st inversion (3 as bass)' },
-    { group: 'dom7', chord: [-5, 0, 4, 10], name: '2nd inversion (5th as bass)' },
-    { group: 'dom7', chord: [-2, 0, 4], name: '3rd inversion (7th as bass)' }
-  ] */
-
   private methods = [ // methods for chord inversion (growing order accomplished adding +10)
     { type: '1st inversion', order: [2, 13, 14, 11] },
-    { type: '2nd inversion', order: [3, 11, 12, 14] },
-    { type: '3rd inversion', order: [4, 11, 12, 13] },
-    { type: 'drop 2', order: [-3, 1, 2, 4] },
-    { type: 'drop 2&4', order: [-1, -3, 2, 4] }
+    { type: '2nd inversion', order: [3, 14, 11, 12] },
+    { type: '3rd inversion', order: [4, 11, 12, 13] }
   ]
 
   mounted () { // draw the lines
@@ -147,9 +128,13 @@ export default class VoicingsPresenter extends Vue {
 
       return { name: name,
         chord: voicing,
-        score: voicing.map(y => this.HPCP[(y + 12 + fundamental) % 12])
+        score: voicing.map((y, i) => {
+          const positionalCoef:number = i === 0 ? 0.9 : 1 - i * 0.01
+          return positionalCoef * this.HPCP[(y + 12 + fundamental) % 12]
+        })
           .reduce((x, y) => x + y) }
-    }).sort((x, y) => y.score - x.score).slice(0, 3)
+    })
+      .sort((x, y) => y.score - x.score).slice(0, 3)
     this.voicings = voicings.map(x => { return { name: x.name, chord: x.chord } })
     this.createChords()
     this.drawChords()
@@ -157,13 +142,13 @@ export default class VoicingsPresenter extends Vue {
 
   private toNote (note:number):string { // return a string representation of the note
     let idx = note + this.CENTRAL_NOTE
-
+    console.log(idx)
     if (idx < 0) {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 2).toString()// below octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE).toString()// below octave
     } if (idx >= 12) {
       return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 1).toString() // octave above
     } else {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 1).toString() // same octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE).toString() // same octave
     }
   }
 
@@ -181,10 +166,10 @@ export default class VoicingsPresenter extends Vue {
       chord.forEach(note => { // for each note within the chord
         let nota = this.toNote(note)
         let oct = nota.slice(-1)
-        console.log(oct)
         if (parseInt(oct) > 3) { noteRighthand.push(nota) } else { noteLefthand.push(nota) }
       }) // once got the names of the note in an array of strings add the stavenote object to an array (octave splitting bw octaves)
 
+      console.log(noteRighthand)
       console.log(noteLefthand)
       const modifiers = chord.map(this.hasModifier)
       let staveright = new Vex.Flow.StaveNote({ clef: 'treble',
@@ -197,8 +182,14 @@ export default class VoicingsPresenter extends Vue {
         }
       })
 
+      let staveleft = new Vex.Flow.StaveNote({ clef: 'bass', keys: [...noteLefthand], duration: '1' })
+      const staveNote2 = modifiers.slice(0, 1).forEach((hasModifier, i) => {
+        if (hasModifier) {
+          return staveleft.addAccidental(i, new Vex.Flow.Accidental('#'))
+        }
+      })
       this.rhRender.push(staveright)
-      this.lhRender.push(new Vex.Flow.StaveNote({ clef: 'bass', keys: [...noteLefthand], duration: '1' }))
+      this.lhRender.push(staveleft)
     })
   }
 
