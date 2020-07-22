@@ -52,8 +52,9 @@ Vexflow is a powerful library for music notation. We converted the frequency max
 
 Voicings is the art of creating chords.
 Why should a keyboard player choose a chord over another? There are many reasons. The melodic direction of the piece, the personal taste, the music ensemble he's playing with (leave the space for the bass and avoid bass notes for example).
-We created a simple engine based not on this factors but only on the harmonic content of the sample. This process is done for major, minor and dominant chords.
-The resulting chords are then plotted again on a stave using VexFlow.
+We created a simple engine based on the harmonic content of the sample. This process is done for the chord selected by the user. We provided a list of some common chords.
+The resulting voicings are classified according to some simple rules, and the three voicings with the highest score are suggested and plotted onto the staves.
+
 ![voicing](/screenshots/voicing.png)
 
 ## Rhythmic analysis

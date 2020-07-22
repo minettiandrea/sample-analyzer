@@ -28,7 +28,7 @@
 
       <v-card-text>
         <input v-model.number="r1" placeholder="?" class="text-center"> against :<input v-model.number="r2" placeholder="?" class="text-center">
-      <v-btn @click="drawPoly" @change='clearPoly'> Visualize possible polyrhythm </v-btn>
+      <v-btn @click="drawPoly"> Visualize possible polyrhythm </v-btn>
       <v-btn @click="clearPoly" @change='clearPoly'> Clear all </v-btn>
       </v-card-text>
 
@@ -52,8 +52,8 @@ export default class SchemaPresenter extends Vue {
   @inject(REGISTRY.Store) store:Store
   @Ref('score') score!:HTMLDivElement
 
-  r1 :number = 4;
-  r2 :number = 3;
+  r1 :number = 3;
+  r2 :number = 4;
   peaks:number[] = [];
   notes: any[] = [];
   tuplets : any[] = []
@@ -108,6 +108,7 @@ export default class SchemaPresenter extends Vue {
   }
 
   private drawPoly () {
+    this.clearPoly()
     if (this.r1 % this.r2 === 0 || this.r2 % this.r1 === 0) return alert('This is not possible...')
     if (this.r1 * this.r2 > 100) return alert('Tigran... is that you?')
     this.POLYACTIVE = true
