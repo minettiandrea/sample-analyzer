@@ -115,8 +115,14 @@ export default class WaveformPresenter extends Vue {
     })
 
     this.store.getPolyLine().subscribe(val => {
+      console.log('calling filter')
       if (val) {
         if (this.canvasalpha) {
+          console.log('calling filter')
+          this.infoPanel.filter(x => {
+            console.log(x)
+            return (x as Line).color == 'yellow'? false : true
+          });
           this.polyLines += val.length
           val.forEach(v => {
             let xpos = v * this.inverseRatio
@@ -128,15 +134,7 @@ export default class WaveformPresenter extends Vue {
       }
     })
 
-    this.$root.$on('clearpoly', () => {
-      if (this.polyLines > 0) { // custom event to clear polyrythmic canvas
-        for (let i = 0; i <= this.polyLines; i++) {
-          this.infoPanel.remove()
-        }
-      }
-      this.polyLines = 0
-      this.infoPanel.redraw()
-    })
+    
   }
 
   private setUpInfoPanel () {

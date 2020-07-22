@@ -15,6 +15,7 @@ export interface Panel {
   add(d:Drawable):void;
   reset():void
   remove():void;
+  filter(callbackfn: (value: Drawable, index: number, array: Drawable[]) => boolean):void;
 }
 
 export class PanelImpl implements Panel {
@@ -35,6 +36,11 @@ export class PanelImpl implements Panel {
 
   add (d:Drawable):void {
     this.elements.push(d)
+  }
+
+  filter(callbackfn: (value: Drawable, index: number, array: Drawable[]) => boolean):void {
+    console.log('filter')
+    this.elements = this.elements.filter(callbackfn)
   }
 
   remove ():void{
