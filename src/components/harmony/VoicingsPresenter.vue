@@ -146,7 +146,7 @@ export default class VoicingsPresenter extends Vue {
     let idx = note + this.CENTRAL_NOTE
 
     if (idx < 0) {
-      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 2).toString()// below octave
+      return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE - 1).toString()// below octave
     } if (idx >= 12) {
       return this.SCALE[mod(idx, 12)] + '/' + (this.DEFAULT_OCTAVE + 1).toString() // octave above
     } else {
