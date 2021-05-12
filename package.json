@@ -13,7 +13,7 @@
     "@babel/polyfill": "^7.4.4",
     "@types/chart.js": "^2.9.23",
     "@types/vexflow": "^1.2.33",
-    "chart.js": "^2.9.3",
+    "chart.js": "^2.9.4",
     "core-js": "^3.4.3",
     "essentia.js": "0.0.9",
     "inversify-props": "^1.4.9",
